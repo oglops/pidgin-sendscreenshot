@@ -1,0 +1,37 @@
+#labels Phase-Implementation
+How to translate or update a translation of the plugin.
+
+=Available translations=
+
+ * Chinese (simplified), by _倪尼_.
+ * Dutch, by _Henk van der Velden_.
+ * French, by _Poussin_.
+ * German, by _David Scheffler_.
+ * Polish, by _Odin_.
+ * Russian, by _Ilya S._ [in progress].
+ * Spanish, by _Alexander Ovalle_.
+
+=HowTo=
+
+We use [http://www.gnu.org/software/gettext/ GNU gettext] to translate the plugin.
+
+==Experienced user==
+
+If you're an experienced gettext user, please send me your new/updated _.po_ file directly.
+
+==New to gettext ?==
+
+Please send me an email where you specify which language you want to translate, then *I will send you back a _.po_ file*.
+
+This file contains all the messages to be translated.
+
+Under Linux, there are some good _.po_ file [http://www.gnu.org/software/gettext/manual/gettext.html#Editing editors]. Under Microsoft Windows, have a look at [http://www.poedit.net/ poedit].
+
+Once the _.po_ file is filled with your translation, please send it back to me.
+
+=Notes=
+
+I know it takes time to translate.
+Well, you don't have to translate everything in the _.po_ file.
+Just translating the messages from the preferences window and the menuitems is fine.
+You can skip error messages at first and translate them later.
