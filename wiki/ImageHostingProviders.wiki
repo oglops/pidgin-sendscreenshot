@@ -16,7 +16,7 @@ Here, you'll learn how to add a custom image hosting provider.
 
 ==Synthax==
 
-You must have a basic knowledge about html forms and Perl regular expressions.
+You must have a basic knowledge about [http://www.w3schools.com/htmL/html_forms.asp html forms] and [http://perldoc.perl.org/perlretut.html Perl regular expressions].
 Here is the *xml synthax* you have to use:
 
 {{{
