@@ -1,0 +1,376 @@
+# French translations for pidgin-screenshot package.
+#
+# This file is distributed under the same license as the pidgin-screenshot package.
+#  <contact@raoulito.info>, 2009.
+#
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pidgin-screenshot 0.6-5\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-03-10 14:04+0100\n"
+"PO-Revision-Date: 2010-03-10 14:04+0100\n"
+"Last-Translator:  <contact@raoulito.info>\n"
+"Language-Team: French\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: src/ftp_upload.h:51
+msgid "FTP upload failed:"
+msgstr "Impossible d'envoyer la capture vers le serveur FTP :"
+
+#: src/ftp_upload.h:54
+msgid "as a link (_FTP upload)"
+msgstr "comme lien (envoi _FTP)"
+
+#: src/ftp_upload.h:55
+msgid "as a URL (_FTP upload)"
+msgstr "comme URL (envoi _FTP)"
+
+#: src/http_upload.h:94
+#, c-format
+msgid "Error on line %d char %d:\n"
+msgstr "Erreur à la ligne %d, caractère %d:\n"
+
+#: src/http_upload.h:95
+#, c-format
+msgid "Something's missing for server '%s':"
+msgstr "Il manque une information pour l'hébergeur '%s' :"
+
+#: src/http_upload.h:96
+#, c-format
+msgid "Please refer to %s to learn how to add your own server."
+msgstr ""
+"Veuillez consulter %s pour savoir comment ajouter votre propre hébergeur."
+
+#: src/http_upload.h:97
+msgid "Regular expression doesn't match !"
+msgstr "Pas de correspondances avec l'expression régulière !"
+
+#: src/http_upload.h:99
+#, c-format
+msgid "Failed to upload the screenshot to '%s'!"
+msgstr "Impossible d'envoyer votre capture vers '%s' !"
+
+#: src/http_upload.h:101
+#, c-format
+msgid ""
+"Your screenshot has been uploaded to '%s' but the link cannot be "
+"extracted :\n"
+"***%s.\n"
+"\n"
+"Posible reasons are:\n"
+" - the server has been updated\n"
+" - cannot load the server response into memory\n"
+" - bad regular expression (if you are intending to add your own server)"
+msgstr ""
+"Votre capture a bien été envoyé vers '%s', mais le lien ne peut pas être "
+"extrait :\n"
+"***%s.\n"
+"\n"
+"Raisons possibles :\n"
+" - le serveur a été mis à jour\n"
+" - la réponse du serveur n'a pu être chargée en mémoire\n"
+" - expression régulière invalide (si vous tentez d'ajouter votre propre "
+"serveur)"
+
+#: src/http_upload.h:108
+msgid "Incorrect xml host config file"
+msgstr "Fichier de configuration xml incorrect"
+
+#: src/http_upload.h:110
+#, c-format
+msgid ""
+"%s.\n"
+"\n"
+"This file contains a list of image hosting providers.\n"
+"Please connect to %s to in order to fetch it."
+msgstr ""
+"%s.\n"
+"\n"
+"Ce fichier de configuration contient une liste d'hébergeurs d'images.\n"
+"Connectez-vous sur %s pour le récupérer."
+
+#: src/http_upload.h:114
+msgid ""
+"You haven't selected any image hosting provider yet.\n"
+"Please select one from the configure dialog."
+msgstr ""
+"Veuillez sélectionner un hébergeur à partir de la boite de dialogue de "
+"configuration du plugin."
+
+#: src/http_upload.h:117
+#, c-format
+msgid ""
+"Failed to parse the contents of:\n"
+"%s"
+msgstr ""
+"Le parseur a rencontré un problème sur :\n"
+"%s"
+
+#: src/http_upload.h:120
+msgid "Selected host not met !"
+msgstr "L'hébergeur sélectionné n'est pas dans le fichier de configuration !"
+
+#: src/http_upload.h:121
+msgid "No server-side form handler !"
+msgstr "Élement 'form_action' absent !"
+
+#: src/http_upload.h:122
+msgid "No file-select control name !"
+msgstr "Élément 'file_input_name' absent !"
+
+#: src/http_upload.h:123
+msgid "No regular expression to extract html link !"
+msgstr "Élément 'regex' absent !"
+
+#: src/http_upload.h:125
+#, c-format
+msgid "\"%s\" is not a valid element name!\n"
+msgstr "\"%s\" n'est pas un nom d'élement valide !\n"
+
+#: src/http_upload.h:126
+#, c-format
+msgid "\"%s\" is not a valid attribute for element \"%s\"!\n"
+msgstr "\"%s\" n'est pas un nom d'attribut valide pour l'élément \"%s\" !\n"
+
+#: src/http_upload.h:127
+#, c-format
+msgid "element \"%s\" is missing an attribute !\n"
+msgstr "il manque un attribut à l'élément \"%s\" !\n"
+
+#: src/http_upload.h:128
+msgid "a \"value\" attribute is missing !\n"
+msgstr "attribut \"value\" manquant !\n"
+
+#: src/http_upload.h:135
+msgid "as a link (_HTML upload)"
+msgstr "comme lien (envoi _HTML)"
+
+#: src/http_upload.h:136
+msgid "as a URL (_HTML upload)"
+msgstr "comme URL (envoi _HTML)"
+
+#: src/http_upload.h:137
+msgid "More info"
+msgstr "Plus d'informations"
+
+#: src/prefs.h:67
+msgid "Image parameters"
+msgstr "Paramètres de l'image"
+
+#: src/prefs.h:68
+msgid "Plugin behaviour"
+msgstr "Comportement du plugin"
+
+#: src/prefs.h:69
+msgid "HTTP upload"
+msgstr "Envoi HTTP"
+
+#: src/prefs.h:70
+msgid "FTP upload"
+msgstr "Envoi FTP"
+
+#: src/prefs.h:72
+msgid "Image format: "
+msgstr "Format de l'image :"
+
+#: src/prefs.h:78
+msgid "JPEG quality level:"
+msgstr "Qualité JPEG :"
+
+#: src/prefs.h:80
+msgid "PNG compression level:"
+msgstr "Niveau de compression PNG :"
+
+#: src/prefs.h:85
+msgid "Highlight mode:"
+msgstr "Méthode graphique de sélection :"
+
+#: src/prefs.h:86
+msgid "lighten up desktop"
+msgstr "éclaircir le bureau"
+
+#: src/prefs.h:87
+msgid "darken desktop"
+msgstr "assombrir le bureau"
+
+#: src/prefs.h:88
+msgid "invert selection only"
+msgstr "inverser la sélection"
+
+#: src/prefs.h:89
+msgid "borders only"
+msgstr "bordures seulement"
+
+#: src/prefs.h:90
+msgid "grayscale desktop"
+msgstr "bureau en noir&blanc"
+
+#: src/prefs.h:92
+msgid "Folder to store captures in:"
+msgstr "Enregistrer les captures dans :"
+
+#: src/prefs.h:94
+msgid "Always ask for filename when sending as a file."
+msgstr "Toujours demander le nom du fichier avant d'envoyer."
+
+#: src/prefs.h:97
+msgid "Show visual cues."
+msgstr "Afficher les repères visuels."
+
+#: src/prefs.h:98
+msgid "Seconds to wait before desktop freezes:"
+msgstr "Secondes à attendre avant le début de la capture :"
+
+#: src/prefs.h:102
+#, c-format
+msgid ""
+"Pick an image hosting provider (<span foreground='blue'><u>list v.%s</u></"
+"span>)"
+msgstr ""
+"Choisissez un hébergeur d'images (<span foreground='blue'><u>liste v.%s</u></"
+"span>)"
+
+#: src/prefs.h:107
+msgid "Connect timeout (sec): "
+msgstr "Tenter de se connecter pendant (sec) :"
+
+#: src/prefs.h:108
+msgid "Upload timeout (sec): "
+msgstr "Tenter d'envoyer les données pendant (sec) :"
+
+#: src/prefs.h:111
+msgid "Remote FTP URL:"
+msgstr "URL distante :"
+
+#: src/prefs.h:112
+msgid "Corresponding Web address:"
+msgstr "Adresse web correspondante :"
+
+#: src/prefs.h:113
+msgid "User:"
+msgstr "Utilisateur :"
+
+#: src/prefs.h:114
+msgid "Password:"
+msgstr "Mot de passe :"
+
+#: src/screenshot.h:72
+msgid "Send Screenshot"
+msgstr "Capture d'Écran"
+
+#: src/screenshot.h:73
+msgid "Capture and send a screenshot."
+msgstr "Prendre une capture d'écran et l'envoyer."
+
+#: src/screenshot.h:74
+msgid "This plugin will capture a screenshot given a rectangular area."
+msgstr ""
+"Ce plugin permet de capturer une zone de l'écran, puis de l'envoyer à vos "
+"contacts."
+
+#: src/screenshot.h:81
+msgid "Error"
+msgstr "Erreur"
+
+#: src/screenshot.h:83
+msgid "Location of your screenshot on disk:"
+msgstr "Emplacement de la capture sur le disque :"
+
+#: src/screenshot.h:85
+#, c-format
+msgid "Cannot allocate enough memory (%lu bytes) to load plugin data !"
+msgstr "Ne peut allouer assez de mémoire (%lu octets) pour charger le plugin !"
+
+#: src/screenshot.h:86
+msgid ""
+"Failed to allocate enough memory to create the screenshot. You will need to "
+"quit some applications and retry."
+msgstr ""
+"%s ne dispose pas d'assez de mémoire pour créer votre capture.\n"
+"Quittez d'autres applications et réessayez."
+
+#: src/screenshot.h:88
+#, c-format
+msgid "Failed to save your screenshot to '%s'."
+msgstr "Impossible d'enregistrer votre capture vers '%s'."
+
+#: src/screenshot.h:90
+#, c-format
+msgid "Failed to get '%s' data."
+msgstr "Impossible de récupérer les données de '%s'."
+
+#: src/screenshot.h:91
+msgid "Failed to insert your screenshot in the text area."
+msgstr "Impossible d'insérer votre capture dans la zone de texte."
+
+#: src/screenshot.h:93
+#, c-format
+msgid ""
+"Another instance of %s is already running.\n"
+"Please wait before sending an other screenshot."
+msgstr ""
+"Une autre instance de %s est en cours d'exécution.\n"
+"Veuillez patientez avant d'envoyer une autre capture."
+
+#: src/screenshot.h:102
+msgid "No selection"
+msgstr "Aucune sélection"
+
+#: src/screenshot.h:103
+msgid "Terms Of Service"
+msgstr "Conditions"
+
+#: src/screenshot.h:111
+msgid "_Screenshot"
+msgstr "_Capture d'Écran"
+
+#: src/screenshot.h:112
+msgid "Insert _Screenshot..."
+msgstr "Insérer une _Capture d'écran..."
+
+#: src/screenshot.h:113
+msgid "Send a _Screenshot..."
+msgstr "Envoyer une _Capture d'Écran..."
+
+#: src/screenshot.h:115
+msgid "capture"
+msgstr "capture"
+
+#: src/screenshot.h:118
+msgid "as an _Image"
+msgstr "comme _Image"
+
+#: src/screenshot.h:120
+msgid "Set capture name"
+msgstr "Nom de la capture"
+
+#: src/screenshot.h:121
+msgid "Capture name:"
+msgstr "Nom de votre capture :"
+
+#: src/screenshot.h:122
+msgid "File already exists!"
+msgstr "Le fichier existe déjà !"
+
+#: src/upload_utils.h:39
+#, c-format
+msgid "Uploading the screenshot to \"%s\"..."
+msgstr "Envoi de la capture vers \"%s\"..."
+
+#: src/upload_utils.h:41
+#, c-format
+msgid ""
+"Failed to insert a link because theconversation window is now closed.\n"
+"\n"
+"The link is:\n"
+"%s"
+msgstr ""
+"Impossible d'insérer le lien vers votre capture, la fenêtre de conversation "
+"ayant été fermée.\n"
+"\n"
+"Le lien est :\n"
+"%s"
