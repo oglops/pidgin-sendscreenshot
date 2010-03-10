@@ -1,0 +1,53 @@
+How to add your own provider.
+
+= Introduction =
+
+Pidgin send-screenshot comes a list of image hosting providers and let you upload your screenshots to one of them.
+
+We recommend the following providers :
+ * [http://megahorst.com/ megahorst]
+ * [http://imgur.com/ imgur]
+
+
+Here, you'll learn how to add a custom image hosting provider.
+
+= Add your own =
+
+==Synthax==
+
+You must have a basic knowledge about html forms and Perl regular expressions.
+Here is the *xml synthax* you have to use:
+
+{{{
+       <host name="Hostname (as it will appear in the configure dialog)">
+            <param location="Country where the server is located">. Not currently used.
+            <param form_action="Server-side form handler"/> 
+            <param file_input_name="Name of the file-select control."/>
+            <param regexp="Perl regexp to mach with the (direct image link)"/.> The interesting part must be surrounded by parenthesis.
+
+            <param name="extra name1" value="extra value1"/>
+              ...
+	    <param name="extra name_n" value="extra value_n"/>
+        </host>
+}}}
+
+
+==Where to ?==
+
+The action takes place in the _"send-screenshot_data"_ folder.
+It is usually located in:
+ * _Drive:\Program Files\Pidgin\_ under Microsoft Windows,
+ * _/usr/share/_ under Mac and Linux.
+
+Please open _*"img_hosting_providers.xml"*_, then add the new xml block (and remove the providers you don't need).
+
+==Icon==
+
+Located in the _"icons"_ subfolder.
+Must be _PNG_ format and 32x32 sized.
+Name must be "Hostname.png"
+
+==Terms Of Service==
+
+Located in the _"tos"_ subfolder.
+Simple text file, name must be "Hostname.txt"
