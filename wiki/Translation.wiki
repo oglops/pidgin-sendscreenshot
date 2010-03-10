@@ -11,7 +11,7 @@ How to translate or update a translation of the plugin.
  * Russian, by _Ilya S._ (in progress).
  * Spanish, by _Alexander Ovalle_.
 
-=HowTo=
+=Howto=
 
 We use [http://www.gnu.org/software/gettext/ GNU gettext] to translate the plugin.
 
