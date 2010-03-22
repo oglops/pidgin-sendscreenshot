@@ -1,5 +1,4 @@
  /*
-  *
   * Pidgin SendScreenshot plugin - http upload  -
   *
   * This program is free software; you can redistribute it and/or modify
@@ -40,8 +39,6 @@ http_upload (PurplePlugin * plugin)
 
   img_ctype =
     g_strdup_printf ("image/%s", purple_prefs_get_string (PREF_IMAGE_TYPE));
-
-  curl_global_init (CURL_GLOBAL_ALL);
 
   /* fill in extra fields */
   for (i = 0; i < PLUGIN (host_data)->extra_names->len; i++)
@@ -139,7 +136,6 @@ http_upload (PurplePlugin * plugin)
   G_UNLOCK (unload);
   return NULL;
 }
-/* #endif */
 
 /*
  * Retrieve informations to post to a server.
@@ -407,8 +403,7 @@ insert_html_link_cb (PurplePlugin * plugin)
 }
 
 void
-http_upload_prepare (const gchar * capture_path_filename,
-		     const gchar * capture_name, PurplePlugin * plugin)
+http_upload_prepare (PurplePlugin * plugin)
 {
   struct host_param_data *host_data;
   gsize length;
@@ -549,9 +544,6 @@ http_upload_prepare (const gchar * capture_path_filename,
   g_markup_parse_context_free (context);
   g_free (xml_contents);
 
-  PLUGIN (capture_name) = g_strdup (capture_name);
-  PLUGIN (capture_path_filename) = g_strdup (capture_path_filename);
-
   /* upload to server */
   PLUGIN (uploading_dialog) =
     show_uploading_dialog (plugin, PLUGIN (host_data)->selected_hostname);
@@ -559,55 +551,6 @@ http_upload_prepare (const gchar * capture_path_filename,
     g_thread_create ((GThreadFunc) http_upload, plugin, FALSE, NULL);
   PLUGIN (timeout_cb_handle) =
     g_timeout_add (50, (GSourceFunc) insert_html_link_cb, plugin);
-}
-
-void on_screenshot_insert_as_link_activate_cb (PidginConversation * gtkconv)
-{
-  PurplePlugin *plugin;
-
-  plugin = purple_plugins_find_with_id (PLUGIN_ID);
-
-  TRY_SET_RUNNING_ON (plugin);
-
-  PLUGIN (send_as) = SEND_AS_HTTP_LINK;
-
-  if (!strcmp (purple_prefs_get_string (PREF_UPLOAD_TO), HOST_DISABLED))
-    {
-      purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
-			   PLUGIN_HOST_DISABLED_ERROR);
-      PLUGIN (running) = FALSE;
-      return;
-    }
-  REMEMBER_ACCOUNT (gtkconv);
-
-  PLUGIN (conv_features) = gtkconv->active_conv->features;
-  FREEZE_DESKTOP ();
-}
-
-void
-  on_screenshot_insert_as_link_show_cb (GtkWidget *
-					as_link, PidginConversation * gtkconv)
-{
-  PurpleConversation *conv = gtkconv->active_conv;
-
-  /*
-   * Depending on which protocol the conv is associated with,
-   * html is supported or not...
-   */
-#if GTK_CHECK_VERSION(2,16,0)
-  if (purple_conversation_get_features (conv) & PURPLE_CONNECTION_NO_IMAGES)
-    gtk_menu_item_set_label (GTK_MENU_ITEM (as_link), SEND_AS_HTML_LINK_TXT);
-  else
-    gtk_menu_item_set_label (GTK_MENU_ITEM (as_link),
-			     SEND_AS_HTML_URL_TXT);
-#else
-  if (purple_conversation_get_features (conv) & PURPLE_CONNECTION_NO_IMAGES)
-    gtk_label_set_label (GTK_LABEL (GTK_BIN (as_link)->child),
-			 SEND_AS_HTML_LINK_TXT);
-  else
-    gtk_label_set_label (GTK_LABEL (GTK_BIN (as_link)->child),
-			 SEND_AS_HTML_URL_TXT);
-#endif
 }
 
 /* end of http_upload.c*/

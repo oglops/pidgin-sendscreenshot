@@ -1,5 +1,4 @@
  /*
-  *
   * Pidgin SendScreenshot - preferences -.
   *
   * This program is free software; you can redistribute it and/or modify
@@ -21,8 +20,9 @@
   *
   */
 
-
 #include "prefs.h"
+#include "pixbuf_utils.h"
+
 #ifdef ENABLE_UPLOAD
 #include "upload_utils.h"
 #include "http_upload.h"
@@ -330,6 +330,36 @@ change_store_folder_cb (GtkFileChooser * folder_chooser)
       g_free (new_folder);
     }
 }
+
+static void
+change_signature_cb (GtkFileChooser * file_chooser, GtkImage * sign_image)
+{
+  gchar *new_signature = gtk_file_chooser_get_filename (file_chooser);
+
+  if (new_signature != NULL)
+    {
+      GdkPixbuf *sign_pixbuf;
+
+      sign_pixbuf = gdk_pixbuf_new_from_file (new_signature, NULL);
+
+      if (!mygdk_pixbuf_check_maxsize
+	  (sign_pixbuf, SIGN_MAXWIDTH, SIGN_MAXHEIGHT))
+	{
+	  PurplePlugin *plugin = purple_plugins_find_with_id (PLUGIN_ID);
+
+	  NotifyError (PLUGIN_SIGNATURE_TOOBIG_ERROR, SIGN_MAXWIDTH,
+		       SIGN_MAXHEIGHT);
+	}
+      else
+	{
+	  gtk_image_set_from_pixbuf (sign_image, sign_pixbuf);
+	  purple_prefs_set_string (PREF_SIGNATURE_FILENAME, new_signature);
+	}
+      g_object_unref (sign_pixbuf);
+      sign_pixbuf = NULL;
+      g_free (new_signature);
+    }
+}
 #endif
 
 GtkWidget *
@@ -337,9 +367,13 @@ get_plugin_pref_frame (PurplePlugin * plugin)
 {
   GtkWidget *ret = NULL;
   GtkWidget *vbox;
-
+  GtkWidget *dropdown_imgtype;
+  GtkWidget *hbox_imgtype;
+  GtkWidget *hbox_sign;
 #if GTK_CHECK_VERSION(2,6,0)
-  GtkWidget *folder_chooser;
+  GdkPixbuf *sign_pixbuf;
+  GtkWidget *folder_chooser, *file_chooser, *sign_image;
+  GtkFileFilter *filter;
 #endif
 
 #ifdef ENABLE_UPLOAD
@@ -364,24 +398,76 @@ get_plugin_pref_frame (PurplePlugin * plugin)
   /* =========================================================================
    *      IMAGE PARAMETERS
    * ========================================================================= */
-
   ret = gtk_vbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
   gtk_container_set_border_width (GTK_CONTAINER (ret), PIDGIN_HIG_BORDER);
 
   vbox = pidgin_make_frame (ret, PREF_UI_FRAME1);
 
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 4);
-  gtk_widget_show (vbox);
 
-  pidgin_prefs_labeled_spin_button (vbox,
-				    PREF_UI_JPEG_QUALITY,
-				    PREF_JPEG_QUALITY, 0, 100, NULL);
-  pidgin_prefs_labeled_spin_button (vbox,
+
+  hbox_imgtype = gtk_hbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
+  hbox_sign = gtk_hbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
+
+
+
+  dropdown_imgtype =
+    pidgin_prefs_dropdown (vbox, PREF_UI_IMAGE_TYPE, PURPLE_PREF_STRING,
+			   PREF_IMAGE_TYPE, PREF_TYPE_JPG, "jpeg",
+			   PREF_TYPE_PNG, "png", NULL);
+
+
+
+  gtk_box_pack_start (GTK_BOX (vbox), hbox_imgtype, TRUE, FALSE, 0);
+  pidgin_prefs_labeled_spin_button (hbox_imgtype,
 				    PREF_UI_PNG_COMRPESSION,
 				    PREF_PNG_COMPRESSION, 0, 9, NULL);
-  pidgin_prefs_dropdown (vbox, PREF_UI_IMAGE_TYPE, PURPLE_PREF_STRING,
-			 PREF_IMAGE_TYPE,
-			 PREF_TYPE_JPG, "jpeg", PREF_TYPE_PNG, "png", NULL);
+  pidgin_prefs_labeled_spin_button (hbox_imgtype,
+				    PREF_UI_JPEG_QUALITY,
+				    PREF_JPEG_QUALITY, 0, 100, NULL);
+
+
+#if GTK_CHECK_VERSION(2,6,0)
+  filter = gtk_file_filter_new ();
+  gtk_file_filter_add_pixbuf_formats (filter);
+
+  gtk_file_filter_set_name (filter, _("Image"));
+
+  file_chooser = gtk_file_chooser_button_new (PREF_UI_SIGNATURE,
+					      GTK_FILE_CHOOSER_ACTION_OPEN);
+
+  gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (file_chooser), filter);
+
+  pidgin_prefs_checkbox (PREF_UI_SIGNATURE, PREF_ADD_SIGNATURE, hbox_sign);
+
+  sign_pixbuf =
+    gdk_pixbuf_new_from_file (purple_prefs_get_string
+			      (PREF_SIGNATURE_FILENAME), NULL);
+
+  sign_image = gtk_image_new_from_pixbuf (NULL);
+
+  if (!mygdk_pixbuf_check_maxsize
+      (sign_pixbuf, SIGN_MAXWIDTH, SIGN_MAXHEIGHT))
+    {
+      NotifyError (PLUGIN_SIGNATURE_TOOBIG_ERROR, SIGN_MAXWIDTH,
+		   SIGN_MAXHEIGHT);
+      purple_prefs_set_string (PREF_SIGNATURE_FILENAME, "");
+    }
+  else if (sign_pixbuf != NULL)
+    gtk_image_set_from_pixbuf (GTK_IMAGE (sign_image), sign_pixbuf);
+  
+  gtk_box_pack_start (GTK_BOX (hbox_sign), sign_image, TRUE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox_sign), file_chooser, TRUE, FALSE, 0);
+
+  g_signal_connect (G_OBJECT (file_chooser), "selection-changed",
+		    G_CALLBACK (change_signature_cb), sign_image);
+
+  g_object_unref (sign_pixbuf);
+  sign_pixbuf = NULL;
+
+  gtk_box_pack_start (GTK_BOX (vbox), hbox_sign, TRUE, FALSE, 0);
+#endif
+
 
   /* =========================================================================
    *      PLUGIN BEHAVIOUR
@@ -455,12 +541,12 @@ get_plugin_pref_frame (PurplePlugin * plugin)
     {
       insert_error_frame (error->message, vbox, plugin);
       g_error_free (error);
+      error = NULL;
       if (contents != NULL)
 	g_free (contents);
     }
   else
     {
-      GError *error = NULL;
       GMarkupParseContext *context;
       struct host_param_data *host_data = PLUGIN (host_data);
 
@@ -477,6 +563,7 @@ get_plugin_pref_frame (PurplePlugin * plugin)
 
 	  insert_error_frame (err_msg_escaped, vbox, plugin);
 	  g_error_free (error);
+	  error = NULL;
 	  g_free (err_msg_escaped);
 	  g_free (contents);
 	  g_markup_parse_context_free (context);
@@ -558,7 +645,6 @@ get_plugin_pref_frame (PurplePlugin * plugin)
 			  || gdk_pixbuf_get_height (pixbuf) >
 			  PIXBUF_HOSTS_SIZE))
 		    {
-
 		      g_object_unref (pixbuf);
 		      pixbuf = NULL;
 		    }
@@ -614,8 +700,6 @@ get_plugin_pref_frame (PurplePlugin * plugin)
 				  hostnames_link, TRUE, FALSE, 0);
 	      gtk_box_pack_end (GTK_BOX (hbox_html),
 				hosts_combobox, TRUE, FALSE, 0);
-	      gtk_widget_show (hbox_html);
-
 #ifdef HAVE_LIBCURL
 	      pidgin_prefs_labeled_spin_button (vbox,
 						PREF_UI_UPLOAD_CONNECTTIMEOUT,
@@ -636,6 +720,7 @@ get_plugin_pref_frame (PurplePlugin * plugin)
 	}
     }
 #endif /* ENABLE_UPLOAD */
-  gtk_widget_show_all (ret);
   return ret;
 }
+
+/* end of prefs.c */

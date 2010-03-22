@@ -1,5 +1,4 @@
  /*
-  *
   * Pidgin SendScreenshot plugin - ftp upload  -
   *
   * This program is free software; you can redistribute it and/or modify
@@ -82,12 +81,9 @@ ftp_upload (PurplePlugin * plugin)
   /* get a FILE * of the same file */
   hd_src = fopen (PLUGIN (capture_path_filename), "rb");
 
-  /* In windows, this will init the winsock stuff */
-  curl_global_init (CURL_GLOBAL_ALL);
-
   /* get a curl handle */
   curl = curl_easy_init ();
-  if (curl)
+  if (curl != NULL)
     {
       static char curl_error[CURL_ERROR_SIZE];
 
@@ -142,8 +138,6 @@ ftp_upload (PurplePlugin * plugin)
 	}
     }
   fclose (hd_src);		/* close the local file */
-  curl_global_cleanup ();
-
   g_free (local_file);
   g_free (remote_url);
 
@@ -209,16 +203,11 @@ insert_ftp_link_cb (PurplePlugin * plugin)
 }
 
 void
-ftp_upload_prepare (PurplePlugin * plugin,
-		    const gchar * capture_path_filename,
-		    const gchar * capture_name)
+ftp_upload_prepare (PurplePlugin * plugin)
 {
   struct host_param_data *host_data;
 
   host_data = PLUGIN (host_data);
-
-  PLUGIN (capture_name) = g_strdup (capture_name);
-  PLUGIN (capture_path_filename) = g_strdup (capture_path_filename);
 
 #ifdef HAVE_LIBCURL
   PLUGIN (uploading_dialog) =
@@ -229,50 +218,6 @@ ftp_upload_prepare (PurplePlugin * plugin,
   PLUGIN (timeout_cb_handle) =
     g_timeout_add (50, (GSourceFunc) insert_ftp_link_cb, plugin);
 
-#endif
-}
-
-void
-on_screenshot_insert_as_ftp_link_activate_cb (PidginConversation * gtkconv)
-{
-  PurplePlugin *plugin;
-
-  plugin = purple_plugins_find_with_id (PLUGIN_ID);
-
-  TRY_SET_RUNNING_ON (plugin);
-
-  REMEMBER_ACCOUNT (gtkconv);
-
-  PLUGIN (send_as) = SEND_AS_FTP_LINK;
-
-  PLUGIN (conv_features) = gtkconv->active_conv->features;
-  FREEZE_DESKTOP ();
-}
-
-void
-on_screenshot_insert_as_ftp_link_show_cb (GtkWidget *
-					  as_link,
-					  PidginConversation * gtkconv)
-{
-  PurpleConversation *conv = gtkconv->active_conv;
-
-  /*
-   * Depending on which protocol the conv is associated with,
-   * html is supported or not...
-   */
-#if GTK_CHECK_VERSION(2,16,0)
-  if (purple_conversation_get_features (conv) & PURPLE_CONNECTION_NO_IMAGES)
-    gtk_menu_item_set_label (GTK_MENU_ITEM (as_link), SEND_AS_FTP_LINK_TXT);
-  else
-    gtk_menu_item_set_label (GTK_MENU_ITEM (as_link),
-			     SEND_AS_FTP_URL_TXT);
-#else
-  if (purple_conversation_get_features (conv) & PURPLE_CONNECTION_NO_IMAGES)
-    gtk_label_set_label (GTK_LABEL (GTK_BIN (as_link)->child),
-			 SEND_AS_FTP_LINK_TXT);
-  else
-    gtk_label_set_label (GTK_LABEL (GTK_BIN (as_link)->child),
-			 SEND_AS_FTP_URL_TXT);
 #endif
 }
 

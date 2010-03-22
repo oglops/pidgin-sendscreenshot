@@ -38,6 +38,7 @@
 #include <gtkmenutray.h>
 #include <glib/gi18n-lib.h>
 #include <plugin.h>
+#include <debug.h>
 #include <pidginstock.h>
 #include <version.h>
 #include <gtkplugin.h>
@@ -77,6 +78,8 @@
 #define PLUGIN_AUTHOR	"Raoul Berger <"PACKAGE_BUGREPORT">"
 #define PLUGIN_WEBSITE 	"http://code.google.com/p/pidgin-sendscreenshot"
 
+G_LOCK_EXTERN (unload);
+
 /* error reporting strings */
 #define PLUGIN_ERROR _("Error")
 
@@ -92,6 +95,8 @@
 
 #define PLUGIN_ALREADY_RUNNING_ERROR _("Another instance of %s is already running.\n"\
 				       "Please wait before sending an other screenshot.")
+#define PLUGIN_SIGNATURE_TOOBIG_ERROR _("The image used to sign the screenshot is too big.\n"\
+					"%dx%d is the maximum allowed.")
 
 /* see on_screenshot_insert_menuitem_activate_cb () */
 #define MSEC_TIMEOUT_VAL 500
@@ -107,6 +112,8 @@
 #define JPG 0
 #define PNG 1
 
+#define SIGN_MAXWIDTH 128
+#define SIGN_MAXHEIGHT 32
 
 #define SCREENSHOT_INSERT_MENUITEM_LABEL _("_Screenshot")
 #define SCREENSHOT_MENUITEM_LABEL _("Insert _Screenshot...")
@@ -129,16 +136,6 @@
   ((PluginExtraVars*)(plugin->extra))->what
 
 
-
-#define CLEAR_CAPTURE_AREA(plugin)\
-  PLUGIN (x1) = -1;\
-  PLUGIN (y1) = -1;\
-  PLUGIN (x2) = -1;\
-  PLUGIN (y2) = -1;\
-  PLUGIN (_x) = -1;\
-  PLUGIN (_y) = -1
-
-
 #define NotifyError(strval,arg...)				\
   {								\
   gchar *strmsg;						\
@@ -147,25 +144,12 @@
     g_free(strmsg);							\
   }
 
-#define MIN_X(plugin)\
-  MIN(PLUGIN (x1), PLUGIN (x2))
-#define MAX_X(plugin)\
-  MAX(PLUGIN (x1), PLUGIN (x2))
-#define MIN_Y(plugin)\
-  MIN(PLUGIN (y1), PLUGIN (y2))
-#define MAX_Y(plugin)\
-  MAX(PLUGIN (y1), PLUGIN (y2))
-#define CAPTURE_WIDTH(plugin)\
-  ABS(PLUGIN (x2) - PLUGIN (x1)) + 1
-#define CAPTURE_HEIGHT(plugin)\
-  ABS(PLUGIN (y2) - PLUGIN (y1)) + 1
-
-#define CLEAR_SEND_INFO_TO_NULL(plugin)				\
-  PLUGIN (account) = NULL;					\
+#define CLEAR_SEND_INFO_TO_NULL(plugin)\
+  PLUGIN (account) = NULL;\
   PLUGIN (pconv) = NULL;\
-  if (PLUGIN(name)) {				\
-    g_free (PLUGIN(name));			\
-    PLUGIN (name) = NULL;			\
+  if (PLUGIN(name)) {\
+    g_free (PLUGIN(name));\
+    PLUGIN (name) = NULL;\
   }
 
 #define CLEAR_PLUGIN_EXTRA_GCHARS(plugin)			\
@@ -177,7 +161,6 @@
   g_free (PLUGIN (capture_path_filename));			\
   PLUGIN (capture_path_filename = NULL);			\
   }
-
 
 #define TRY_SET_RUNNING_ON(plugin)				\
   if ( ! PLUGIN (running))					\
@@ -212,12 +195,8 @@ typedef enum
 #endif
 
 
-/* PurpleConversation *get_receiver_conv (PurplePlugin * plugin); */
-
 GtkWidget *get_receiver_window (PurplePlugin * plugin);
-
 GtkIMHtml *get_receiver_imhtml (PidginConversation * gtkconv);
-
 
 typedef struct
 {
@@ -230,8 +209,10 @@ typedef struct
   GtkWidget *blist_window;
 
   /* to display frozen desktop state */
+  GdkGC * gc;
   GtkWidget *root_window;
-  GdkPixbuf *root_pixbuf;
+  GdkPixbuf *root_pixbuf_x;
+  GdkPixbuf *root_pixbuf_orig;
   GdkImage *root_image;
 
   /* where to send capture ? */
@@ -278,14 +259,6 @@ typedef struct
 #endif
 
 } PluginExtraVars;
-
-guint timeout_freeze_screen (PurplePlugin * plugin);
-
-void paint_background (GtkWidget * root_window, GdkRectangle area,
-		       PurplePlugin * plugin);
-void draw_hv_lines (GtkWidget * root_window, GdkEventMotion * event,
-		    PurplePlugin * plugin);
-
 #endif
 
-/* end of screenshot.h */
+/* end of main.h */

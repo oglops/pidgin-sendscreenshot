@@ -6,10 +6,16 @@
 
 EXTRA_DIST = \
 	prefs.h \
-	screenshot.h \
+	main.h \
+	screencap.h \
 	http_upload.h \
 	ftp_upload.h \
-	upload_utils.h
+	upload_utils.h \
+	pixbuf_utils.h \
+	menus.h \
+	dialogs.h \
+	mswin-freeze.c \
+	mswin-freeze.h
 
 ardir = $(PIDGIN_LIBDIR)/pidgin
 
@@ -22,7 +28,11 @@ ar_LTLIBRARIES = screenshot.la
 
 screenshot_la_SOURCES = \
 	prefs.c \
-	screenshot.c
+	main.c \
+	screencap.c \
+	pixbuf_utils.c \
+	menus.c \
+	dialogs.c
 
 if ENABLE_UPLOAD
 screenshot_la_SOURCES += \

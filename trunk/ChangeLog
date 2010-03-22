@@ -1,5 +1,10 @@
 Pidgin Screenshot Plugin Changelog
 
+Version 0.7 03/22/10:
+	* Added option to print a signature at the bottom-right corner.
+	* Added Russian translation by Ilya S. 
+	* Fixed bad target conv when inserting screenshot from Conversation menu.
+	* Fixed multi-head support on MsWindows.
 Version 0.6-5 03/06/10:
 	* Added option to specify a corresponding Web address when uploading
 	  to a remote FTP server (idea of David Hazelden, thanx !).
