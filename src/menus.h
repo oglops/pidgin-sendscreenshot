@@ -1,6 +1,5 @@
  /*
-  *
-  *  Pidgin SendScreenshot plugin - common upload funcs, header -
+  * Pidgin SendScreenshot third-party plugin - menus and menuitems-
   *
   * This program is free software; you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -21,32 +20,13 @@
   *
   */
 
-#ifndef __UPLOAD_UTILS_H__
-#define __UPLOAD_UTILS_H__ 1
-
-#ifdef HAVE_CONFIG_H
-# include "../config.h"
-#endif
-
-#ifndef ENABLE_UPLOAD
-#error "***** ENABLE_UPLOAD is not defined ! *****"
-#endif
+#ifndef __MENUS_H__
+#define __MENUS_H__ 1
 
 #include "main.h"
 
-
-
-#define PLUGIN_SENDING_INFO _("Uploading the screenshot to \"%s\"...")
-
-#define PLUGIN_UPLOAD_CLOSED_CONV_ERROR _("Failed to insert a link because the"\
-					  "conversation window is now closed.\n"\
-					  "\nThe link is:\n%s")
-
-void real_insert_link (PurplePlugin * plugin, gchar * url);
-
-GtkWidget *show_uploading_dialog (PurplePlugin * plugin, const gchar * str);
-
+GtkWidget *create_plugin_submenu (PidginConversation * gtkconv,
+				  gboolean multiconv);
 #endif
 
-
-/* fin de upload_utils.h */
+/* end of menus.h */

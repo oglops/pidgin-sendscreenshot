@@ -1,5 +1,4 @@
  /*
-  *
   *  Pidgin SendScreenshot plugin - preferences, header -
   *
   * This program is free software; you can redistribute it and/or modify
@@ -32,7 +31,7 @@
 
 #include <gtkpluginpref.h>
 #include <gtkprefs.h>
-#include "screenshot.h"
+#include "main.h"
 
 
 /* xml prefs keys */
@@ -45,6 +44,8 @@
 #define PREF_ASK_FILENAME PREF_PREFIX "/ask-filename"
 #define PREF_SHOW_VISUAL_CUES PREF_PREFIX "/show_visualcues"
 #define PREF_WAIT_BEFORE_SCREENSHOT PREF_PREFIX "/wait_time"
+#define PREF_ADD_SIGNATURE PREF_PREFIX "/add-signature"
+#define PREF_SIGNATURE_FILENAME PREF_PREFIX "/signature-filename"
 
 #ifdef ENABLE_UPLOAD
 
@@ -79,8 +80,7 @@
 #define PREF_PNG_COMPRESSION_DEFAULT 9
 #define PREF_UI_PNG_COMRPESSION _("PNG compression level:")
 
-
-#define PREF_IMAGE_TYPE_DEFAULT "jpeg"
+#define PREF_UI_SIGNATURE _("Always add this signature:")
 
 #define PREF_UI_HIGHLIGHT_MODE _("Highlight mode:")
 #define PREF_HIGHLIGHT_MODE_01 _("lighten up desktop")

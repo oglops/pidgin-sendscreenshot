@@ -1,6 +1,4 @@
-
  /*
-  *
   * Pidgin SendScreenshot plugin - common upload utilities -
   *
   * This program is free software; you can redistribute it and/or modify
@@ -77,7 +75,7 @@ show_uploading_dialog (PurplePlugin * plugin, const gchar * str)
   GtkWidget *gtkconv_window;
   gchar *send_msg = NULL;
 
-  progress_bar = gtk_progress_bar_new ();
+  progress_bar = gtk_progress_bar_new ();	/* FIXME */
   img =
     gtk_image_new_from_stock (PIDGIN_STOCK_UPLOAD,
 			      gtk_icon_size_from_name
@@ -90,8 +88,7 @@ show_uploading_dialog (PurplePlugin * plugin, const gchar * str)
 					GTK_WINDOW ((gtkconv_window) ?
 						    gtkconv_window :
 						    PLUGIN (blist_window)),
-					GTK_DIALOG_NO_SEPARATOR,
-					NULL);
+					GTK_DIALOG_NO_SEPARATOR, NULL);
 
   gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
   gtk_progress_bar_set_pulse_step (GTK_PROGRESS_BAR (progress_bar), 0.05);
@@ -116,7 +113,6 @@ show_uploading_dialog (PurplePlugin * plugin, const gchar * str)
   gtk_box_pack_start (GTK_BOX (content_area), hbox, FALSE, FALSE, 0);
   gtk_box_pack_start (GTK_BOX (hbox), img, FALSE, FALSE, 0);
   gtk_box_pack_start (GTK_BOX (hbox), progress_bar, FALSE, FALSE, 0);
-
 
   gtk_widget_show_all (dialog);
   return dialog;

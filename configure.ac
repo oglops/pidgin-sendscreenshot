@@ -44,7 +44,7 @@ IT_PROG_INTLTOOL
 GETTEXT_PACKAGE=screenshot
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, ["$GETTEXT_PACKAGE"], [Define the gettext package to be used.])
-ALL_LINGUAS="de es fr it nl pl zh_CN"
+ALL_LINGUAS="de es fr nl pl ru zh_CN"
 AM_GLIB_GNU_GETTEXT
 
 #
@@ -52,7 +52,7 @@ AM_GLIB_GNU_GETTEXT
 #
 AC_PROG_CC_STDC
 if test "x$GCC" = "xyes"; then
-	CFLAGS="-Wall -Wextra -ggdb -O1"
+	CFLAGS="-Wall -Wextra -Wshadow -ggdb -O1"
 fi
 AC_SUBST(CFLAGS)
 
@@ -79,7 +79,7 @@ if test "x$enable_upload" = "xyes" ; then
    foundlibcurl="no"
    foundpcre="not found"
    LIBCURL_CHECK_CONFIG([yes], 
-	   	        [7.15.1], # make sure CURLOPT_ERRORBUFFER is always filled in on errors 
+	   	        [7.19.1], # make sure CURLOPT_ERRORBUFFER is always filled in on errors 
  		        [foundlibcurl="yes"
 			 PKG_CHECK_MODULES(GRegex, 
                                            [glib-2.0 >= 2.14.0], # glib with PCRE support
@@ -90,7 +90,7 @@ if test "x$enable_upload" = "xyes" ; then
 
       AC_MSG_ERROR([
 To compile this plugin *with* upload support, you must have :
- - libcurl >= 7.15.1 ($foundlibcurl) and glib>=2.14.0 ($foundpcre).
+ - libcurl >= 7.19.1 ($foundlibcurl) and glib>=2.14.0 ($foundpcre).
 
 If you don't need this feature, please specify --disable-upload when running configure.])
    else

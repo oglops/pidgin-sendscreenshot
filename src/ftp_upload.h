@@ -1,5 +1,4 @@
  /*
-  *
   *  Pidgin SendScreenshot plugin - ftp upload, header -
   *
   * This program is free software; you can redistribute it and/or modify
@@ -33,20 +32,10 @@
 #error "***** ENABLE_UPLOAD is not defined ! *****"
 #endif
 
-#include "screenshot.h"
+#include "main.h"
 
 void
-ftp_upload_prepare (PurplePlugin * plugin,
-		    const gchar * capture_path_filename,
-		    const gchar * capture_name);
-
-
-void
-on_screenshot_insert_as_ftp_link_show_cb (GtkWidget *
-					  as_link,
-					  PidginConversation * gtkconv);
-
-void on_screenshot_insert_as_ftp_link_activate_cb (PidginConversation * gtkconv);
+ftp_upload_prepare (PurplePlugin * plugin);
 
 #define PLUGIN_FTP_UPLOAD_ERROR _("FTP upload failed:")
 

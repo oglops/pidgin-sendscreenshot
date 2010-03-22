@@ -1,5 +1,4 @@
  /*
-  *
   *  Pidgin SendScreenshot plugin - http upload header -
   *
   * This program is free software; you can redistribute it and/or modify
@@ -32,7 +31,7 @@
 #error "***** ENABLE_UPLOAD is not defined ! *****"
 #endif
 
-#include "screenshot.h"
+#include "main.h"
 
 #define CLEAR_HOST_PARAM_DATA(host_data)			\
   host_data->is_inside = FALSE;					\
@@ -136,21 +135,10 @@
 #define SEND_AS_HTML_URL_TXT _("as a URL (_HTML upload)")
 #define MORE_INFO _("More info")
 
-#ifdef HAVE_LIBCURL
-G_LOCK_EXTERN (unload);
-#endif
-
 /* decls, prototypes... whatever they are called : */
 
 void
-http_upload_prepare (const gchar * capture_path_filename,
-		     const gchar * capture_name, PurplePlugin * plugin);
-
-void on_screenshot_insert_as_link_activate_cb (PidginConversation * gtkconv);
-
-void
-on_screenshot_insert_as_link_show_cb (GtkWidget *
-				      as_link, PidginConversation * gtkconv);
+http_upload_prepare (PurplePlugin * plugin);
 
 #endif
 
