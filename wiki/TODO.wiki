@@ -1,0 +1,5 @@
+#labels Featured
+=Todo=
+
+==Features you'd like to have==
+ * hotkeys
