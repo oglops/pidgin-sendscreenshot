@@ -8,14 +8,13 @@ msgstr ""
 "Project-Id-Version: pidgin-sendscreenshot 0.6-5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-03-18 19:38+0100\n"
-"PO-Revision-Date: 2010-03-15 18:05+0300\n"
+"PO-Revision-Date: 2010-03-19 18:01+0300\n"
 "Last-Translator: Ilya S. <root@nfodb.ru>\n"
 "Language-Team: Russian\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%"
-"10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #: src/ftp_upload.h:43
 msgid "FTP upload failed:"
@@ -56,8 +55,7 @@ msgstr "Ошибка загрузки скриншота на '%s'!"
 #: src/http_upload.h:101
 #, c-format
 msgid ""
-"Your screenshot has been uploaded to '%s' but the link cannot be "
-"extracted :\n"
+"Your screenshot has been uploaded to '%s' but the link cannot be extracted :\n"
 "***%s.\n"
 "\n"
 "Posible reasons are:\n"
@@ -156,7 +154,7 @@ msgstr "Показать больше информации"
 
 #: src/prefs.c:439
 msgid "Image"
-msgstr ""
+msgstr "Изображение"
 
 #: src/prefs.h:69
 msgid "Image parameters"
@@ -188,7 +186,7 @@ msgstr "Уровень сжатия PNG:"
 
 #: src/prefs.h:87
 msgid "Always add this signature:"
-msgstr ""
+msgstr "Всегда добавлять подпись:"
 
 #: src/prefs.h:89
 msgid "Highlight mode:"
@@ -232,11 +230,8 @@ msgstr "Сколько секунд ждать до заморозки экра�
 
 #: src/prefs.h:106
 #, c-format
-msgid ""
-"Pick an image hosting provider (<span foreground='blue'><u>list v.%s</u></"
-"span>)"
-msgstr ""
-"Выберите сайт для закачки  (<span foreground='blue'><u>list v.%s</u></span>)"
+msgid "Pick an image hosting provider (<span foreground='blue'><u>list v.%s</u></span>)"
+msgstr "Выберите сайт для закачки  (<span foreground='blue'><u>list v.%s</u></span>)"
 
 #: src/prefs.h:111
 msgid "Connect timeout (sec): "
@@ -288,12 +283,8 @@ msgid "Cannot allocate enough memory (%lu bytes) to load plugin data !"
 msgstr "Невозможно выделить достаточно памяти (%lu байт) для загрузки плагина!"
 
 #: src/screenshot.h:88
-msgid ""
-"Failed to allocate enough memory to create the screenshot. You will need to "
-"quit some applications and retry."
-msgstr ""
-"Невозможно выделить память под создание скриншота. Закройте несколько "
-"программ и попробуйте снова."
+msgid "Failed to allocate enough memory to create the screenshot. You will need to quit some applications and retry."
+msgstr "Невозможно выделить память под создание скриншота. Закройте несколько программ и попробуйте снова."
 
 #: src/screenshot.h:90
 #, c-format
@@ -324,6 +315,8 @@ msgid ""
 "The image used to sign the screenshot is too big.\n"
 "%dx%d is the maximum allowed."
 msgstr ""
+"Изображение для подписи скриншота слишком большое.\n"
+"%dx%d максимально разрешенный размер."
 
 #: src/screenshot.h:106
 msgid "No selection"
@@ -382,3 +375,4 @@ msgstr ""
 "\n"
 "Ссылка:\n"
 "%s"
+
