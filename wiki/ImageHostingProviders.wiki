@@ -3,7 +3,7 @@ How to add your own provider.
 
 = Introduction =
 
-Pidgin send-screenshot comes a list of image hosting providers and let you upload your screenshots to one of them.
+Pidgin send-screenshot comes with a list of image hosting providers and let you upload your screenshots to one of them.
 
 We recommend the following providers :
  * [http://megahorst.com/ megahorst]
