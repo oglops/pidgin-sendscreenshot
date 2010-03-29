@@ -1,5 +1,8 @@
 Pidgin Screenshot Plugin Changelog
 
+Version 0.7-1 ??:
+	* Connect timeout option also available for FTP_upload.
+	* ...
 Version 0.7 03/22/10:
 	* Added option to print a signature at the bottom-right corner.
 	* Added Russian translation by Ilya S. 

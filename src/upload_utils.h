@@ -42,7 +42,7 @@
 					  "conversation window is now closed.\n"\
 					  "\nThe link is:\n%s")
 
-void real_insert_link (PurplePlugin * plugin, gchar * url);
+void real_insert_link (PurplePlugin * plugin, const gchar * url);
 
 GtkWidget *show_uploading_dialog (PurplePlugin * plugin, const gchar * str);
 

@@ -700,15 +700,6 @@ get_plugin_pref_frame (PurplePlugin * plugin)
 				  hostnames_link, TRUE, FALSE, 0);
 	      gtk_box_pack_end (GTK_BOX (hbox_html),
 				hosts_combobox, TRUE, FALSE, 0);
-#ifdef HAVE_LIBCURL
-	      pidgin_prefs_labeled_spin_button (vbox,
-						PREF_UI_UPLOAD_CONNECTTIMEOUT,
-						PREF_UPLOAD_CONNECTTIMEOUT, 1,
-						30, NULL);
-	      pidgin_prefs_labeled_spin_button (vbox, PREF_UI_UPLOAD_TIMEOUT,
-						PREF_UPLOAD_TIMEOUT, 1, 30,
-						NULL);
-#endif
 	      g_markup_parse_context_free (context);
 	      g_free (contents);
 	    }
@@ -719,6 +710,17 @@ get_plugin_pref_frame (PurplePlugin * plugin)
 	  CLEAR_HOST_PARAM_DATA (host_data);
 	}
     }
+  /* =========================================================================
+   *   GENERAL UPLOAD OPTIONS
+   * ========================================================================= */
+  vbox = pidgin_make_frame (ret, PREF_UI_FRAME5);
+  pidgin_prefs_labeled_spin_button (vbox,
+				    PREF_UI_UPLOAD_CONNECTTIMEOUT,
+				    PREF_UPLOAD_CONNECTTIMEOUT, 1,
+				    30, NULL);
+  pidgin_prefs_labeled_spin_button (vbox, PREF_UI_UPLOAD_TIMEOUT,
+				    PREF_UPLOAD_TIMEOUT, 1, 30,
+				    NULL);
 #endif /* ENABLE_UPLOAD */
   return ret;
 }

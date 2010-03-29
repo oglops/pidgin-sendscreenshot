@@ -39,7 +39,6 @@ http_upload (PurplePlugin * plugin)
 
   img_ctype =
     g_strdup_printf ("image/%s", purple_prefs_get_string (PREF_IMAGE_TYPE));
-
   /* fill in extra fields */
   for (i = 0; i < PLUGIN (host_data)->extra_names->len; i++)
     {
@@ -129,7 +128,6 @@ http_upload (PurplePlugin * plugin)
       g_unlink (path);
       g_free (path);
     }
-
   G_LOCK (unload);
   if (plugin->extra != NULL)
     PLUGIN (libcurl_thread) = NULL;
@@ -544,7 +542,11 @@ http_upload_prepare (PurplePlugin * plugin)
   g_markup_parse_context_free (context);
   g_free (xml_contents);
 
+ 
   /* upload to server */
+  g_assert (PLUGIN (uploading_dialog) == NULL);
+  g_assert (PLUGIN (libcurl_thread) == NULL);
+ 
   PLUGIN (uploading_dialog) =
     show_uploading_dialog (plugin, PLUGIN (host_data)->selected_hostname);
   PLUGIN (libcurl_thread) =

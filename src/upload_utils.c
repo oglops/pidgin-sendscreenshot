@@ -27,24 +27,26 @@
  * Insert the html link we just fetched from server.
  */
 void
-real_insert_link (PurplePlugin * plugin, gchar * url)
+real_insert_link (PurplePlugin * plugin, const gchar * url)
 {
-  GtkTextMark *mark;
   GtkIMHtml *imhtml = get_receiver_imhtml (PLUGIN (pconv));
 
-  if (!imhtml)
+  if (imhtml == NULL)
     {
       NotifyError (PLUGIN_UPLOAD_CLOSED_CONV_ERROR, url);
     }
   else
     {
-      mark =
+      GtkTextMark *mark =
 	gtk_text_buffer_get_insert
 	(gtk_text_view_get_buffer (GTK_TEXT_VIEW (imhtml)));
-
+      
+      g_assert (mark != NULL);
+      
       if (PLUGIN (conv_features) & PURPLE_CONNECTION_HTML)
 	{
-	  gtk_imhtml_insert_link (imhtml, mark, url, PLUGIN (capture_name));
+	  gtk_imhtml_insert_link (imhtml, mark, url, 
+				  g_path_get_basename (PLUGIN (capture_path_filename)));
 	}
       else
 	{
@@ -73,6 +75,7 @@ show_uploading_dialog (PurplePlugin * plugin, const gchar * str)
   GtkWidget *hbox;
   GtkWidget *progress_bar;
   GtkWidget *gtkconv_window;
+  GtkWidget *blist_window;
   gchar *send_msg = NULL;
 
   progress_bar = gtk_progress_bar_new ();	/* FIXME */
@@ -83,11 +86,11 @@ show_uploading_dialog (PurplePlugin * plugin, const gchar * str)
   hbox = gtk_hbox_new (FALSE, PIDGIN_HIG_BOX_SPACE);
 
   gtkconv_window = get_receiver_window (plugin);
+  blist_window = pidgin_blist_get_default_gtk_blist()->window;
 
   dialog = gtk_dialog_new_with_buttons (PLUGIN_NAME,
 					GTK_WINDOW ((gtkconv_window) ?
-						    gtkconv_window :
-						    PLUGIN (blist_window)),
+						    gtkconv_window : blist_window),
 					GTK_DIALOG_NO_SEPARATOR, NULL);
 
   gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);

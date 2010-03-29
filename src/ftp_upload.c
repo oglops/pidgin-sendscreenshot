@@ -20,18 +20,9 @@
   *
   */
 
-
 #include "ftp_upload.h"
 #include "prefs.h"
 #include "upload_utils.h"
-
-#ifdef WIN32
-#include <io.h>
-#else
-#include <unistd.h>
-#endif
-
-#ifdef HAVE_LIBCURL
 
 G_LOCK_DEFINE (unload);
 
@@ -56,7 +47,6 @@ read_callback (void *ptr, size_t size, size_t nmemb, void *stream)
 static gpointer
 ftp_upload (PurplePlugin * plugin)
 {
-
   CURL *curl;
   CURLcode res;
   FILE *hd_src;
@@ -64,12 +54,18 @@ ftp_upload (PurplePlugin * plugin)
   curl_off_t fsize;
   struct curl_slist *headerlist = NULL;
   char *local_file, *remote_url;
+  
+  gchar *basename = NULL;
 
-  local_file = g_strdup_printf ("RNFR %s", PLUGIN (capture_name));
+  basename = g_path_get_basename (PLUGIN (capture_path_filename));
+  local_file = g_strdup_printf ("RNFR %s", basename);
+  
   remote_url =
     g_strdup_printf ("%s/%s",
 		     purple_prefs_get_string (PREF_FTP_REMOTE_URL),
-		     PLUGIN (capture_name));
+		     basename);
+  g_free (basename);
+  basename = NULL;
 
   /* get the file size of the local file */
   if (stat (PLUGIN (capture_path_filename), &file_info))
@@ -89,6 +85,12 @@ ftp_upload (PurplePlugin * plugin)
 
       /* build a list of commands to pass to libcurl */
       headerlist = curl_slist_append (headerlist, local_file);
+      
+      /* install timeouts */
+      curl_easy_setopt (curl, CURLOPT_CONNECTTIMEOUT,
+			purple_prefs_get_int (PREF_UPLOAD_CONNECTTIMEOUT));
+      curl_easy_setopt (curl, CURLOPT_TIMEOUT,
+			purple_prefs_get_int (PREF_UPLOAD_TIMEOUT));
 
       /* we want to use our own read function */
       curl_easy_setopt (curl, CURLOPT_READFUNCTION, read_callback);
@@ -147,10 +149,7 @@ ftp_upload (PurplePlugin * plugin)
   return NULL;
 }
 
-
-#endif /* HAVE_LIBCURL */
-
-gboolean
+static gboolean
 insert_ftp_link_cb (PurplePlugin * plugin)
 {
   /* still uploading... */
@@ -178,24 +177,27 @@ insert_ftp_link_cb (PurplePlugin * plugin)
       else
 	{
 	  gchar *remote_url;
+	  gchar *basename;
+	  
+	  basename = g_path_get_basename (PLUGIN (capture_path_filename));
 
 	  if (strcmp (purple_prefs_get_string (PREF_FTP_WEB_ADDR), ""))
 	    /* not only a ftp server, but also a html server */
 	    remote_url = g_strdup_printf ("%s/%s",
 					  purple_prefs_get_string
 					  (PREF_FTP_WEB_ADDR),
-					  PLUGIN (capture_name));
+					  basename);
 	  else
 	    remote_url = g_strdup_printf ("%s/%s",
 					  purple_prefs_get_string
 					  (PREF_FTP_REMOTE_URL),
-					  PLUGIN (capture_name));
+					  basename);
 
 	  real_insert_link (plugin, remote_url);
 	  g_free (remote_url);
+	  g_free (basename);
 	}
     }
-
   CLEAR_PLUGIN_EXTRA_GCHARS (plugin);
   CLEAR_SEND_INFO_TO_NULL (plugin);
   PLUGIN (running) = FALSE;
@@ -209,7 +211,9 @@ ftp_upload_prepare (PurplePlugin * plugin)
 
   host_data = PLUGIN (host_data);
 
-#ifdef HAVE_LIBCURL
+  g_assert (PLUGIN (uploading_dialog) == NULL);
+  g_assert (PLUGIN (libcurl_thread) == NULL);
+  
   PLUGIN (uploading_dialog) =
     show_uploading_dialog (plugin,
 			   purple_prefs_get_string (PREF_FTP_REMOTE_URL));
@@ -217,8 +221,6 @@ ftp_upload_prepare (PurplePlugin * plugin)
     g_thread_create ((GThreadFunc) ftp_upload, plugin, FALSE, NULL);
   PLUGIN (timeout_cb_handle) =
     g_timeout_add (50, (GSourceFunc) insert_ftp_link_cb, plugin);
-
-#endif
 }
 
 /* end of ftp_upload.c */

@@ -153,10 +153,6 @@ G_LOCK_EXTERN (unload);
   }
 
 #define CLEAR_PLUGIN_EXTRA_GCHARS(plugin)			\
-  if (PLUGIN (capture_name)) {					\
-  g_free (PLUGIN (capture_name));				\
-  PLUGIN (capture_name = NULL);					\
-  }								\
   if (PLUGIN (capture_path_filename)) {				\
   g_free (PLUGIN (capture_path_filename));			\
   PLUGIN (capture_path_filename = NULL);			\
@@ -206,14 +202,13 @@ typedef struct
 
   SendType send_as;
 
-  GtkWidget *blist_window;
-
   /* to display frozen desktop state */
   GdkGC * gc;
   GtkWidget *root_window;
-  GdkPixbuf *root_pixbuf_x;
+  /* original image */
   GdkPixbuf *root_pixbuf_orig;
-  GdkImage *root_image;
+  /* modified image (highlight mode) */
+  GdkPixbuf *root_pixbuf_x;
 
   /* where to send capture ? */
   PurpleConnectionFlags conv_features;
@@ -227,8 +222,8 @@ typedef struct
   /* capture area */
   gint x1, y1, x2, y2, _x, _y;
 
-  /* insert_html_cb_data */
-  gchar *capture_name, *capture_path_filename;
+  /* screenshot's location */
+  gchar *capture_path_filename;
 
 #ifdef ENABLE_UPLOAD
   GtkWidget *uploading_dialog;
