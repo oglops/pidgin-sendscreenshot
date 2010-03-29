@@ -146,11 +146,9 @@ remove_screenshot_insert_menuitem_pidgin (PidginConversation * gtkconv)
   GtkWidget *screenshot_insert_menuitem, *screenshot_menuitem,
     *conversation_menu;
   PidginWindow *win;
-
   PurplePlugin *plugin;
 
   plugin = purple_plugins_find_with_id (PLUGIN_ID);
-
 
   win = pidgin_conv_get_window (gtkconv);
   if (win != NULL)
@@ -207,10 +205,8 @@ on_blist_context_menu_send_capture (PurpleBlistNode * node,
 {
   if (PURPLE_BLIST_NODE_IS_BUDDY (node))
     {
-
       PurpleBuddy *buddy = (PurpleBuddy *) node;
-      /*  PurpleConversation *conv; */
-
+ 
       TRY_SET_RUNNING_ON (plugin);
 
       PLUGIN (send_as) = SEND_AS_FILE;
@@ -263,15 +259,6 @@ add_to_blist_context_menu (PurpleBlistNode * node, GList ** menu,
     }
 }
 
-static void
-get_blist_window_cb (PurpleBuddyList * blist, PurplePlugin * plugin)
-{
-  PidginBuddyList *gtk_blist = PIDGIN_BLIST (blist);
-
-  PLUGIN (blist_window) = gtk_blist->window;
-  g_assert (PLUGIN (blist_window));
-}
-
 static gboolean
 plugin_load (PurplePlugin * plugin)
 {
@@ -298,7 +285,6 @@ plugin_load (PurplePlugin * plugin)
       PLUGIN (xml_hosts_filename) =
 	g_build_filename (PLUGIN_DATADIR, "pidgin_screenshot_data",
 			  "img_hosting_providers.xml", NULL);
-      /* only once */
       curl_global_init (CURL_GLOBAL_ALL);
 #endif
       convs = purple_get_conversations ();
@@ -315,17 +301,6 @@ plugin_load (PurplePlugin * plugin)
 			     "blist-node-extended-menu", plugin,
 			     PURPLE_CALLBACK (add_to_blist_context_menu),
 			     plugin);
-      /* save pointer to the budddy list window when created */
-      if (!
-	  (PLUGIN (blist_window) =
-	   PIDGIN_BLIST (purple_get_blist ())->window))
-	{
-	  purple_signal_connect (pidgin_blist_get_handle (),
-				 "gtkblist-created", plugin,
-				 PURPLE_CALLBACK (get_blist_window_cb),
-				 plugin);
-	}
-
       while (convs)
 	{
 	  PurpleConversation *conv = (PurpleConversation *) convs->data;
@@ -393,18 +368,16 @@ plugin_unload (PurplePlugin * plugin)
   CLEAR_PLUGIN_EXTRA_GCHARS (plugin);
 
 #ifdef ENABLE_UPLOAD
-
   CLEAR_HOST_PARAM_DATA_FULL (host_data);
   g_free (PLUGIN (xml_hosts_filename));
   g_free (PLUGIN (host_data));
-  curl_global_cleanup ();
-
 #endif
 
   g_free (plugin->extra);
   plugin->extra = NULL;
 
 #if defined ENABLE_UPLOAD
+  curl_global_cleanup ();
   G_UNLOCK (unload);
 #endif
   return TRUE;
@@ -478,12 +451,8 @@ init_plugin (PurplePlugin * plugin)
   purple_prefs_add_int (PREF_WAIT_BEFORE_SCREENSHOT, 0);
   purple_prefs_add_string (PREF_FTP_REMOTE_URL, "ftp://");
   purple_prefs_add_string (PREF_FTP_WEB_ADDR, "");
-#ifdef HAVE_LIBCURL
   purple_prefs_add_int (PREF_UPLOAD_TIMEOUT, 30);
   purple_prefs_add_int (PREF_UPLOAD_CONNECTTIMEOUT, 10);
-#else
-  purple_prefs_add_int (PREF_UPLOAD_ACTIVITY_TIMEOUT, 60);
-#endif
 #endif
 
   purple_prefs_add_bool (PREF_ASK_FILENAME, FALSE);

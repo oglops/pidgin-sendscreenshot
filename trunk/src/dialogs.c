@@ -74,7 +74,7 @@ set_sensitive_if_input_and_noexist (GtkWidget * entry,
 
 /* part stolen from pidgin/gtkconv.c */
 static GtkWidget *
-capture_rename (PurplePlugin * plugin)
+capture_rename (PurplePlugin * plugin, const gchar * entry_init)
 {
   GdkColor red = { 0, 65535, 0, 0 };
   GtkWidget *dlgbox_rename;
@@ -83,6 +83,7 @@ capture_rename (PurplePlugin * plugin)
   GtkWidget *entry;
   GtkWidget *warn_label;
   GtkWidget *gtkconv_window;
+  GtkWidget *blist_window;
   GtkWidget *img;
   GtkWidget *content_area;
 
@@ -92,12 +93,12 @@ capture_rename (PurplePlugin * plugin)
 			      gtk_icon_size_from_name
 			      (PIDGIN_ICON_SIZE_TANGO_HUGE));
   gtkconv_window = get_receiver_window (plugin);
-
+  blist_window = pidgin_blist_get_default_gtk_blist()->window;
+  
   dlgbox_rename = gtk_dialog_new_with_buttons (DLGBOX_CAPNAME_TITLE,
 					       GTK_WINDOW ((gtkconv_window) ?
 							   gtkconv_window :
-							   PLUGIN
-							   (blist_window)),
+							   blist_window),
 					       GTK_DIALOG_MODAL |
 					       GTK_DIALOG_DESTROY_WITH_PARENT,
 					       GTK_STOCK_OK, GTK_RESPONSE_OK,
@@ -135,7 +136,7 @@ capture_rename (PurplePlugin * plugin)
   gtk_box_pack_start (GTK_BOX (content_area), warn_label, FALSE, FALSE, 0);
   entry = gtk_entry_new ();
 
-  gtk_entry_set_text (GTK_ENTRY (entry), PLUGIN(capture_name));
+  gtk_entry_set_text (GTK_ENTRY (entry), entry_init);
 
   gtk_entry_set_activates_default (GTK_ENTRY (entry), TRUE);
 
@@ -166,7 +167,7 @@ capture_rename (PurplePlugin * plugin)
     - as file 
     - to a remote FTP server
 */
-void screenshot_maybe_rename (PurplePlugin *plugin) {
+void screenshot_maybe_rename (PurplePlugin *plugin, gchar **basename) {
   if (purple_prefs_get_bool (PREF_ASK_FILENAME) &&
       (PLUGIN (send_as) == SEND_AS_FILE
 #ifdef ENABLE_UPLOAD
@@ -179,7 +180,7 @@ void screenshot_maybe_rename (PurplePlugin *plugin) {
 	  GtkWidget *dlgbox_rename = NULL;
 	  gint result = 0;
 	  
-	  dlgbox_rename = capture_rename (plugin);
+	  dlgbox_rename = capture_rename (plugin, *basename);
 	  result = gtk_dialog_run (GTK_DIALOG (dlgbox_rename));
 
 	  if (result == GTK_RESPONSE_OK)
@@ -188,8 +189,8 @@ void screenshot_maybe_rename (PurplePlugin *plugin) {
 
 	      entry = g_object_get_data (G_OBJECT (dlgbox_rename), "entry");
 
-	      g_free (PLUGIN(capture_name));
-	      PLUGIN(capture_name) =
+	      g_free (*basename);
+	      *basename = 
 		g_strdup (gtk_entry_get_text (GTK_ENTRY (entry)));
 	    }
 	  gtk_widget_destroy (dlgbox_rename);

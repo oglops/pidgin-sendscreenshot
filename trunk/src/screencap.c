@@ -447,7 +447,7 @@ extract_capture (PurplePlugin * plugin) {
 static gboolean
 save_capture (PurplePlugin *plugin,
 		GdkPixbuf *capture) {
- 
+  gchar *basename = NULL;
   gchar *param_name = NULL;
   gchar *param_value = NULL;
   GError *error = NULL;
@@ -456,7 +456,6 @@ save_capture (PurplePlugin *plugin,
     purple_prefs_get_string (PREF_IMAGE_TYPE);
   
   g_assert (PLUGIN (capture_path_filename) == NULL);
-  g_assert (PLUGIN (capture_name) == NULL);
   
   if (!strcmp (extension, "png"))
     {
@@ -474,15 +473,17 @@ save_capture (PurplePlugin *plugin,
   
   /* create default name */
   g_get_current_time (&g_tv);
-  PLUGIN (capture_name) =
+  basename =
     g_strdup_printf ("%s_%ld.%s", CAPTURE, g_tv.tv_sec, extension);
   
   /* eventually ask the user for a new name */
-  screenshot_maybe_rename (plugin);
+  screenshot_maybe_rename (plugin, &basename);
   
   PLUGIN (capture_path_filename) =
     g_build_filename (purple_prefs_get_string (PREF_STORE_FOLDER),
-		      PLUGIN (capture_name), NULL);
+		      basename, NULL);
+  g_free (basename);
+  basename = NULL;
   
   /* store capture in a file */
   gdk_pixbuf_save (capture, PLUGIN(capture_path_filename), extension,

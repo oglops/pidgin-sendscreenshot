@@ -69,6 +69,7 @@
 #define PREF_UI_FRAME2 _("Plugin behaviour")
 #define PREF_UI_FRAME3 _("HTTP upload")
 #define PREF_UI_FRAME4 _("FTP upload")
+#define PREF_UI_FRAME5 _("Upload options")
 
 #define PREF_UI_IMAGE_TYPE _("Image format: ")
 #define PREF_TYPE_JPG "JPEG"
