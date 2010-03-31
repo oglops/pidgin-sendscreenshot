@@ -68,10 +68,8 @@ http_upload (PurplePlugin * plugin)
 
       curl_easy_setopt (curl, CURLOPT_URL, PLUGIN (host_data)->form_action);
 
-      curl_easy_setopt (curl, CURLOPT_CONNECTTIMEOUT,
-			purple_prefs_get_int (PREF_UPLOAD_CONNECTTIMEOUT));
-      curl_easy_setopt (curl, CURLOPT_TIMEOUT,
-			purple_prefs_get_int (PREF_UPLOAD_TIMEOUT));
+      plugin_curl_set_common_opts (curl, plugin);
+      
       curl_easy_setopt (curl, CURLOPT_ERRORBUFFER, curl_error);
 
       /* hmm... or InternetExplorer? */

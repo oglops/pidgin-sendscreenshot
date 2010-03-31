@@ -21,7 +21,67 @@
   */
 
 #include "upload_utils.h"
+#include "prefs.h"
 
+/*
+ * Set common curl options for http and ftp upload.
+ */
+void plugin_curl_set_common_opts(CURL * curl, PurplePlugin * plugin) {
+  const PurpleProxyInfo *gpi = NULL;
+   
+  g_assert (curl != NULL);
+  g_assert (PLUGIN(account) != NULL);
+  
+  /* install timeouts */
+  curl_easy_setopt (curl, CURLOPT_CONNECTTIMEOUT,
+		    purple_prefs_get_int (PREF_UPLOAD_CONNECTTIMEOUT));
+  curl_easy_setopt (curl, CURLOPT_TIMEOUT,
+		    purple_prefs_get_int (PREF_UPLOAD_TIMEOUT));
+
+  
+  /* use proxy settings */
+  if ((gpi = purple_proxy_get_setup(PLUGIN(account))) != NULL)
+    {
+      PurpleProxyType proxy_type = purple_proxy_info_get_type (gpi);
+  
+      if (proxy_type != PURPLE_PROXY_NONE){
+	long curl_proxy_type;
+	const gchar *proxy_username = NULL;
+	const gchar *proxy_password = NULL;
+
+	proxy_username = purple_proxy_info_get_username (gpi);
+	proxy_password = purple_proxy_info_get_password (gpi);
+	
+	/* set proxy type */
+	if (proxy_type == PURPLE_PROXY_HTTP)
+	  curl_proxy_type = CURLPROXY_HTTP;
+	else if (proxy_type == PURPLE_PROXY_SOCKS4) {
+	  if (purple_prefs_get_bool("/purple/proxy/socks4_remotedns"))
+	    curl_proxy_type = CURLPROXY_SOCKS4A;
+	  else
+	    curl_proxy_type = CURLPROXY_SOCKS4;
+	}
+	else if  (proxy_type == PURPLE_PROXY_SOCKS5)
+	  curl_proxy_type = CURLPROXY_SOCKS5;
+	else
+	  {
+	    /* should not happen */
+	    NotifyError ("proxy type :'%d' is invalid", proxy_type);
+	    return;
+	  }
+	curl_easy_setopt (curl, CURLOPT_PROXYTYPE, curl_proxy_type);
+	curl_easy_setopt (curl, CURLOPT_PROXYPORT, purple_proxy_info_get_port (gpi));
+	curl_easy_setopt (curl, CURLOPT_PROXY,  purple_proxy_info_get_host (gpi));
+
+	if (!purple_strequal(proxy_username, "")) {
+	  curl_easy_setopt (curl, CURLOPT_PROXYUSERNAME, proxy_username);
+      
+	  if (!purple_strequal(proxy_password, ""))
+	    curl_easy_setopt (curl, CURLOPT_PROXYPASSWORD, proxy_password);
+	}
+      }
+    }
+}
 
 /*
  * Insert the html link we just fetched from server.
