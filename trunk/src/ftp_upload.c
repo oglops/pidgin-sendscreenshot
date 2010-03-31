@@ -86,12 +86,8 @@ ftp_upload (PurplePlugin * plugin)
       /* build a list of commands to pass to libcurl */
       headerlist = curl_slist_append (headerlist, local_file);
       
-      /* install timeouts */
-      curl_easy_setopt (curl, CURLOPT_CONNECTTIMEOUT,
-			purple_prefs_get_int (PREF_UPLOAD_CONNECTTIMEOUT));
-      curl_easy_setopt (curl, CURLOPT_TIMEOUT,
-			purple_prefs_get_int (PREF_UPLOAD_TIMEOUT));
-
+      plugin_curl_set_common_opts (curl, plugin);
+      
       /* we want to use our own read function */
       curl_easy_setopt (curl, CURLOPT_READFUNCTION, read_callback);
 
@@ -146,7 +142,7 @@ ftp_upload (PurplePlugin * plugin)
   G_LOCK (unload);
   PLUGIN (libcurl_thread) = NULL;
   G_UNLOCK (unload);
-  return NULL;
+   return NULL;
 }
 
 static gboolean
