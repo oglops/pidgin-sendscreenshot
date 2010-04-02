@@ -36,7 +36,7 @@
 
 
 
-#define PLUGIN_SENDING_INFO _("Uploading the screenshot to \"%s\"...")
+#define PLUGIN_SENDING_INFO _("Uploading to \"%s\"...")
 
 #define PLUGIN_UPLOAD_CLOSED_CONV_ERROR _("Failed to insert a link because the"\
 					  "conversation window is now closed.\n"\
@@ -49,4 +49,4 @@ GtkWidget *show_uploading_dialog (PurplePlugin * plugin, const gchar * str);
 #endif
 
 
-/* fin de upload_utils.h */
+/* end of upload_utils.h */

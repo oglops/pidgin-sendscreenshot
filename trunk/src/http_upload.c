@@ -80,6 +80,7 @@ http_upload (PurplePlugin * plugin)
       curl_easy_setopt (curl, CURLOPT_HTTPHEADER, headerlist);
 
       curl_easy_setopt (curl, CURLOPT_HTTPPOST, formpost);
+
       res = curl_easy_perform (curl);
 
       curl_formfree (formpost);
@@ -160,8 +161,18 @@ xml_get_host_data_start_element_handler (GMarkupParseContext * context,
     {
       if (attribute_names[0])
 	{
-	  if (!strcmp (attribute_values[0], host_data->selected_hostname))
-	    host_data->is_inside = TRUE;
+	  if (!strcmp (attribute_names[0], "name"))
+	    {
+	      if (!strcmp (attribute_values[0], host_data->selected_hostname))
+		host_data->is_inside = TRUE;
+	    }
+	  else
+	    g_set_error (error,
+			 G_MARKUP_ERROR,
+			 G_MARKUP_ERROR_UNKNOWN_ATTRIBUTE,
+			 PLUGIN_PARSE_XML_ERRMSG_INVATTR,
+			 line_number, char_number,
+			 attribute_names[0], element_name);
 	}
       else
 	{
@@ -172,10 +183,9 @@ xml_get_host_data_start_element_handler (GMarkupParseContext * context,
 		       line_number, char_number, element_name);
 	}
     }
-  else if (!strcmp (element_name, "param"))
+  else if (!strcmp (element_name, "param") )
     {
-      if (host_data->is_inside)
-	{
+      if (host_data->is_inside) {
 	  if (attribute_names[0])
 	    {
 	      if (!strcmp (attribute_names[0], "form_action")
@@ -236,7 +246,7 @@ xml_get_host_data_start_element_handler (GMarkupParseContext * context,
 			   PLUGIN_PARSE_XML_ERRMSG_MISSATTR,
 			   line_number, char_number, element_name);
 	    }
-	}
+    }
     }
   else
     {
@@ -392,9 +402,7 @@ insert_html_link_cb (PurplePlugin * plugin)
 	}
     }
   CLEAR_HOST_PARAM_DATA_FULL (PLUGIN (host_data));
-  CLEAR_PLUGIN_EXTRA_GCHARS (plugin);
-  CLEAR_SEND_INFO_TO_NULL (plugin);
-  PLUGIN (running) = FALSE;
+  plugin_stop (plugin);
   return FALSE;
 }
 
@@ -420,7 +428,7 @@ http_upload_prepare (PurplePlugin * plugin)
       g_free (host_data->selected_hostname);
       host_data->selected_hostname = NULL;
 
-      PLUGIN (running) = FALSE;
+      plugin_stop (plugin);
       return;
     }
   context =
@@ -534,7 +542,7 @@ http_upload_prepare (PurplePlugin * plugin)
       g_markup_parse_context_free (context);
       g_free (xml_contents);
       CLEAR_HOST_PARAM_DATA_FULL (host_data);
-      PLUGIN (running) = FALSE;
+      plugin_stop (plugin);
       return;
     }
   g_markup_parse_context_free (context);

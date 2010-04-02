@@ -1,8 +1,10 @@
 Pidgin Screenshot Plugin Changelog
 
-Version 0.7-1 ??:
-	* Connect timeout option also available for FTP_upload.
-	* ...
+Version 0.7-1 04/??/10:
+	* Don't ignore proxy settings ! (Repported by Paul Matthias Diderichsen and Homolibere).
+	* Updated Chinese translation (error messages still untranslated).
+	* Set menuitems insensitive when plugin is running.
+	* See real FTP upload progress.
 Version 0.7 03/22/10:
 	* Added option to print a signature at the bottom-right corner.
 	* Added Russian translation by Ilya S. 
