@@ -154,8 +154,7 @@ hosts_combobox_changed_cb (GtkComboBox * hosts_combobox)
 						GTK_RESPONSE_YES,
 						GTK_STOCK_CANCEL,
 						GTK_RESPONSE_NO, NULL);
-      /*  gtk_window_set_resizable (GTK_WINDOW (tos_dialog), FALSE); */
-
+   
 #if GTK_CHECK_VERSION (2,14,0)
       content_area = gtk_dialog_get_content_area (GTK_DIALOG (tos_dialog));
 #else
@@ -285,24 +284,31 @@ prefs_start_element_handler (GMarkupParseContext * context,
     }
   else if (!strcmp (element_name, "host"))
     {
-      if (attribute_names[0] && !strcmp (attribute_names[0], "name")
-	  && strcmp (attribute_values[0], HOST_DISABLED))
-	{			/* just in case */
-	  gchar *host_name = g_strdup (attribute_values[0]);
-
-	  g_array_append_val (host_data->host_names, host_name);
-
-	}
-      else
-	{
+      if (attribute_names[0]) {
+	if ( !strcmp (attribute_names[0], "name"))
+	  {
+	    if (strcmp (attribute_values[0], HOST_DISABLED))
+	      {			/* just in case */
+		gchar *host_name = g_strdup (attribute_values[0]);		
+		g_array_append_val (host_data->host_names, host_name);
+	    }
+	  }
+	else
 	  g_set_error (error,
 		       G_MARKUP_ERROR,
-		       G_MARKUP_ERROR_MISSING_ATTRIBUTE,
-		       PLUGIN_PARSE_XML_ERRMSG_MISSATTR,
-		       line_number, char_number, element_name);
-	}
-    }
+		       G_MARKUP_ERROR_UNKNOWN_ATTRIBUTE,
+		       PLUGIN_PARSE_XML_ERRMSG_INVATTR,
+		       line_number, char_number,
+		       attribute_names[0], element_name);
+      }
+      else
+	g_set_error (error,
+		     G_MARKUP_ERROR,
+		     G_MARKUP_ERROR_MISSING_ATTRIBUTE,
+		     PLUGIN_PARSE_XML_ERRMSG_MISSATTR,
+		      line_number, char_number, element_name);
 
+    }
   (void) context;
   (void) error;
 }
@@ -368,8 +374,7 @@ get_plugin_pref_frame (PurplePlugin * plugin)
   GtkWidget *ret = NULL;
   GtkWidget *vbox;
   GtkWidget *dropdown_imgtype;
-  GtkWidget *hbox_imgtype;
-  GtkWidget *hbox_sign;
+  GtkWidget *hbox_imgtype, *hbox_sign;
 #if GTK_CHECK_VERSION(2,6,0)
   GdkPixbuf *sign_pixbuf;
   GtkWidget *folder_chooser, *file_chooser, *sign_image;
@@ -408,7 +413,7 @@ get_plugin_pref_frame (PurplePlugin * plugin)
 
   hbox_imgtype = gtk_hbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
   hbox_sign = gtk_hbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
-
+  
 
 
   dropdown_imgtype =

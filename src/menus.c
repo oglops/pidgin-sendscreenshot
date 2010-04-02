@@ -33,13 +33,13 @@ static void
 on_screenshot_insert_as_link_aux (PidginWindow * win,
 				  PidginConversation * _gtkconv)
 {
-
   PurplePlugin *plugin;
   PidginConversation *gtkconv;
 
   plugin = purple_plugins_find_with_id (PLUGIN_ID);
 
-  TRY_SET_RUNNING_ON (plugin);
+  g_assert (PLUGIN(running) == FALSE);
+  PLUGIN(running) = TRUE;
 
   PLUGIN (send_as) = SEND_AS_HTTP_LINK;
 
@@ -53,7 +53,7 @@ on_screenshot_insert_as_link_aux (PidginWindow * win,
     {
       purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
 			   PLUGIN_HOST_DISABLED_ERROR);
-      PLUGIN (running) = FALSE;
+      plugin_stop (plugin);
       return;
     }
   REMEMBER_ACCOUNT (gtkconv);
@@ -111,8 +111,9 @@ on_screenshot_insert_as_ftp_link_aux (PidginWindow * win,
 
 
   plugin = purple_plugins_find_with_id (PLUGIN_ID);
-
-  TRY_SET_RUNNING_ON (plugin);
+  
+  g_assert (PLUGIN(running) == FALSE);
+  PLUGIN(running) = TRUE;
 
   if (win != NULL)
     gtkconv =
@@ -177,7 +178,8 @@ on_screenshot_insert_as_image_aux (PidginWindow * win,
 
   plugin = purple_plugins_find_with_id (PLUGIN_ID);
 
-  TRY_SET_RUNNING_ON (plugin);
+  g_assert (PLUGIN(running) == FALSE);
+  PLUGIN(running) = TRUE;
 
   PLUGIN (send_as) = SEND_AS_IMAGE;
 
@@ -228,11 +230,12 @@ static void
 on_conversation_menu_show_cb (PidginWindow * win)
 {
   PurpleConversation *conv;
-  GtkWidget *conversation_menu, *img_menuitem;
+  GtkWidget *conversation_menu, *img_menuitem, *screenshot_menuitem;
 #ifdef ENABLE_UPLOAD
   GtkWidget *link_menuitem, *ftp_link_menuitem;
 #endif
 
+  PurplePlugin * plugin = purple_plugins_find_with_id (PLUGIN_ID);
 
   conv = pidgin_conv_window_get_active_conversation (win);
   conversation_menu =
@@ -252,13 +255,18 @@ on_conversation_menu_show_cb (PidginWindow * win)
     g_object_get_data (G_OBJECT (conversation_menu), "img_menuitem");
   on_screenshot_insert_as_image_show_cb (img_menuitem,
 					 PIDGIN_CONVERSATION (conv));
+
+  screenshot_menuitem = 
+    g_object_get_data (G_OBJECT (conversation_menu), "screenshot_menuitem");
+
+  gtk_widget_set_sensitive (screenshot_menuitem, !PLUGIN(running));
 }
 
 
 /**
    Create a submenu with send as Image, Link (Http) and Link (Ftp) menuitems.
  */
-GtkWidget *
+static GtkWidget *
 create_plugin_submenu (PidginConversation * gtkconv, gboolean multiconv)
 {
   GtkWidget *submenu;
@@ -289,7 +297,6 @@ create_plugin_submenu (PidginConversation * gtkconv, gboolean multiconv)
       g_signal_connect_swapped (G_OBJECT (conversation_menu), "show",
 				G_CALLBACK (on_conversation_menu_show_cb),
 				win);
-
 
       g_signal_connect_swapped (G_OBJECT (as_image),
 				"activate",
@@ -349,6 +356,207 @@ create_plugin_submenu (PidginConversation * gtkconv, gboolean multiconv)
 #endif
     }
   return submenu;
+}
+
+static
+void on_insert_menu_show_cb (GtkWidget *screenshot_insert_menuitem) {
+  PurplePlugin * plugin = purple_plugins_find_with_id (PLUGIN_ID);
+  gtk_widget_set_sensitive (screenshot_insert_menuitem, !PLUGIN(running));
+}
+
+void
+create_plugin_menuitems (PidginConversation * gtkconv)
+{
+  PurplePlugin *plugin;
+  PidginWindow *win;
+  GtkWidget *conversation_menu, *screenshot_menuitem;
+  GtkWidget *screenshot_insert_menuitem;
+
+  plugin = purple_plugins_find_with_id (PLUGIN_ID);
+
+  win = pidgin_conv_get_window (gtkconv);
+
+  conversation_menu =
+    gtk_item_factory_get_widget (win->menu.item_factory, N_("/Conversation"));
+  screenshot_insert_menuitem =
+    g_object_get_data (G_OBJECT (gtkconv->toolbar),
+		       "screenshot_insert_menuitem");
+  screenshot_menuitem =
+    g_object_get_data (G_OBJECT (conversation_menu), "screenshot_menuitem");
+  
+  /* Add us to the conv "Insert" menu */
+  if (screenshot_insert_menuitem == NULL)
+    {
+      GtkWidget *insert_menu, *submenu;
+
+      if ((insert_menu =
+	   g_object_get_data (G_OBJECT (gtkconv->toolbar),
+			      "insert_menu")) != NULL)
+	{
+	  /* add us to the "insert" list */
+	  screenshot_insert_menuitem =
+	    gtk_menu_item_new_with_mnemonic
+	    (SCREENSHOT_INSERT_MENUITEM_LABEL);
+	  
+	  submenu = create_plugin_submenu (gtkconv, FALSE);
+
+	  g_signal_connect_swapped (G_OBJECT (insert_menu), "show",
+				    G_CALLBACK (on_insert_menu_show_cb),
+				    screenshot_insert_menuitem);
+	  
+	  gtk_menu_item_set_submenu (GTK_MENU_ITEM
+				     (screenshot_insert_menuitem), submenu);
+
+	  gtk_menu_shell_insert (GTK_MENU_SHELL (insert_menu),
+				 screenshot_insert_menuitem, 1);
+
+	  /* register new widget */
+	  g_object_set_data (G_OBJECT (gtkconv->toolbar),
+			     "screenshot_insert_menuitem",
+			     screenshot_insert_menuitem);
+	}
+    }
+
+  /* Add us to the conv "Conversation" menu. */
+  if (screenshot_menuitem == NULL)
+    {
+      GList *children = NULL, *head_chld = NULL;	/* don't g_list_free() it */
+      guint i = 0;
+      GtkWidget *submenu = create_plugin_submenu (gtkconv, TRUE);
+
+      screenshot_menuitem =
+	gtk_menu_item_new_with_mnemonic (SCREENSHOT_MENUITEM_LABEL);
+
+      gtk_menu_item_set_submenu (GTK_MENU_ITEM
+				 (screenshot_menuitem), submenu);
+
+      gtk_widget_show_all (submenu);
+
+      children =
+	gtk_container_get_children (GTK_CONTAINER (conversation_menu));
+      head_chld = children;	/* keep first element addr */
+
+      /* pack our menuitem at correct place */
+      while (children != NULL && children->data !=
+	     (gpointer) win->menu.insert_image)
+	{
+	  children = g_list_next (children);
+	  i++;
+	}
+      g_list_free (head_chld);
+
+      gtk_menu_shell_insert (GTK_MENU_SHELL (conversation_menu),
+			     screenshot_menuitem, i + 1);
+      gtk_widget_show (screenshot_menuitem);
+
+      g_object_set_data (G_OBJECT (conversation_menu),
+			 "screenshot_menuitem", screenshot_menuitem);
+    }
+}
+
+void
+remove_pidgin_menuitems (PidginConversation * gtkconv)
+{
+  GtkWidget *screenshot_insert_menuitem, *screenshot_menuitem,
+    *conversation_menu;
+  PidginWindow *win;
+  PurplePlugin *plugin;
+
+  plugin = purple_plugins_find_with_id (PLUGIN_ID);
+
+  win = pidgin_conv_get_window (gtkconv);
+  if (win != NULL)
+    {
+      if ((conversation_menu =
+	   gtk_item_factory_get_widget (win->menu.item_factory,
+					N_("/Conversation"))) != NULL)
+	{
+	  if ((screenshot_menuitem =
+	       g_object_get_data (G_OBJECT (conversation_menu),
+				  "screenshot_menuitem")) != NULL)
+	    {
+	      gtk_widget_destroy (screenshot_menuitem);
+	      g_object_steal_data (G_OBJECT (conversation_menu),
+				   "screenshot_menuitem");
+	      g_object_steal_data (G_OBJECT (conversation_menu),
+				   "img_menuitem");
+#ifdef ENABLE_UPLOAD
+	      g_object_steal_data (G_OBJECT (conversation_menu),
+				   "link_menuitem");
+	      g_object_steal_data (G_OBJECT (conversation_menu),
+				   "ftp_link_menuitem");
+#endif
+	    }
+	}
+    }
+  screenshot_insert_menuitem =
+    g_object_get_data (G_OBJECT (gtkconv->toolbar),
+		       "screenshot_insert_menuitem");
+  if (screenshot_insert_menuitem != NULL)
+    {
+      gtk_widget_destroy (screenshot_insert_menuitem);
+      g_object_steal_data (G_OBJECT (gtkconv->toolbar),
+			   "screenshot_insert_menuitem");
+    }
+}
+
+static void
+on_blist_context_menu_send_capture (PurpleBlistNode * node,
+				    PurplePlugin * plugin)
+{
+  g_assert (PLUGIN(running) == FALSE);
+  PLUGIN(running) = TRUE;
+
+  if (PURPLE_BLIST_NODE_IS_BUDDY (node))
+    {
+      PurpleBuddy *buddy = (PurpleBuddy *) node;
+ 
+      PLUGIN (send_as) = SEND_AS_FILE;
+
+      PLUGIN (account) = purple_buddy_get_account (buddy);
+      PLUGIN (name) = g_strdup_printf ("%s", purple_buddy_get_name (buddy));
+
+      /* see on_screenshot_insert_as_image_activate_cb () */
+      FREEZE_DESKTOP ();
+    }
+}
+
+/* stolen from autoaccept.c and gtkblist.c files. */
+void
+buddy_context_menu_add_item (PurpleBlistNode * node, GList ** menu,
+			     PurplePlugin *plugin)
+{
+  PurplePluginProtocolInfo *prpl_info;
+
+  if (PURPLE_BLIST_NODE_IS_BUDDY (node))
+    {
+      prpl_info =
+	PURPLE_PLUGIN_PROTOCOL_INFO (((PurpleBuddy *) node)->account->gc->
+				     prpl);
+
+      if (prpl_info && prpl_info->send_file)
+	{
+	  if (!prpl_info->can_receive_file ||
+	      prpl_info->can_receive_file (((PurpleBuddy *) node)->account->
+					   gc, ((PurpleBuddy *) node)->name))
+	    {
+	      PurpleMenuAction *action;
+
+	      if (!PURPLE_BLIST_NODE_IS_BUDDY (node)
+		  && !PURPLE_BLIST_NODE_IS_CONTACT (node)
+		  && !(purple_blist_node_get_flags (node) &
+		       PURPLE_BLIST_NODE_FLAG_NO_SAVE))
+		return;
+
+	      action =
+		purple_menu_action_new (SCREENSHOT_SEND_MENUITEM_LABEL,
+					PURPLE_CALLBACK
+					(on_blist_context_menu_send_capture),
+					plugin, NULL);
+	      (*menu) = g_list_prepend (*menu, action);	/* add */
+	    }
+	}
+    }
 }
 
 /* end of menus.c */

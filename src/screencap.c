@@ -88,7 +88,7 @@ timeout_freeze_screen (PurplePlugin * plugin)
 	{
 	  purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
 			       PLUGIN_MEMORY_ERROR);
-	  PLUGIN (running) = FALSE;
+	  plugin_stop (plugin);
 	  return 0;
 	}
     }
@@ -139,7 +139,7 @@ timeout_freeze_screen (PurplePlugin * plugin)
 	{
 	  purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
 			       PLUGIN_MEMORY_ERROR);
-	  PLUGIN (running) = FALSE;
+	  plugin_stop (plugin);
 	  return 0;
 	}
 #ifdef G_OS_WIN32
@@ -158,7 +158,7 @@ timeout_freeze_screen (PurplePlugin * plugin)
 			       PLUGIN_MEMORY_ERROR);
 	  g_object_unref (PLUGIN (root_pixbuf_orig));
 	  PLUGIN (root_pixbuf_orig) = NULL;
-	  PLUGIN (running) = FALSE;
+	  plugin_stop (plugin);
 	  return 0;
 	}
     }
@@ -370,8 +370,7 @@ on_root_window_button_press_cb (GtkWidget * root_window,
 	      g_object_unref (PLUGIN (root_pixbuf_x));
 	      PLUGIN (root_pixbuf_x) = NULL;
 	    }
-
-	  PLUGIN (running) = FALSE;
+	  plugin_stop (plugin);
 	}
       else if (PLUGIN (x1) != -1)
 	{
@@ -455,8 +454,9 @@ save_capture (PurplePlugin *plugin,
   const gchar *const extension =
     purple_prefs_get_string (PREF_IMAGE_TYPE);
   
-  g_assert (PLUGIN (capture_path_filename) == NULL);
-  
+  if (PLUGIN (capture_path_filename) != NULL)
+    g_free (PLUGIN (capture_path_filename));
+
   if (!strcmp (extension, "png"))
     {
       param_name = g_strdup ("compression");
@@ -502,8 +502,7 @@ save_capture (PurplePlugin *plugin,
       NotifyError ("%s\n\n\%s", errmsg_saveto, error->message);
       
       g_free (errmsg_saveto);
-      CLEAR_SEND_INFO_TO_NULL (plugin);
-      PLUGIN (running) = FALSE;
+      plugin_stop (plugin);
       g_error_free (error);
       return FALSE;
     }
@@ -539,7 +538,7 @@ on_root_window_button_release_cb (GtkWidget * root_window,
     {
       purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
 			   PLUGIN_MEMORY_ERROR);
-      PLUGIN (running) = FALSE;
+      plugin_stop (plugin);
     }
   else
     {
@@ -557,9 +556,7 @@ on_root_window_button_release_cb (GtkWidget * root_window,
 		serv_send_file
 		  (purple_account_get_connection
 		   (PLUGIN (account)), PLUGIN (name), PLUGIN(capture_path_filename));
-		CLEAR_PLUGIN_EXTRA_GCHARS (plugin);
-		CLEAR_SEND_INFO_TO_NULL (plugin);
-		PLUGIN (running) = FALSE;
+		plugin_stop (plugin);
 		break;
 	      }
 	    case SEND_AS_IMAGE:
@@ -620,9 +617,7 @@ on_root_window_button_release_cb (GtkWidget * root_window,
 			gtk_widget_grab_focus (GTK_WIDGET (imhtml));
 		      }
 		  }
-		CLEAR_PLUGIN_EXTRA_GCHARS (plugin);
-		CLEAR_SEND_INFO_TO_NULL (plugin);
-		PLUGIN (running) = FALSE;
+		plugin_stop (plugin);
 		break;
 	      }
 #ifdef ENABLE_UPLOAD

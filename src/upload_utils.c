@@ -37,7 +37,6 @@ void plugin_curl_set_common_opts(CURL * curl, PurplePlugin * plugin) {
 		    purple_prefs_get_int (PREF_UPLOAD_CONNECTTIMEOUT));
   curl_easy_setopt (curl, CURLOPT_TIMEOUT,
 		    purple_prefs_get_int (PREF_UPLOAD_TIMEOUT));
-
   
   /* use proxy settings */
   if ((gpi = purple_proxy_get_setup(PLUGIN(account))) != NULL)
@@ -138,7 +137,7 @@ show_uploading_dialog (PurplePlugin * plugin, const gchar * str)
   GtkWidget *blist_window;
   gchar *send_msg = NULL;
 
-  progress_bar = gtk_progress_bar_new ();	/* FIXME */
+  progress_bar = gtk_progress_bar_new ();
   img =
     gtk_image_new_from_stock (PIDGIN_STOCK_UPLOAD,
 			      gtk_icon_size_from_name
@@ -159,7 +158,6 @@ show_uploading_dialog (PurplePlugin * plugin, const gchar * str)
   g_object_set_data (G_OBJECT (dialog), "progress-bar", progress_bar);
 
   send_msg = g_strdup_printf (PLUGIN_SENDING_INFO, str);
-
 
   gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progress_bar), send_msg);
 

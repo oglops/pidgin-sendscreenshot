@@ -93,8 +93,6 @@ G_LOCK_EXTERN (unload);
 #define PLUGIN_GET_DATA_ERROR _("Failed to get '%s' data.")
 #define PLUGIN_STORE_FAILED_ERROR _("Failed to insert your screenshot in the text area.")
 
-#define PLUGIN_ALREADY_RUNNING_ERROR _("Another instance of %s is already running.\n"\
-				       "Please wait before sending an other screenshot.")
 #define PLUGIN_SIGNATURE_TOOBIG_ERROR _("The image used to sign the screenshot is too big.\n"\
 					"%dx%d is the maximum allowed.")
 
@@ -152,21 +150,6 @@ G_LOCK_EXTERN (unload);
     PLUGIN (name) = NULL;\
   }
 
-#define CLEAR_PLUGIN_EXTRA_GCHARS(plugin)			\
-  if (PLUGIN (capture_path_filename)) {				\
-  g_free (PLUGIN (capture_path_filename));			\
-  PLUGIN (capture_path_filename = NULL);			\
-  }
-
-#define TRY_SET_RUNNING_ON(plugin)				\
-  if ( ! PLUGIN (running))					\
-    PLUGIN (running) = TRUE;					\
-  else								\
-    {								\
-      NotifyError (PLUGIN_ALREADY_RUNNING_ERROR, PLUGIN_NAME);	\
-      return;							\
-    }
-
 /*
  * If we immediately freeze the screen, then the menuitem we just
  * click on may remain. That's we wait for a small timeout.
@@ -193,6 +176,8 @@ typedef enum
 
 GtkWidget *get_receiver_window (PurplePlugin * plugin);
 GtkIMHtml *get_receiver_imhtml (PidginConversation * gtkconv);
+void plugin_stop (PurplePlugin * plugin); 
+
 
 typedef struct
 {
@@ -230,6 +215,9 @@ typedef struct
   GThread *libcurl_thread;
   gchar *xml_hosts_filename;
   guint timeout_cb_handle;
+
+  off_t read_size;
+  off_t total_size;
 
   /* host data from xml */
   struct host_param_data
