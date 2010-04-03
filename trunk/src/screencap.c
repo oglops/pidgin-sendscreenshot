@@ -639,50 +639,34 @@ on_root_window_button_release_cb (GtkWidget * root_window,
 }
 
 static gboolean
-on_root_window_map_event_cb (GtkWidget * root_window, GdkEvent * event, PurplePlugin *plugin)
+on_root_window_expose_cb (GtkWidget * root_window,
+			  GdkEventExpose * event, PurplePlugin * plugin)
 {
   GdkWindow *gdkwin;
-  GdkRectangle area;
-  gint width, height;
-  
-  gtk_window_move (GTK_WINDOW (root_window), 0, 0);
   
 #if GTK_CHECK_VERSION(2,14,0)
   gdkwin = gtk_widget_get_window (root_window);
 #else
   gdkwin = root_window->window;
 #endif
-
-  if (PLUGIN(gc) == NULL)
-    PLUGIN(gc) = gdk_gc_new (gdkwin);
   
-  gdk_drawable_get_size (gdkwin, &width, &height);
-  area.x = 0;
-  area.y = 0;
-  area.width = width;
-  area.height = height;
-  paint_background (root_window, area, plugin);
-
-  (void) event;
-  return TRUE;
-}
-
-static gboolean
-on_root_window_expose_cb (GtkWidget * root_window,
-			  GdkEventExpose * event, PurplePlugin * plugin)
-{
-      GdkWindow *gdkwin;
+  /* no area is selected */
+  if (PLUGIN (x1) == - 1) 
+    {
+      gtk_window_move (GTK_WINDOW (root_window), 0, 0);
+      
+      if (PLUGIN(gc) == NULL)
+	PLUGIN(gc) = gdk_gc_new (gdkwin);
+      
+      paint_background (root_window, event->area, plugin);
+    } 
+  else 
+    {
       GdkRegion *selection_region;
       GdkRegion *background_region;
       GdkRectangle selection_rectangle;
       GdkRectangle *background_rectangles = NULL;
       gint n_rectangles, idx;
-
-#if GTK_CHECK_VERSION(2,14,0)
-      gdkwin = gtk_widget_get_window (root_window);
-#else
-      gdkwin = root_window->window;
-#endif
 
       selection_rectangle.width = CAPTURE_WIDTH (plugin);
       selection_rectangle.height = CAPTURE_HEIGHT (plugin);
@@ -782,6 +766,7 @@ on_root_window_expose_cb (GtkWidget * root_window,
       /* remember old coords to clear after */
       PLUGIN (_x) = PLUGIN (x2);
       PLUGIN (_y) = PLUGIN (y2);
+  }
    return TRUE;
 }
 
@@ -814,8 +799,7 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
     {
       draw_cues (root_window, event->x, event->y, FALSE, plugin);
     }
-  return TRUE;
-
+    return TRUE;
 }
 
 static void
@@ -871,10 +855,6 @@ prepare_root_window (PurplePlugin * plugin)
   g_signal_connect (GTK_OBJECT (PLUGIN (root_window)),
 		    "motion-notify-event",
 		    G_CALLBACK (on_root_window_motion_notify_cb), plugin);
-
-  g_signal_connect (GTK_OBJECT (PLUGIN (root_window)),
-		    "map-event",
-		    G_CALLBACK (on_root_window_map_event_cb), plugin);
 
 #ifdef G_OS_WIN32
   /* waiting for signal "monitors-changed" to be implemented

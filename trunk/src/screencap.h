@@ -24,6 +24,7 @@
 #define __SCREENCAP_H__ 1
 
 #include "main.h"
+#include "debug.h"
 
 #define MIN_X(plugin)\
   MIN(PLUGIN (x1), PLUGIN (x2))
