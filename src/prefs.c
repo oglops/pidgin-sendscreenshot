@@ -451,24 +451,24 @@ get_plugin_pref_frame (PurplePlugin * plugin)
 
   sign_image = gtk_image_new_from_pixbuf (NULL);
 
-  if (!mygdk_pixbuf_check_maxsize
-      (sign_pixbuf, SIGN_MAXWIDTH, SIGN_MAXHEIGHT))
+  if (sign_pixbuf != NULL)
     {
-      NotifyError (PLUGIN_SIGNATURE_TOOBIG_ERROR, SIGN_MAXWIDTH,
-		   SIGN_MAXHEIGHT);
-      purple_prefs_set_string (PREF_SIGNATURE_FILENAME, "");
+      if (!mygdk_pixbuf_check_maxsize (sign_pixbuf, SIGN_MAXWIDTH, SIGN_MAXHEIGHT))
+	{
+	  NotifyError (PLUGIN_SIGNATURE_TOOBIG_ERROR, SIGN_MAXWIDTH,
+		       SIGN_MAXHEIGHT);
+	  purple_prefs_set_string (PREF_SIGNATURE_FILENAME, "");
+	}
+      gtk_image_set_from_pixbuf (GTK_IMAGE (sign_image), sign_pixbuf);
+      g_object_unref (sign_pixbuf);
+      sign_pixbuf = NULL;
     }
-  else if (sign_pixbuf != NULL)
-    gtk_image_set_from_pixbuf (GTK_IMAGE (sign_image), sign_pixbuf);
   
   gtk_box_pack_start (GTK_BOX (hbox_sign), sign_image, TRUE, FALSE, 0);
   gtk_box_pack_start (GTK_BOX (hbox_sign), file_chooser, TRUE, FALSE, 0);
 
   g_signal_connect (G_OBJECT (file_chooser), "selection-changed",
 		    G_CALLBACK (change_signature_cb), sign_image);
-
-  g_object_unref (sign_pixbuf);
-  sign_pixbuf = NULL;
 
   gtk_box_pack_start (GTK_BOX (vbox), hbox_sign, TRUE, FALSE, 0);
 #endif
