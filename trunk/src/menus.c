@@ -20,6 +20,7 @@
   *
   */
 
+#include "main.h"
 #include "menus.h"
 #include "prefs.h"
 #include "screencap.h"
@@ -274,30 +275,29 @@ create_plugin_submenu (PidginConversation * gtkconv, gboolean multiconv)
 
   submenu = gtk_menu_new ();
 
-  as_image = gtk_menu_item_new_with_mnemonic (SEND_AS_IMAGE_TXT);	/* FIXME */
+  as_image = gtk_menu_item_new_with_mnemonic (SEND_AS_IMAGE_TXT);
 
 #ifdef ENABLE_UPLOAD
-  as_link = gtk_menu_item_new_with_mnemonic (SEND_AS_HTML_LINK_TXT);	/* FIXME */
-  as_ftp_link = gtk_menu_item_new_with_mnemonic (SEND_AS_FTP_LINK_TXT);	/* FIXME */
-  gtk_menu_shell_insert (GTK_MENU_SHELL (submenu), as_ftp_link, 0);	/* FIXME */
-  gtk_menu_shell_insert (GTK_MENU_SHELL (submenu), as_link, 1);	/* FIXME */
-  gtk_menu_shell_insert (GTK_MENU_SHELL (submenu), as_image, 2);	/* FIXME */
+  as_link = gtk_menu_item_new_with_mnemonic (SEND_AS_HTML_LINK_TXT);
+  as_ftp_link = gtk_menu_item_new_with_mnemonic (SEND_AS_FTP_LINK_TXT);
+  gtk_menu_shell_insert (GTK_MENU_SHELL (submenu), as_ftp_link, 0);
+  gtk_menu_shell_insert (GTK_MENU_SHELL (submenu), as_link, 1);
+  gtk_menu_shell_insert (GTK_MENU_SHELL (submenu), as_image, 2);
 #else
   gtk_menu_shell_insert (GTK_MENU_SHELL (submenu), as_image, 0);
 #endif
 
   if (multiconv)
     {
-
       PidginWindow *win = pidgin_conv_get_window (gtkconv);
       GtkWidget *conversation_menu =
 	gtk_item_factory_get_widget (win->menu.item_factory,
 				     N_("/Conversation"));
-
+      
       g_signal_connect_swapped (G_OBJECT (conversation_menu), "show",
 				G_CALLBACK (on_conversation_menu_show_cb),
 				win);
-
+      
       g_signal_connect_swapped (G_OBJECT (as_image),
 				"activate",
 				G_CALLBACK
@@ -365,139 +365,177 @@ void on_insert_menu_show_cb (GtkWidget *screenshot_insert_menuitem) {
 }
 
 void
-create_plugin_menuitems (PidginConversation * gtkconv)
+create_plugin_menuitems (PurpleConversation * conv)
 {
-  PurplePlugin *plugin;
-  PidginWindow *win;
-  GtkWidget *conversation_menu, *screenshot_menuitem;
-  GtkWidget *screenshot_insert_menuitem;
-
-  plugin = purple_plugins_find_with_id (PLUGIN_ID);
-
-  win = pidgin_conv_get_window (gtkconv);
-
-  conversation_menu =
-    gtk_item_factory_get_widget (win->menu.item_factory, N_("/Conversation"));
-  screenshot_insert_menuitem =
-    g_object_get_data (G_OBJECT (gtkconv->toolbar),
-		       "screenshot_insert_menuitem");
-  screenshot_menuitem =
-    g_object_get_data (G_OBJECT (conversation_menu), "screenshot_menuitem");
-  
-  /* Add us to the conv "Insert" menu */
-  if (screenshot_insert_menuitem == NULL)
+  if (PIDGIN_IS_PIDGIN_CONVERSATION (conv))
     {
-      GtkWidget *insert_menu, *submenu;
-
-      if ((insert_menu =
-	   g_object_get_data (G_OBJECT (gtkconv->toolbar),
-			      "insert_menu")) != NULL)
+      PidginConversation * gtkconv;
+      PurplePlugin *plugin;
+      PidginWindow *win;
+      GtkWidget *conversation_menu, *screenshot_menuitem;
+      GtkWidget *screenshot_insert_menuitem;
+      
+      gtkconv = PIDGIN_CONVERSATION (conv);
+      plugin = purple_plugins_find_with_id (PLUGIN_ID);
+      
+      win = pidgin_conv_get_window (gtkconv);
+      
+      conversation_menu =
+	gtk_item_factory_get_widget (win->menu.item_factory, N_("/Conversation"));
+      screenshot_insert_menuitem =
+	g_object_get_data (G_OBJECT (gtkconv->toolbar),
+			   "screenshot_insert_menuitem");
+      screenshot_menuitem =
+	g_object_get_data (G_OBJECT (conversation_menu), "screenshot_menuitem");
+      
+      /* Add us to the conv "Insert" menu */
+      if (screenshot_insert_menuitem == NULL)
 	{
-	  /* add us to the "insert" list */
-	  screenshot_insert_menuitem =
-	    gtk_menu_item_new_with_mnemonic
-	    (SCREENSHOT_INSERT_MENUITEM_LABEL);
+	  GtkWidget *insert_menu, *submenu;
 	  
-	  submenu = create_plugin_submenu (gtkconv, FALSE);
-
-	  g_signal_connect_swapped (G_OBJECT (insert_menu), "show",
-				    G_CALLBACK (on_insert_menu_show_cb),
-				    screenshot_insert_menuitem);
+	  if ((insert_menu =
+	       g_object_get_data (G_OBJECT (gtkconv->toolbar),
+				  "insert_menu")) != NULL)
+	    {
+	      /* add us to the "insert" list */
+	      screenshot_insert_menuitem =
+		gtk_menu_item_new_with_mnemonic
+		(SCREENSHOT_INSERT_MENUITEM_LABEL);
+	      
+	      submenu = create_plugin_submenu (gtkconv, FALSE);
+	      
+	      g_signal_connect_swapped (G_OBJECT (insert_menu), "show",
+					G_CALLBACK (on_insert_menu_show_cb),
+					screenshot_insert_menuitem);
+	      
+	      gtk_menu_item_set_submenu (GTK_MENU_ITEM
+					 (screenshot_insert_menuitem), submenu);
+	      
+	      gtk_menu_shell_insert (GTK_MENU_SHELL (insert_menu),
+				     screenshot_insert_menuitem, 1);
+	      
+	      /* register new widget */
+	      g_object_set_data (G_OBJECT (gtkconv->toolbar),
+				 "screenshot_insert_menuitem",
+				 screenshot_insert_menuitem);
+	    }
+	}
+      
+      /* Add us to the conv "Conversation" menu. */
+      if (screenshot_menuitem == NULL)
+	{
+	  GList *children = NULL, *head_chld = NULL;	/* don't g_list_free() it */
+	  guint i = 0;
+	  GtkWidget *submenu = create_plugin_submenu (gtkconv, TRUE);
+	  
+	  screenshot_menuitem =
+	    gtk_menu_item_new_with_mnemonic (SCREENSHOT_MENUITEM_LABEL);
 	  
 	  gtk_menu_item_set_submenu (GTK_MENU_ITEM
-				     (screenshot_insert_menuitem), submenu);
-
-	  gtk_menu_shell_insert (GTK_MENU_SHELL (insert_menu),
-				 screenshot_insert_menuitem, 1);
-
-	  /* register new widget */
-	  g_object_set_data (G_OBJECT (gtkconv->toolbar),
-			     "screenshot_insert_menuitem",
-			     screenshot_insert_menuitem);
-	}
-    }
-
-  /* Add us to the conv "Conversation" menu. */
-  if (screenshot_menuitem == NULL)
-    {
-      GList *children = NULL, *head_chld = NULL;	/* don't g_list_free() it */
-      guint i = 0;
-      GtkWidget *submenu = create_plugin_submenu (gtkconv, TRUE);
-
-      screenshot_menuitem =
-	gtk_menu_item_new_with_mnemonic (SCREENSHOT_MENUITEM_LABEL);
-
-      gtk_menu_item_set_submenu (GTK_MENU_ITEM
-				 (screenshot_menuitem), submenu);
-
-      gtk_widget_show_all (submenu);
-
-      children =
-	gtk_container_get_children (GTK_CONTAINER (conversation_menu));
-      head_chld = children;	/* keep first element addr */
-
-      /* pack our menuitem at correct place */
-      while (children != NULL && children->data !=
-	     (gpointer) win->menu.insert_image)
-	{
-	  children = g_list_next (children);
-	  i++;
-	}
-      g_list_free (head_chld);
-
-      gtk_menu_shell_insert (GTK_MENU_SHELL (conversation_menu),
-			     screenshot_menuitem, i + 1);
-      gtk_widget_show (screenshot_menuitem);
-
-      g_object_set_data (G_OBJECT (conversation_menu),
+				     (screenshot_menuitem), submenu);
+	  
+	  gtk_widget_show_all (submenu);
+	  
+	  children =
+	    gtk_container_get_children (GTK_CONTAINER (conversation_menu));
+	  head_chld = children;	/* keep first element addr */
+	  
+	  /* pack our menuitem at correct place */
+	  while (children != NULL && children->data !=
+		 (gpointer) win->menu.insert_image)
+	    {
+	      children = g_list_next (children);
+	      i++;
+	    }
+	  g_list_free (head_chld);
+	  
+	  gtk_menu_shell_insert (GTK_MENU_SHELL (conversation_menu),
+				 screenshot_menuitem, i + 1);
+	  gtk_widget_show (screenshot_menuitem);
+	  
+	  g_object_set_data (G_OBJECT (conversation_menu),
 			 "screenshot_menuitem", screenshot_menuitem);
+	}
     }
 }
 
 void
-remove_pidgin_menuitems (PidginConversation * gtkconv)
+remove_pidgin_menuitems (PurpleConversation *conv)
 {
-  GtkWidget *screenshot_insert_menuitem, *screenshot_menuitem,
-    *conversation_menu;
-  PidginWindow *win;
-  PurplePlugin *plugin;
-
-  plugin = purple_plugins_find_with_id (PLUGIN_ID);
-
-  win = pidgin_conv_get_window (gtkconv);
-  if (win != NULL)
-    {
-      if ((conversation_menu =
-	   gtk_item_factory_get_widget (win->menu.item_factory,
-					N_("/Conversation"))) != NULL)
-	{
-	  if ((screenshot_menuitem =
-	       g_object_get_data (G_OBJECT (conversation_menu),
-				  "screenshot_menuitem")) != NULL)
-	    {
-	      gtk_widget_destroy (screenshot_menuitem);
-	      g_object_steal_data (G_OBJECT (conversation_menu),
-				   "screenshot_menuitem");
-	      g_object_steal_data (G_OBJECT (conversation_menu),
-				   "img_menuitem");
+  if (PIDGIN_IS_PIDGIN_CONVERSATION (conv)) {
+    PurplePlugin *plugin;
+    GtkWidget *screenshot_insert_menuitem;
+    GtkWidget *screenshot_menuitem, *conversation_menu;
+    GtkWidget *insert_menu;
+    PidginWindow *win;
+    PidginConversation * gtkconv;
+    
+    gtkconv = PIDGIN_CONVERSATION (conv);
+    plugin = purple_plugins_find_with_id (PLUGIN_ID);
+    
+    win = pidgin_conv_get_window (gtkconv);
+    if (win != NULL)
+      {
+	if ((conversation_menu =
+	     gtk_item_factory_get_widget (win->menu.item_factory,
+					  N_("/Conversation"))) != NULL)
+	  {
+	    /* remove signal */
+	    gulong handler = 
+	      g_signal_handler_find  (conversation_menu,
+				      G_SIGNAL_MATCH_FUNC,
+				      0,
+				      0,
+				      NULL,
+				      G_CALLBACK (on_conversation_menu_show_cb),
+				      NULL);
+	    if (handler)
+	      g_signal_handler_disconnect (conversation_menu, handler);
+	    
+	    if ((screenshot_menuitem =
+		 g_object_get_data (G_OBJECT (conversation_menu),
+				    "screenshot_menuitem")) != NULL)
+	      {
+		gtk_widget_destroy (screenshot_menuitem);
+		g_object_steal_data (G_OBJECT (conversation_menu),
+				     "screenshot_menuitem");
+		g_object_steal_data (G_OBJECT (conversation_menu),
+				     "img_menuitem");
 #ifdef ENABLE_UPLOAD
-	      g_object_steal_data (G_OBJECT (conversation_menu),
-				   "link_menuitem");
-	      g_object_steal_data (G_OBJECT (conversation_menu),
-				   "ftp_link_menuitem");
+		g_object_steal_data (G_OBJECT (conversation_menu),
+				     "link_menuitem");
+		g_object_steal_data (G_OBJECT (conversation_menu),
+				     "ftp_link_menuitem");
 #endif
-	    }
-	}
+	      }
+	  }
+      }
+    /* remove signal */
+    if ((insert_menu =
+	 g_object_get_data (G_OBJECT (gtkconv->toolbar),
+			    "insert_menu")) != NULL) {
+      gulong handler = 
+	g_signal_handler_find  (insert_menu,
+				G_SIGNAL_MATCH_FUNC,
+				0,
+				0,
+				NULL,
+				G_CALLBACK (on_insert_menu_show_cb),
+				NULL);
+      if (handler)
+	g_signal_handler_disconnect (insert_menu, handler);
     }
-  screenshot_insert_menuitem =
-    g_object_get_data (G_OBJECT (gtkconv->toolbar),
-		       "screenshot_insert_menuitem");
-  if (screenshot_insert_menuitem != NULL)
-    {
-      gtk_widget_destroy (screenshot_insert_menuitem);
-      g_object_steal_data (G_OBJECT (gtkconv->toolbar),
-			   "screenshot_insert_menuitem");
-    }
+
+    screenshot_insert_menuitem =
+      g_object_get_data (G_OBJECT (gtkconv->toolbar),
+			 "screenshot_insert_menuitem");
+    if (screenshot_insert_menuitem != NULL)
+      {
+	gtk_widget_destroy (screenshot_insert_menuitem);
+	g_object_steal_data (G_OBJECT (gtkconv->toolbar),
+			     "screenshot_insert_menuitem");
+      }
+  }
 }
 
 static void

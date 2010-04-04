@@ -174,11 +174,13 @@ typedef enum
 #endif
 
 
+/* functions */
+
 GtkWidget *get_receiver_window (PurplePlugin * plugin);
 GtkIMHtml *get_receiver_imhtml (PidginConversation * gtkconv);
 void plugin_stop (PurplePlugin * plugin); 
 
-
+/* main struct holding data */
 typedef struct
 {
   /* prevent two instances of SndScreenshot to run
