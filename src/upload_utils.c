@@ -71,10 +71,10 @@ void plugin_curl_set_common_opts(CURL * curl, PurplePlugin * plugin) {
 	curl_easy_setopt (curl, CURLOPT_PROXYTYPE, curl_proxy_type);
 	curl_easy_setopt (curl, CURLOPT_PROXYPORT, purple_proxy_info_get_port (gpi));
 	curl_easy_setopt (curl, CURLOPT_PROXY,  purple_proxy_info_get_host (gpi));
-
-	if (!purple_strequal(proxy_username, "")) {
+	
+	if (!strpurple_strequal(proxy_username, "")) {
 	  curl_easy_setopt (curl, CURLOPT_PROXYUSERNAME, proxy_username);
-      
+	  
 	  if (!purple_strequal(proxy_password, ""))
 	    curl_easy_setopt (curl, CURLOPT_PROXYPASSWORD, proxy_password);
 	}
