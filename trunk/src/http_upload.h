@@ -93,16 +93,14 @@
 #define PLUGIN_ERR_ON_LINE gettext_noop ("Error on line %d char %d:\n")
 #define PLUGIN_XML_STUFF_MISSING  _("Something's missing for server \'%s\':")
 #define PLUGIN_PLEASE_REFER_TO _("Please refer to %s to learn how to add your own server.")
-#define PLUGIN_UPLOAD_REGEXP_NOTMACH_ERROR gettext_noop ("Regular expression doesn't match !")
 
 #define PLUGIN_UPLOAD_ERROR _("Failed to upload the screenshot to '%s'!")
 
-#define PLUGIN_UPLOAD_FETCHURL_ERROR _("Your screenshot has been uploaded to '%s' "\
-				       "but the link cannot be extracted :\n***%s.\n\n"\
-				       "Posible reasons are:\n"\
-				       " - the server has been updated\n"\
-				       " - cannot load the server response into memory\n"\
-				       " - bad regular expression (if you are intending to add your own server)")
+#define PLUGIN_UPLOAD_BAD_REGEXP_ERROR _("Bad regular expression: '%s'!")
+
+#define PLUGIN_UPLOAD_FETCHURL_ERROR _("Cannot fetch the URL of your screenshot !\n"\
+				       "Regular expression doesn't match (see debug window).\n"\
+				       "Most likeley '%s' has been updated...\n")
 
 #define PLUGIN_UPLOAD_XML_ERROR _("Incorrect xml host config file")
 
