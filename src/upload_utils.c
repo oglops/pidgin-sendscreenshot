@@ -42,7 +42,6 @@ void plugin_curl_set_common_opts(CURL * curl, PurplePlugin * plugin) {
   if ((gpi = purple_proxy_get_setup(PLUGIN(account))) != NULL)
     {
       PurpleProxyType proxy_type = purple_proxy_info_get_type (gpi);
-  
       if (proxy_type != PURPLE_PROXY_NONE){
 	long curl_proxy_type;
 	const gchar *proxy_username = NULL;
@@ -72,7 +71,7 @@ void plugin_curl_set_common_opts(CURL * curl, PurplePlugin * plugin) {
 	curl_easy_setopt (curl, CURLOPT_PROXYPORT, purple_proxy_info_get_port (gpi));
 	curl_easy_setopt (curl, CURLOPT_PROXY,  purple_proxy_info_get_host (gpi));
 	
-	if (!strpurple_strequal(proxy_username, "")) {
+	if (!purple_strequal(proxy_username, "")) {
 	  curl_easy_setopt (curl, CURLOPT_PROXYUSERNAME, proxy_username);
 	  
 	  if (!purple_strequal(proxy_password, ""))

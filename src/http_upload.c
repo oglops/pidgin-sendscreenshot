@@ -24,6 +24,33 @@
 #include "http_upload.h"
 #include "prefs.h"
 
+static
+size_t write_function (void *ptr, size_t size, size_t nmemb, void * data) {
+  PurplePlugin * plugin = (PurplePlugin*) data;
+  
+  gchar * previous = PLUGIN (host_data)->htmlcode;
+  gsize previous_size = 0;
+
+  if (previous != NULL)
+    previous_size = strlen (previous);
+
+  if ((previous = g_try_realloc (previous,
+				 previous_size*sizeof(gchar) + nmemb*size + 1)) != NULL)
+    {
+      guint c;
+      gchar *new =  previous + previous_size;
+ 
+      for (c = 0; c < nmemb; c++)
+	*new++ = *((gchar*)ptr++); 
+
+      *new = '\0';
+      PLUGIN (host_data)->htmlcode = previous;
+      return nmemb*size;
+    }
+  else
+    return 0;
+}
+
 static gpointer
 http_upload (PurplePlugin * plugin)
 {				/* this is a thread */
@@ -62,21 +89,21 @@ http_upload (PurplePlugin * plugin)
   headerlist = curl_slist_append (headerlist, buf);
   if ((curl = curl_easy_init ()) != NULL)
     {
-      char *path;
-      FILE *store_url_data = purple_mkstemp (&path, FALSE);
       static char curl_error[CURL_ERROR_SIZE];
 
       curl_easy_setopt (curl, CURLOPT_URL, PLUGIN (host_data)->form_action);
 
       plugin_curl_set_common_opts (curl, plugin);
       
+      curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1);
+
       curl_easy_setopt (curl, CURLOPT_ERRORBUFFER, curl_error);
 
       /* hmm... or InternetExplorer? */
       curl_easy_setopt (curl, CURLOPT_USERAGENT, "Mozilla/5.0");
 
-      curl_easy_setopt (curl, CURLOPT_WRITEDATA, store_url_data);
-      curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, fwrite);
+      curl_easy_setopt (curl, CURLOPT_WRITEDATA, plugin);
+      curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, write_function);
       curl_easy_setopt (curl, CURLOPT_HTTPHEADER, headerlist);
 
       curl_easy_setopt (curl, CURLOPT_HTTPPOST, formpost);
@@ -85,7 +112,6 @@ http_upload (PurplePlugin * plugin)
 
       curl_formfree (formpost);
       curl_slist_free_all (headerlist);
-      fclose (store_url_data);
       curl_easy_cleanup (curl);
 
       /* 
@@ -95,37 +121,14 @@ http_upload (PurplePlugin * plugin)
       G_LOCK (unload);
       if (plugin->extra != NULL)
 	{
-	  gsize size;
-
-	  if (res == 0)
+	  if (res != 0)
 	    {
-	      GError *error = NULL;
-
-	      if (g_file_get_contents (path,
-				       &PLUGIN (host_data)->htmlcode, &size,
-				       &error) == FALSE)
-		{
-		  if (PLUGIN (host_data)->htmlcode != NULL)
-		    {
-		      g_free (PLUGIN (host_data)->htmlcode);
-		      PLUGIN (host_data)->htmlcode = NULL;
-
-		    }
-
-		  PLUGIN (host_data)->htmlcode =
-		    g_strdup_printf ("ERR_FETCH: %s", error->message);
-		  g_error_free (error);
-		}
-	    }
-	  else
-	    {
+	      g_assert (PLUGIN (host_data)->htmlcode == NULL);
 	      PLUGIN (host_data)->htmlcode =
 		g_strdup_printf ("ERR_UPLOAD: %s", curl_error);
 	    }
 	}
       G_UNLOCK (unload);
-      g_unlink (path);
-      g_free (path);
     }
   G_LOCK (unload);
   if (plugin->extra != NULL)
@@ -318,20 +321,6 @@ insert_html_link_cb (PurplePlugin * plugin)
 		       PLUGIN (capture_path_filename));
 	  g_free (errmsg_uploadto);
 	}
-      else if (g_str_has_prefix (PLUGIN (host_data)->htmlcode, "ERR_FETCH:"))
-	{
-	  gchar *errmsg_uploadto =
-	    g_strdup_printf (PLUGIN_UPLOAD_FETCHURL_ERROR,
-			     PLUGIN (host_data)->selected_hostname,
-			     PLUGIN (host_data)->htmlcode);
-
-	  NotifyError ("%s\n\n%s\n%s",
-		       errmsg_uploadto,
-		       PLUGIN_UPLOAD_DISCLOC_ERROR,
-		       PLUGIN (capture_path_filename));
-
-	  g_free (errmsg_uploadto);
-	}
       else
 	{
 	  GRegex *url_regex = NULL;
@@ -342,17 +331,16 @@ insert_html_link_cb (PurplePlugin * plugin)
 			    G_REGEX_MULTILINE, 0, &error)) == NULL)
 	    {
 
-	      gchar *errmsg_uploadto =
-		g_strdup_printf (PLUGIN_UPLOAD_FETCHURL_ERROR,
-				 PLUGIN (host_data)->selected_hostname,
+	      gchar *errmsg =
+		g_strdup_printf (PLUGIN_UPLOAD_BAD_REGEXP_ERROR,
 				 error->message);
 
 	      NotifyError ("%s\n\n%s\n%s",
-			   errmsg_uploadto,
+			   errmsg,
 			   PLUGIN_UPLOAD_DISCLOC_ERROR,
 			   PLUGIN (capture_path_filename));
 
-	      g_free (errmsg_uploadto);
+	      g_free (errmsg);
 	      g_error_free (error);
 	    }
 	  else
@@ -365,28 +353,30 @@ insert_html_link_cb (PurplePlugin * plugin)
 	      nospace = g_regex_replace_literal (space_regex,
 						 PLUGIN (host_data)->htmlcode,
 						 -1, 0, "", 0, NULL);
-	      g_free (PLUGIN (host_data)->htmlcode);
-	      PLUGIN (host_data)->htmlcode = NULL;
 	      g_regex_unref (space_regex);
-	      if (g_regex_match (url_regex, nospace, 0, &url_match_info) ==
-		  FALSE)
+	      if (g_regex_match (url_regex, nospace, 0, &url_match_info) == FALSE)
 		{
-		  gchar *errmsg_uploadto;
+		  gchar *errmsg;
 		  if (url_match_info != NULL)
 		    g_match_info_free (url_match_info);
 		  g_regex_unref (url_regex);
 		  g_free (nospace);
 
-		  errmsg_uploadto =
+		  errmsg =
 		    g_strdup_printf (PLUGIN_UPLOAD_FETCHURL_ERROR,
+				     PLUGIN (host_data)->selected_hostname);
+
+		  purple_debug_info (PLUGIN_ID, 
+				     gettext_noop ("Regexp doesn't match HTTP upload response !\nServer: %s\nRegexp:\n%s\nResponse:\n%s\n"),
 				     PLUGIN (host_data)->selected_hostname,
-				     PLUGIN_UPLOAD_REGEXP_NOTMACH_ERROR);
+				     PLUGIN (host_data)->regexp,
+				     PLUGIN (host_data)->htmlcode);
 
 		  NotifyError ("%s\n\n%s\n%s",
-			       errmsg_uploadto,
+			       errmsg,
 			       PLUGIN_UPLOAD_DISCLOC_ERROR,
 			       PLUGIN (capture_path_filename));
-		  g_free (errmsg_uploadto);
+		  g_free (errmsg);
 		}
 	      else
 		{
@@ -398,6 +388,8 @@ insert_html_link_cb (PurplePlugin * plugin)
 		  real_insert_link (plugin, url);
 		  g_free (url);
 		}
+	      g_free (PLUGIN (host_data)->htmlcode);
+	      PLUGIN (host_data)->htmlcode = NULL;
 	    }
 	}
     }
