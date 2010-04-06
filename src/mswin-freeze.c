@@ -110,8 +110,8 @@ sendBMPToGimp (HBITMAP hBMP, HDC hDC, RECT rect)
 
   pixbuf = gdk_pixbuf_new_from_data
     ((guchar *) capBytes,
-     GDK_COLORSPACE_RGB, FALSE, 8, ROUND4 (width), height, ROUND4(width) * 3, NULL,
-     NULL);
+     GDK_COLORSPACE_RGB, FALSE, 8, ROUND4 (width), height, ROUND4 (width) * 3,
+     NULL, NULL);
 
   return pixbuf;
 }

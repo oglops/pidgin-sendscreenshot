@@ -47,11 +47,9 @@
   PLUGIN (_x) = -1;\
   PLUGIN (_y) = -1
 
-void
-prepare_root_window (PurplePlugin * plugin);
+void prepare_root_window (PurplePlugin * plugin);
 
-guint
-timeout_freeze_screen (PurplePlugin * plugin);
+guint timeout_freeze_screen (PurplePlugin * plugin);
 
 #endif
 

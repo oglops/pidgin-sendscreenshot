@@ -154,7 +154,7 @@ hosts_combobox_changed_cb (GtkComboBox * hosts_combobox)
 						GTK_RESPONSE_YES,
 						GTK_STOCK_CANCEL,
 						GTK_RESPONSE_NO, NULL);
-   
+
 #if GTK_CHECK_VERSION (2,14,0)
       content_area = gtk_dialog_get_content_area (GTK_DIALOG (tos_dialog));
 #else
@@ -284,29 +284,30 @@ prefs_start_element_handler (GMarkupParseContext * context,
     }
   else if (!strcmp (element_name, "host"))
     {
-      if (attribute_names[0]) {
-	if ( !strcmp (attribute_names[0], "name"))
-	  {
-	    if (strcmp (attribute_values[0], HOST_DISABLED))
-	      {			/* just in case */
-		gchar *host_name = g_strdup (attribute_values[0]);		
-		g_array_append_val (host_data->host_names, host_name);
+      if (attribute_names[0])
+	{
+	  if (!strcmp (attribute_names[0], "name"))
+	    {
+	      if (strcmp (attribute_values[0], HOST_DISABLED))
+		{		/* just in case */
+		  gchar *host_name = g_strdup (attribute_values[0]);
+		  g_array_append_val (host_data->host_names, host_name);
+		}
 	    }
-	  }
-	else
-	  g_set_error (error,
-		       G_MARKUP_ERROR,
-		       G_MARKUP_ERROR_UNKNOWN_ATTRIBUTE,
-		       PLUGIN_PARSE_XML_ERRMSG_INVATTR,
-		       line_number, char_number,
-		       attribute_names[0], element_name);
-      }
+	  else
+	    g_set_error (error,
+			 G_MARKUP_ERROR,
+			 G_MARKUP_ERROR_UNKNOWN_ATTRIBUTE,
+			 PLUGIN_PARSE_XML_ERRMSG_INVATTR,
+			 line_number, char_number,
+			 attribute_names[0], element_name);
+	}
       else
 	g_set_error (error,
 		     G_MARKUP_ERROR,
 		     G_MARKUP_ERROR_MISSING_ATTRIBUTE,
 		     PLUGIN_PARSE_XML_ERRMSG_MISSATTR,
-		      line_number, char_number, element_name);
+		     line_number, char_number, element_name);
 
     }
   (void) context;
@@ -413,7 +414,7 @@ get_plugin_pref_frame (PurplePlugin * plugin)
 
   hbox_imgtype = gtk_hbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
   hbox_sign = gtk_hbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
-  
+
 
 
   dropdown_imgtype =
@@ -453,7 +454,8 @@ get_plugin_pref_frame (PurplePlugin * plugin)
 
   if (sign_pixbuf != NULL)
     {
-      if (!mygdk_pixbuf_check_maxsize (sign_pixbuf, SIGN_MAXWIDTH, SIGN_MAXHEIGHT))
+      if (!mygdk_pixbuf_check_maxsize
+	  (sign_pixbuf, SIGN_MAXWIDTH, SIGN_MAXHEIGHT))
 	{
 	  NotifyError (PLUGIN_SIGNATURE_TOOBIG_ERROR, SIGN_MAXWIDTH,
 		       SIGN_MAXHEIGHT);
@@ -463,7 +465,7 @@ get_plugin_pref_frame (PurplePlugin * plugin)
       g_object_unref (sign_pixbuf);
       sign_pixbuf = NULL;
     }
-  
+
   gtk_box_pack_start (GTK_BOX (hbox_sign), sign_image, TRUE, FALSE, 0);
   gtk_box_pack_start (GTK_BOX (hbox_sign), file_chooser, TRUE, FALSE, 0);
 
@@ -721,11 +723,9 @@ get_plugin_pref_frame (PurplePlugin * plugin)
   vbox = pidgin_make_frame (ret, PREF_UI_FRAME5);
   pidgin_prefs_labeled_spin_button (vbox,
 				    PREF_UI_UPLOAD_CONNECTTIMEOUT,
-				    PREF_UPLOAD_CONNECTTIMEOUT, 1,
-				    30, NULL);
+				    PREF_UPLOAD_CONNECTTIMEOUT, 1, 30, NULL);
   pidgin_prefs_labeled_spin_button (vbox, PREF_UI_UPLOAD_TIMEOUT,
-				    PREF_UPLOAD_TIMEOUT, 1, 30,
-				    NULL);
+				    PREF_UPLOAD_TIMEOUT, 1, 30, NULL);
 #endif /* ENABLE_UPLOAD */
   return ret;
 }

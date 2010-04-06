@@ -31,12 +31,12 @@ read_callback (void *ptr, size_t size, size_t nmemb, void *stream)
 {
   PurplePlugin *plugin;
   size_t ret;
-  
+
   plugin = purple_plugins_find_with_id (PLUGIN_ID);
 
   ret = fread (ptr, size, nmemb, stream);
-  
-  PLUGIN(read_size) += ret*size; /* progress bar */
+
+  PLUGIN (read_size) += ret * size;	/* progress bar */
   return ret;
 }
 
@@ -59,14 +59,13 @@ ftp_upload (PurplePlugin * plugin)
       NotifyError ("Couldnt open '%s'\n", PLUGIN (capture_path_filename));
       return NULL;
     }
-  PLUGIN(total_size) = file_info.st_size;
+  PLUGIN (total_size) = file_info.st_size;
 
   basename = g_path_get_basename (PLUGIN (capture_path_filename));
   local_file = g_strdup_printf ("RNFR %s", basename);
-    remote_url =
+  remote_url =
     g_strdup_printf ("%s/%s",
-		     purple_prefs_get_string (PREF_FTP_REMOTE_URL),
-		     basename);
+		     purple_prefs_get_string (PREF_FTP_REMOTE_URL), basename);
 
   g_free (basename);
   basename = NULL;
@@ -82,9 +81,9 @@ ftp_upload (PurplePlugin * plugin)
 
       /* build a list of commands to pass to libcurl */
       headerlist = curl_slist_append (headerlist, local_file);
-      
+
       plugin_curl_set_common_opts (curl, plugin);
-      
+
       /* we want to use our own read function */
       curl_easy_setopt (curl, CURLOPT_READFUNCTION, read_callback);
 
@@ -112,14 +111,15 @@ ftp_upload (PurplePlugin * plugin)
          option you MUST make sure that the type of the passed-in argument is a
          curl_off_t. If you use CURLOPT_INFILESIZE (without _LARGE) you must
          make sure that to pass in a type 'long' argument. */
-      curl_easy_setopt (curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t) PLUGIN(total_size));
+      curl_easy_setopt (curl, CURLOPT_INFILESIZE_LARGE,
+			(curl_off_t) PLUGIN (total_size));
 
       curl_easy_setopt (curl, CURLOPT_ERRORBUFFER, curl_error);
 
       /* Now run off and do what you've been told! */
       res = curl_easy_perform (curl);
 
-      PLUGIN(read_size) = 0;
+      PLUGIN (read_size) = 0;
 
       /* clean up the FTP commands list */
       curl_slist_free_all (headerlist);
@@ -148,16 +148,17 @@ static gboolean
 insert_ftp_link_cb (PurplePlugin * plugin)
 {
   /* still uploading... */
-  if (PLUGIN(libcurl_thread) != NULL)
+  if (PLUGIN (libcurl_thread) != NULL)
     {
       GtkProgressBar *progress_bar =
 	g_object_get_data (G_OBJECT (PLUGIN (uploading_dialog)),
 			   "progress-bar");
-      if (PLUGIN(read_size) == 0)
+      if (PLUGIN (read_size) == 0)
 	gtk_progress_bar_pulse (progress_bar);
-      else 
+      else
 	gtk_progress_bar_set_fraction (progress_bar,
-				       PLUGIN(read_size) / (gdouble)PLUGIN(total_size));
+				       PLUGIN (read_size) /
+				       (gdouble) PLUGIN (total_size));
       return TRUE;
     }
   else
@@ -177,20 +178,18 @@ insert_ftp_link_cb (PurplePlugin * plugin)
 	{
 	  gchar *remote_url;
 	  gchar *basename;
-	  
+
 	  basename = g_path_get_basename (PLUGIN (capture_path_filename));
 
 	  if (strcmp (purple_prefs_get_string (PREF_FTP_WEB_ADDR), ""))
 	    /* not only a ftp server, but also a html server */
 	    remote_url = g_strdup_printf ("%s/%s",
 					  purple_prefs_get_string
-					  (PREF_FTP_WEB_ADDR),
-					  basename);
+					  (PREF_FTP_WEB_ADDR), basename);
 	  else
 	    remote_url = g_strdup_printf ("%s/%s",
 					  purple_prefs_get_string
-					  (PREF_FTP_REMOTE_URL),
-					  basename);
+					  (PREF_FTP_REMOTE_URL), basename);
 
 	  real_insert_link (plugin, remote_url);
 	  g_free (remote_url);
@@ -210,15 +209,15 @@ ftp_upload_prepare (PurplePlugin * plugin)
 
   g_assert (PLUGIN (uploading_dialog) == NULL);
   g_assert (PLUGIN (libcurl_thread) == NULL);
-  
-  PLUGIN(read_size) = 0;
+
+  PLUGIN (read_size) = 0;
 
   PLUGIN (uploading_dialog) =
     show_uploading_dialog (plugin,
 			   purple_prefs_get_string (PREF_FTP_REMOTE_URL));
   PLUGIN (libcurl_thread) =
-     g_thread_create ((GThreadFunc) ftp_upload, plugin, FALSE, NULL); 
-  
+    g_thread_create ((GThreadFunc) ftp_upload, plugin, FALSE, NULL);
+
   PLUGIN (timeout_cb_handle) =
     g_timeout_add (500, (GSourceFunc) insert_ftp_link_cb, plugin);
 }

@@ -34,8 +34,7 @@
 
 #include "main.h"
 
-void
-ftp_upload_prepare (PurplePlugin * plugin);
+void ftp_upload_prepare (PurplePlugin * plugin);
 
 #define PLUGIN_FTP_SENDING_INFO _("Uploading %d/%d bytes...")
 
