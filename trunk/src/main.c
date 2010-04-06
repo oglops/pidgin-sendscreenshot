@@ -29,7 +29,7 @@
 #include "screencap.h"
 
 #ifdef ENABLE_UPLOAD
-#include "http_upload.h" /* CLEAR_HOST_PARAM_DATA_FULL() */
+#include "http_upload.h"	/* CLEAR_HOST_PARAM_DATA_FULL() */
 #endif
 
 GtkWidget *
@@ -52,14 +52,16 @@ get_receiver_imhtml (PidginConversation * conv)
     return NULL;
 }
 
-void plugin_stop (PurplePlugin * plugin) {
+void
+plugin_stop (PurplePlugin * plugin)
+{
   GList *convs;
-  
-  g_assert (PLUGIN(running) == TRUE);
+
+  g_assert (PLUGIN (running) == TRUE);
 
   CLEAR_SEND_INFO_TO_NULL (plugin);
   PLUGIN (running) = FALSE;
-  
+
   /* reactivate menuitems */
   convs = purple_get_conversations ();
   while (convs != NULL)
@@ -68,30 +70,31 @@ void plugin_stop (PurplePlugin * plugin) {
       if (PIDGIN_IS_PIDGIN_CONVERSATION (conv))
 	{
 	  PidginConversation *gtkconv;
-	  PidginWindow *win; 
+	  PidginWindow *win;
 	  GtkWidget *screenshot_insert_menuitem;
-	  GtkWidget * screenshot_menuitem, *conversation_menu;
-    
+	  GtkWidget *screenshot_menuitem, *conversation_menu;
+
 	  gtkconv = PIDGIN_CONVERSATION (conv);
-	  
+
 	  win = pidgin_conv_get_window (gtkconv);
-    
+
 	  conversation_menu =
-	    gtk_item_factory_get_widget (win->menu.item_factory, N_("/Conversation"));
-	    
+	    gtk_item_factory_get_widget (win->menu.item_factory,
+					 N_("/Conversation"));
+
 	  if ((screenshot_insert_menuitem =
 	       g_object_get_data (G_OBJECT (gtkconv->toolbar),
 				  "screenshot_insert_menuitem")) != NULL)
 	    gtk_widget_set_sensitive (screenshot_insert_menuitem, TRUE);
-	  
+
 	  if ((screenshot_menuitem =
 	       g_object_get_data (G_OBJECT (conversation_menu),
 				  "screenshot_menuitem")) != NULL)
 	    gtk_widget_set_sensitive (screenshot_menuitem, TRUE);
-	  
+
 	}
       convs = g_list_next (convs);
-    } 
+    }
 }
 
 static gboolean
@@ -126,17 +129,16 @@ plugin_load (PurplePlugin * plugin)
       purple_signal_connect (pidgin_conversations_get_handle (),
 			     "conversation-switched",
 			     plugin,
-			     PURPLE_CALLBACK (create_plugin_menuitems),
-			     NULL);
+			     PURPLE_CALLBACK (create_plugin_menuitems), NULL);
       /* to add us to the buddy list context menu (and "plus" menu) */
       purple_signal_connect (purple_blist_get_handle (),
 			     "blist-node-extended-menu", plugin,
 			     PURPLE_CALLBACK (buddy_context_menu_add_item),
 			     plugin);
-      
+
       /* add menuitems to existing conversations */
       purple_conversation_foreach (create_plugin_menuitems);
-   
+
       return TRUE;
     }
 }
@@ -175,15 +177,21 @@ plugin_unload (PurplePlugin * plugin)
       gtk_widget_destroy (PLUGIN (root_window));
       PLUGIN (root_window) = NULL;
     }
+  if (PLUGIN (root_events) != NULL)
+    {
+      gtk_widget_destroy (PLUGIN (root_events));
+      PLUGIN (root_events) = NULL;
+    }
   if (PLUGIN (gc) != NULL)
     {
       g_object_unref (PLUGIN (gc));
       PLUGIN (gc) = NULL;
     }
-  if (PLUGIN (capture_path_filename) != NULL) {
-    g_free (PLUGIN (capture_path_filename));
-    PLUGIN (capture_path_filename = NULL);
-  }
+  if (PLUGIN (capture_path_filename) != NULL)
+    {
+      g_free (PLUGIN (capture_path_filename));
+      PLUGIN (capture_path_filename = NULL);
+    }
 
 #ifdef ENABLE_UPLOAD
   CLEAR_HOST_PARAM_DATA_FULL (host_data);
@@ -223,10 +231,10 @@ static PurplePluginInfo info = {
   /* some elements need translation,
      initialize them in init_plugin() */
   PLUGIN_ID,
-  NULL, /* PLUGIN_NAME */
+  NULL,				/* PLUGIN_NAME */
   PACKAGE_VERSION,
-  NULL, /* PLUGIN_SUMMARY */
-  NULL, /* PLUGIN_DESCRIPTION */
+  NULL,				/* PLUGIN_SUMMARY */
+  NULL,				/* PLUGIN_DESCRIPTION */
   PLUGIN_AUTHOR,
   PLUGIN_WEBSITE,
 
@@ -239,7 +247,7 @@ static PurplePluginInfo info = {
   NULL,
 
   NULL,
-  
+
   /* reserved */
   NULL,
   NULL,
@@ -293,5 +301,4 @@ init_plugin (PurplePlugin * plugin)
 }
 
 PURPLE_INIT_PLUGIN (screenshot, init_plugin, info)
-
 /* end of main.c */

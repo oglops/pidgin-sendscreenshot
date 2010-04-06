@@ -26,58 +26,66 @@
 /*
  * Set common curl options for http and ftp upload.
  */
-void plugin_curl_set_common_opts(CURL * curl, PurplePlugin * plugin) {
+void
+plugin_curl_set_common_opts (CURL * curl, PurplePlugin * plugin)
+{
   const PurpleProxyInfo *gpi = NULL;
-   
+
   g_assert (curl != NULL);
-  g_assert (PLUGIN(account) != NULL);
-  
+  g_assert (PLUGIN (account) != NULL);
+
   /* install timeouts */
   curl_easy_setopt (curl, CURLOPT_CONNECTTIMEOUT,
 		    purple_prefs_get_int (PREF_UPLOAD_CONNECTTIMEOUT));
   curl_easy_setopt (curl, CURLOPT_TIMEOUT,
 		    purple_prefs_get_int (PREF_UPLOAD_TIMEOUT));
-  
+
   /* use proxy settings */
-  if ((gpi = purple_proxy_get_setup(PLUGIN(account))) != NULL)
+  if ((gpi = purple_proxy_get_setup (PLUGIN (account))) != NULL)
     {
       PurpleProxyType proxy_type = purple_proxy_info_get_type (gpi);
-      if (proxy_type != PURPLE_PROXY_NONE){
-	long curl_proxy_type;
-	const gchar *proxy_username = NULL;
-	const gchar *proxy_password = NULL;
+      if (proxy_type != PURPLE_PROXY_NONE)
+	{
+	  long curl_proxy_type;
+	  const gchar *proxy_username = NULL;
+	  const gchar *proxy_password = NULL;
 
-	proxy_username = purple_proxy_info_get_username (gpi);
-	proxy_password = purple_proxy_info_get_password (gpi);
-	
-	/* set proxy type */
-	if (proxy_type == PURPLE_PROXY_HTTP)
-	  curl_proxy_type = CURLPROXY_HTTP;
-	else if (proxy_type == PURPLE_PROXY_SOCKS4) {
-	  if (purple_prefs_get_bool("/purple/proxy/socks4_remotedns"))
-	    curl_proxy_type = CURLPROXY_SOCKS4A;
+	  proxy_username = purple_proxy_info_get_username (gpi);
+	  proxy_password = purple_proxy_info_get_password (gpi);
+
+	  /* set proxy type */
+	  if (proxy_type == PURPLE_PROXY_HTTP)
+	    curl_proxy_type = CURLPROXY_HTTP;
+	  else if (proxy_type == PURPLE_PROXY_SOCKS4)
+	    {
+	      if (purple_prefs_get_bool ("/purple/proxy/socks4_remotedns"))
+		curl_proxy_type = CURLPROXY_SOCKS4A;
+	      else
+		curl_proxy_type = CURLPROXY_SOCKS4;
+	    }
+	  else if (proxy_type == PURPLE_PROXY_SOCKS5)
+	    curl_proxy_type = CURLPROXY_SOCKS5;
 	  else
-	    curl_proxy_type = CURLPROXY_SOCKS4;
+	    {
+	      /* should not happen */
+	      NotifyError ("proxy type :'%d' is invalid", proxy_type);
+	      return;
+	    }
+	  curl_easy_setopt (curl, CURLOPT_PROXYTYPE, curl_proxy_type);
+	  curl_easy_setopt (curl, CURLOPT_PROXYPORT,
+			    purple_proxy_info_get_port (gpi));
+	  curl_easy_setopt (curl, CURLOPT_PROXY,
+			    purple_proxy_info_get_host (gpi));
+
+	  if (proxy_username && !strcmp (proxy_username, ""))
+	    {
+	      curl_easy_setopt (curl, CURLOPT_PROXYUSERNAME, proxy_username);
+
+	      if (proxy_password && !strcmp (proxy_password, ""))
+		curl_easy_setopt (curl, CURLOPT_PROXYPASSWORD,
+				  proxy_password);
+	    }
 	}
-	else if  (proxy_type == PURPLE_PROXY_SOCKS5)
-	  curl_proxy_type = CURLPROXY_SOCKS5;
-	else
-	  {
-	    /* should not happen */
-	    NotifyError ("proxy type :'%d' is invalid", proxy_type);
-	    return;
-	  }
-	curl_easy_setopt (curl, CURLOPT_PROXYTYPE, curl_proxy_type);
-	curl_easy_setopt (curl, CURLOPT_PROXYPORT, purple_proxy_info_get_port (gpi));
-	curl_easy_setopt (curl, CURLOPT_PROXY,  purple_proxy_info_get_host (gpi));
-	
-	if (proxy_username && !strcmp(proxy_username, "")) {
-	  curl_easy_setopt (curl, CURLOPT_PROXYUSERNAME, proxy_username);
-	  
-	  if (proxy_password && !strcmp(proxy_password, ""))
-	    curl_easy_setopt (curl, CURLOPT_PROXYPASSWORD, proxy_password);
-	}
-      }
     }
 }
 
@@ -98,13 +106,14 @@ real_insert_link (PurplePlugin * plugin, const gchar * url)
       GtkTextMark *mark =
 	gtk_text_buffer_get_insert
 	(gtk_text_view_get_buffer (GTK_TEXT_VIEW (imhtml)));
-      
+
       g_assert (mark != NULL);
-      
+
       if (PLUGIN (conv_features) & PURPLE_CONNECTION_HTML)
 	{
-	  gtk_imhtml_insert_link (imhtml, mark, url, 
-				  g_path_get_basename (PLUGIN (capture_path_filename)));
+	  gtk_imhtml_insert_link (imhtml, mark, url,
+				  g_path_get_basename (PLUGIN
+						       (capture_path_filename)));
 	}
       else
 	{
@@ -144,11 +153,12 @@ show_uploading_dialog (PurplePlugin * plugin, const gchar * str)
   hbox = gtk_hbox_new (FALSE, PIDGIN_HIG_BOX_SPACE);
 
   gtkconv_window = get_receiver_window (plugin);
-  blist_window = pidgin_blist_get_default_gtk_blist()->window;
+  blist_window = pidgin_blist_get_default_gtk_blist ()->window;
 
   dialog = gtk_dialog_new_with_buttons (PLUGIN_NAME,
 					GTK_WINDOW ((gtkconv_window) ?
-						    gtkconv_window : blist_window),
+						    gtkconv_window :
+						    blist_window),
 					GTK_DIALOG_NO_SEPARATOR, NULL);
 
   gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);

@@ -135,8 +135,7 @@
 
 /* decls, prototypes... whatever they are called : */
 
-void
-http_upload_prepare (PurplePlugin * plugin);
+void http_upload_prepare (PurplePlugin * plugin);
 
 #endif
 

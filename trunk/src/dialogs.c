@@ -93,8 +93,8 @@ capture_rename (PurplePlugin * plugin, const gchar * entry_init)
 			      gtk_icon_size_from_name
 			      (PIDGIN_ICON_SIZE_TANGO_HUGE));
   gtkconv_window = get_receiver_window (plugin);
-  blist_window = pidgin_blist_get_default_gtk_blist()->window;
-  
+  blist_window = pidgin_blist_get_default_gtk_blist ()->window;
+
   dlgbox_rename = gtk_dialog_new_with_buttons (DLGBOX_CAPNAME_TITLE,
 					       GTK_WINDOW ((gtkconv_window) ?
 							   gtkconv_window :
@@ -167,7 +167,9 @@ capture_rename (PurplePlugin * plugin, const gchar * entry_init)
     - as file 
     - to a remote FTP server
 */
-void screenshot_maybe_rename (PurplePlugin *plugin, gchar **basename) {
+void
+screenshot_maybe_rename (PurplePlugin * plugin, gchar ** basename)
+{
   if (purple_prefs_get_bool (PREF_ASK_FILENAME) &&
       (PLUGIN (send_as) == SEND_AS_FILE
 #ifdef ENABLE_UPLOAD
@@ -175,26 +177,25 @@ void screenshot_maybe_rename (PurplePlugin *plugin, gchar **basename) {
 #else
       )
 #endif
-	)
+    )
+    {
+      GtkWidget *dlgbox_rename = NULL;
+      gint result = 0;
+
+      dlgbox_rename = capture_rename (plugin, *basename);
+      result = gtk_dialog_run (GTK_DIALOG (dlgbox_rename));
+
+      if (result == GTK_RESPONSE_OK)
 	{
-	  GtkWidget *dlgbox_rename = NULL;
-	  gint result = 0;
-	  
-	  dlgbox_rename = capture_rename (plugin, *basename);
-	  result = gtk_dialog_run (GTK_DIALOG (dlgbox_rename));
+	  GtkWidget *entry = NULL;
 
-	  if (result == GTK_RESPONSE_OK)
-	    {
-	      GtkWidget *entry = NULL;
+	  entry = g_object_get_data (G_OBJECT (dlgbox_rename), "entry");
 
-	      entry = g_object_get_data (G_OBJECT (dlgbox_rename), "entry");
-
-	      g_free (*basename);
-	      *basename = 
-		g_strdup (gtk_entry_get_text (GTK_ENTRY (entry)));
-	    }
-	  gtk_widget_destroy (dlgbox_rename);
+	  g_free (*basename);
+	  *basename = g_strdup (gtk_entry_get_text (GTK_ENTRY (entry)));
 	}
+      gtk_widget_destroy (dlgbox_rename);
+    }
 }
 
 /* end of dialogs.h */

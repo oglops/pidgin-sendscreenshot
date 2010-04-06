@@ -24,28 +24,30 @@
 #include "http_upload.h"
 #include "prefs.h"
 
-static
-size_t write_function (void *ptr, size_t size, size_t nmemb, void * data) {
-  PurplePlugin * plugin = (PurplePlugin*) data;
-  
-  gchar * previous = PLUGIN (host_data)->htmlcode;
+static size_t
+write_function (void *ptr, size_t size, size_t nmemb, void *data)
+{
+  PurplePlugin *plugin = (PurplePlugin *) data;
+
+  gchar *previous = PLUGIN (host_data)->htmlcode;
   gsize previous_size = 0;
 
   if (previous != NULL)
     previous_size = strlen (previous);
 
   if ((previous = g_try_realloc (previous,
-				 previous_size*sizeof(gchar) + nmemb*size + 1)) != NULL)
+				 previous_size * sizeof (gchar) +
+				 nmemb * size + 1)) != NULL)
     {
       guint c;
-      gchar *new =  previous + previous_size;
- 
+      gchar *new = previous + previous_size;
+
       for (c = 0; c < nmemb; c++)
-	*new++ = *((gchar*)ptr++); 
+	*new++ = *((gchar *) ptr++);
 
       *new = '\0';
       PLUGIN (host_data)->htmlcode = previous;
-      return nmemb*size;
+      return nmemb * size;
     }
   else
     return 0;
@@ -94,7 +96,7 @@ http_upload (PurplePlugin * plugin)
       curl_easy_setopt (curl, CURLOPT_URL, PLUGIN (host_data)->form_action);
 
       plugin_curl_set_common_opts (curl, plugin);
-      
+
       curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1);
 
       curl_easy_setopt (curl, CURLOPT_ERRORBUFFER, curl_error);
@@ -186,9 +188,10 @@ xml_get_host_data_start_element_handler (GMarkupParseContext * context,
 		       line_number, char_number, element_name);
 	}
     }
-  else if (!strcmp (element_name, "param") )
+  else if (!strcmp (element_name, "param"))
     {
-      if (host_data->is_inside) {
+      if (host_data->is_inside)
+	{
 	  if (attribute_names[0])
 	    {
 	      if (!strcmp (attribute_names[0], "form_action")
@@ -249,7 +252,7 @@ xml_get_host_data_start_element_handler (GMarkupParseContext * context,
 			   PLUGIN_PARSE_XML_ERRMSG_MISSATTR,
 			   line_number, char_number, element_name);
 	    }
-    }
+	}
     }
   else
     {
@@ -311,8 +314,7 @@ insert_html_link_cb (PurplePlugin * plugin)
 	{
 	  gchar *errmsg_uploadto = g_strdup_printf (PLUGIN_UPLOAD_ERROR,
 						    PLUGIN
-						    (host_data)->
-						    selected_hostname);
+						    (host_data)->selected_hostname);
 
 	  NotifyError ("%s\n\n%s\n\n%s\n%s",
 		       errmsg_uploadto,
@@ -331,9 +333,8 @@ insert_html_link_cb (PurplePlugin * plugin)
 			    G_REGEX_MULTILINE, 0, &error)) == NULL)
 	    {
 
-	      gchar *errmsg =
-		g_strdup_printf (PLUGIN_UPLOAD_BAD_REGEXP_ERROR,
-				 error->message);
+	      gchar *errmsg = g_strdup_printf (PLUGIN_UPLOAD_BAD_REGEXP_ERROR,
+					       error->message);
 
 	      NotifyError ("%s\n\n%s\n%s",
 			   errmsg,
@@ -354,7 +355,8 @@ insert_html_link_cb (PurplePlugin * plugin)
 						 PLUGIN (host_data)->htmlcode,
 						 -1, 0, "", 0, NULL);
 	      g_regex_unref (space_regex);
-	      if (g_regex_match (url_regex, nospace, 0, &url_match_info) == FALSE)
+	      if (g_regex_match (url_regex, nospace, 0, &url_match_info) ==
+		  FALSE)
 		{
 		  gchar *errmsg;
 		  if (url_match_info != NULL)
@@ -366,8 +368,9 @@ insert_html_link_cb (PurplePlugin * plugin)
 		    g_strdup_printf (PLUGIN_UPLOAD_FETCHURL_ERROR,
 				     PLUGIN (host_data)->selected_hostname);
 
-		  purple_debug_info (PLUGIN_ID, 
-				     gettext_noop ("Regexp doesn't match HTTP upload response !\nServer: %s\nRegexp:\n%s\nResponse:\n%s\n"),
+		  purple_debug_info (PLUGIN_ID,
+				     gettext_noop
+				     ("Regexp doesn't match HTTP upload response !\nServer: %s\nRegexp:\n%s\nResponse:\n%s\n"),
 				     PLUGIN (host_data)->selected_hostname,
 				     PLUGIN (host_data)->regexp,
 				     PLUGIN (host_data)->htmlcode);
@@ -540,11 +543,11 @@ http_upload_prepare (PurplePlugin * plugin)
   g_markup_parse_context_free (context);
   g_free (xml_contents);
 
- 
+
   /* upload to server */
   g_assert (PLUGIN (uploading_dialog) == NULL);
   g_assert (PLUGIN (libcurl_thread) == NULL);
- 
+
   PLUGIN (uploading_dialog) =
     show_uploading_dialog (plugin, PLUGIN (host_data)->selected_hostname);
   PLUGIN (libcurl_thread) =

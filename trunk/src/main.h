@@ -178,7 +178,7 @@ typedef enum
 
 GtkWidget *get_receiver_window (PurplePlugin * plugin);
 GtkIMHtml *get_receiver_imhtml (PidginConversation * gtkconv);
-void plugin_stop (PurplePlugin * plugin); 
+void plugin_stop (PurplePlugin * plugin);
 
 /* main struct holding data */
 typedef struct
@@ -190,8 +190,9 @@ typedef struct
   SendType send_as;
 
   /* to display frozen desktop state */
-  GdkGC * gc;
+  GdkGC *gc;
   GtkWidget *root_window;
+  GtkWidget *root_events;
   /* original image */
   GdkPixbuf *root_pixbuf_orig;
   /* modified image (highlight mode) */
