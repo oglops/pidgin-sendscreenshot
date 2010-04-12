@@ -138,7 +138,6 @@ plugin_load (PurplePlugin * plugin)
 
       /* add menuitems to existing conversations */
       purple_conversation_foreach (create_plugin_menuitems);
-
       return TRUE;
     }
 }
@@ -192,7 +191,7 @@ plugin_unload (PurplePlugin * plugin)
       g_free (PLUGIN (capture_path_filename));
       PLUGIN (capture_path_filename = NULL);
     }
-
+  
 #ifdef ENABLE_UPLOAD
   CLEAR_HOST_PARAM_DATA_FULL (host_data);
   g_free (PLUGIN (xml_hosts_filename));

@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: pidgin-sendscreenshot 0.6-5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-03-18 19:38+0100\n"
-"PO-Revision-Date: 2010-03-19 18:01+0300\n"
+"PO-Revision-Date: 2010-04-08 16:42+0300\n"
 "Last-Translator: Ilya S. <root@nfodb.ru>\n"
 "Language-Team: Russian\n"
 "MIME-Version: 1.0\n"
@@ -340,7 +340,7 @@ msgstr "Отправить _Скриншот..."
 
 #: src/screenshot.h:121
 msgid "capture"
-msgstr "скриншот"
+msgstr "capture"
 
 #: src/screenshot.h:124
 msgid "as an _Image"
