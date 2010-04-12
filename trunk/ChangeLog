@@ -1,10 +1,12 @@
 Pidgin Screenshot Plugin Changelog
 
-Version 0.7-1 04/??/10:
+Version 0.8 04/11/10:
 	* Don't ignore proxy settings ! (Repported by Paul Matthias Diderichsen and Homolibere).
+	* Faster selection drawing.
 	* Updated Chinese translation (error messages still untranslated).
 	* Set menuitems insensitive when plugin is running.
 	* See real FTP upload progress.
+	* Added keybord interaction while selecting (Escape, ctrl keys). More to come...
 Version 0.7 03/22/10:
 	* Added option to print a signature at the bottom-right corner.
 	* Added Russian translation by Ilya S. 

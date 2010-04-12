@@ -173,6 +173,8 @@ typedef enum
 { SEND_AS_FILE, SEND_AS_IMAGE } SendType;
 #endif
 
+typedef enum
+{ SELECT_REGULAR, SELECT_CENTER_HOLD} SelectionMode;
 
 /* functions */
 
@@ -193,10 +195,13 @@ typedef struct
   GdkGC *gc;
   GtkWidget *root_window;
   GtkWidget *root_events;
+
   /* original image */
   GdkPixbuf *root_pixbuf_orig;
   /* modified image (highlight mode) */
   GdkPixbuf *root_pixbuf_x;
+  GdkRegion *border_new, *border_old, *new, *old;
+ 
 
   /* where to send capture ? */
   PurpleConnectionFlags conv_features;
@@ -209,6 +214,7 @@ typedef struct
 
   /* capture area */
   gint x1, y1, x2, y2, _x, _y;
+  SelectionMode select_mode;
 
   /* screenshot's location */
   gchar *capture_path_filename;

@@ -26,6 +26,9 @@
 #include "main.h"
 #include "debug.h"
 
+/* selection border width */
+#define BORDER_WIDTH 3
+
 #define MIN_X(plugin)\
   MIN(PLUGIN (x1), PLUGIN (x2))
 #define MAX_X(plugin)\
@@ -38,6 +41,9 @@
   ABS(PLUGIN (x2) - PLUGIN (x1)) + 1
 #define CAPTURE_HEIGHT(plugin)\
   ABS(PLUGIN (y2) - PLUGIN (y1)) + 1
+
+#define BACKGROUND_PIXBUF\
+  PLUGIN (root_pixbuf_x) != NULL ?  PLUGIN (root_pixbuf_x) : PLUGIN (root_pixbuf_orig)
 
 #define CLEAR_CAPTURE_AREA(plugin)\
   PLUGIN (x1) = -1;\
