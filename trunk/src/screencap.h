@@ -26,8 +26,17 @@
 #include "main.h"
 #include "debug.h"
 
-/* selection border width */
+/* selection border width :
+   should we add an option to modify ? */
 #define BORDER_WIDTH 3
+
+typedef enum {
+  LighenUp=1,
+  Darken=2,
+  InvertOnly=3,
+  BordersOnly=4,
+  Grayscale=5
+} HighlightMode;
 
 #define MIN_X(plugin)\
   MIN(PLUGIN (x1), PLUGIN (x2))
@@ -42,6 +51,7 @@
 #define CAPTURE_HEIGHT(plugin)\
   ABS(PLUGIN (y2) - PLUGIN (y1)) + 1
 
+/* background = not (roi) */
 #define BACKGROUND_PIXBUF\
   PLUGIN (root_pixbuf_x) != NULL ?  PLUGIN (root_pixbuf_x) : PLUGIN (root_pixbuf_orig)
 
@@ -53,10 +63,10 @@
   PLUGIN (_x) = -1;\
   PLUGIN (_y) = -1
 
+/* prototypes */
 void prepare_root_window (PurplePlugin * plugin);
-
 guint timeout_freeze_screen (PurplePlugin * plugin);
 
-#endif
+#endif /* __SCREENCAP_H__ */
 
 /* end of screencap.h */

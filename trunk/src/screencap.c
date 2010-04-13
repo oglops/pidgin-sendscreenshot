@@ -146,7 +146,7 @@ timeout_freeze_screen (PurplePlugin * plugin)
 #endif
 
   if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) < 3 ||
-      purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == 5)
+      purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == Grayscale)
     {
       g_assert (PLUGIN (root_pixbuf_x) == NULL);
       g_assert (PLUGIN (root_pixbuf_orig) != NULL);
@@ -164,11 +164,11 @@ timeout_freeze_screen (PurplePlugin * plugin)
   /* apply effects */
   if (PLUGIN (root_pixbuf_x) != NULL)
     {
-      if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == 1)
+      if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == LighenUp)
 	mygdk_pixbuf_lighten (PLUGIN (root_pixbuf_x), PIXEL_VAL);
-      else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == 2)
+      else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == Darken)
 	mygdk_pixbuf_darken (PLUGIN (root_pixbuf_x), PIXEL_VAL);
-      else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == 5)
+      else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == Grayscale)
 	mygdk_pixbuf_grey (PLUGIN (root_pixbuf_x));
     }
   /* let the user capture an area... */
@@ -255,7 +255,6 @@ draw_cues (GtkWidget * root_window,
   /* erase old cues */
   if (PLUGIN (_y) >= 0 && PLUGIN (_x) >= 0)
     {
-
       paint_rectangle (h,
 		       root_window->window,
 		       BACKGROUND_PIXBUF,
@@ -334,7 +333,6 @@ plugin_cancel (PurplePlugin * plugin)
   plugin_stop (plugin);
 }
 
-
 static void
 paint_region (GdkRegion * region,
 	      GdkWindow * gdkwin, GdkPixbuf * pixbuf, PurplePlugin * plugin)
@@ -368,7 +366,6 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
       g_assert (PLUGIN(border_old) == NULL);
       g_assert (PLUGIN(border_new) == NULL);
       
-
 #if GTK_CHECK_VERSION(2,14,0)
       gdkwin = gtk_widget_get_window (root_window);
 #else
@@ -419,7 +416,7 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
       new_r.x = MIN_X (plugin);
       new_r.y = MIN_Y (plugin);
 
-      if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != 3)
+      if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != InvertOnly)
 	{
 	  PLUGIN (old) = gdk_region_rectangle (&old_r);
 	  PLUGIN (new) = gdk_region_rectangle (&new_r);
@@ -445,7 +442,7 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
 	  gdk_region_subtract (PLUGIN (border_new), border_inter);
 	}
 
-      if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != 4)
+      if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != BordersOnly)
 	{
 	  GdkRegion  * inter;
 
@@ -461,23 +458,20 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
 	}
 
       /* remove old borders */
-      if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != 3)
+      if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != InvertOnly)
 	paint_region (PLUGIN (border_old), gdkwin, PLUGIN (root_pixbuf_orig),
 		      plugin);
 
-
       /* clear old selection */
-      if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == 3)
+      if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == InvertOnly)
 	paint_region (PLUGIN (old), gdkwin, PLUGIN (root_pixbuf_orig),
 		      plugin);
-
-      else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != 4)
+      else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != BordersOnly)
 	paint_region (PLUGIN (old), gdkwin, PLUGIN (root_pixbuf_x), plugin);
 
 
-
       /* draw selection */
-      if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == 3)
+      if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == InvertOnly)
 	{
 	  gdk_gc_set_function (PLUGIN (gc), GDK_COPY_INVERT);
 	  paint_region (PLUGIN (new), gdkwin, PLUGIN (root_pixbuf_orig),
@@ -485,13 +479,13 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
 	  gdk_gc_set_function (PLUGIN (gc), GDK_COPY);
 
 	}
-      else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != 4)
+      else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != BordersOnly)
 	paint_region (PLUGIN (new), gdkwin, PLUGIN (root_pixbuf_orig),
 		      plugin);
 
 
       /* add selection borders */
-      if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != 3)
+      if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != InvertOnly)
 	{
 	  gdk_gc_set_function (PLUGIN (gc), GDK_COPY_INVERT);
 	  paint_region (PLUGIN (border_new), gdkwin,
@@ -499,32 +493,27 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
 	  gdk_gc_set_function (PLUGIN (gc), GDK_COPY);
 	}
 
-
-     if (PLUGIN (old) != NULL)
+      if (PLUGIN (old) != NULL)
 	{
 	  gdk_region_destroy (PLUGIN (old));
 	  PLUGIN (old) = NULL;
 	}
-
       if (PLUGIN (border_old) != NULL)
 	{
 	  gdk_region_destroy (PLUGIN (border_old));
 	  PLUGIN (border_old) = NULL;
 	}
-
       if (PLUGIN (new) != NULL)
 	{
 	  gdk_region_destroy (PLUGIN (new));
 	  PLUGIN (new) = NULL;
-
 	}
       if (PLUGIN (border_new) != NULL)
 	{
 	  gdk_region_destroy (PLUGIN (border_new));
 	  PLUGIN (border_new) = NULL;
 	}
-
-
+      
       if (border_inter != NULL)
 	gdk_region_destroy (border_inter);
 
@@ -541,7 +530,6 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
     }
   return TRUE;
 }
-
 
 static gboolean
 on_root_window_button_press_cb (GtkWidget * root_window,
@@ -561,7 +549,6 @@ on_root_window_button_press_cb (GtkWidget * root_window,
 
       if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES))
 	draw_cues (root_window, event->x, event->y, TRUE, plugin);
-
 
       /* draw upper-left pixel */
       rect.x = PLUGIN (x1);
@@ -583,6 +570,7 @@ on_root_window_button_press_cb (GtkWidget * root_window,
   else if (event->button == 2 &&	/* hide the current conversation window  */
 	   get_receiver_window (plugin) && !PLUGIN (iconified))
     {
+      gtk_widget_hide (PLUGIN (root_events));
       gtk_widget_hide (root_window);
 
       if (PLUGIN (root_pixbuf_x) != NULL)
@@ -626,7 +614,6 @@ on_root_window_button_press_cb (GtkWidget * root_window,
 	}
     }
   return TRUE;
-
 }
 
 static GdkPixbuf *
@@ -645,7 +632,6 @@ extract_capture (PurplePlugin * plugin)
 
   if (capture != NULL)
     {
-
       /* 2/ make invisible areas black */
       mask_monitors (capture,
 		     gdk_get_default_root_window (),
@@ -760,7 +746,9 @@ on_root_window_button_release_cb (GtkWidget * root_window,
     return TRUE;
 
   /* come back to the real world */
+  gtk_widget_hide (PLUGIN (root_events));
   gtk_widget_hide (root_window);
+
   if (PLUGIN (root_pixbuf_x) != NULL)
     {
       g_object_unref (PLUGIN (root_pixbuf_x));
@@ -968,6 +956,9 @@ prepare_root_window (PurplePlugin * plugin)
    */
   screen = gdk_screen_get_default ();
 
+  g_assert (PLUGIN (root_window) == NULL);
+  g_assert (PLUGIN (root_events) == NULL);
+  
   /* No toplevel otherwise some desktops (say Xfce4),
    * won't allow us to cover the entire screen. */
   PLUGIN (root_window) = gtk_window_new (GTK_WINDOW_POPUP);
