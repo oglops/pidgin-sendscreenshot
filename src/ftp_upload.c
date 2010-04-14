@@ -52,7 +52,7 @@ ftp_upload (PurplePlugin * plugin)
   gchar *remote_url = NULL;
   gchar *basename = NULL;
 
-
+  G_LOCK (unload);
   /* get the file size of the local file */
   if (g_stat (PLUGIN (capture_path_filename), &file_info))
     {
@@ -128,17 +128,12 @@ ftp_upload (PurplePlugin * plugin)
       curl_easy_cleanup (curl);
 
       if (res != 0)
-	{
-	  G_LOCK (unload);
-	  PLUGIN (host_data)->htmlcode = g_strdup_printf ("%s", curl_error);
-	  G_UNLOCK (unload);
-	}
+	PLUGIN (host_data)->htmlcode = g_strdup_printf ("%s", curl_error);
     }
   fclose (hd_src);		/* close the local file */
   g_free (local_file);
   g_free (remote_url);
 
-  G_LOCK (unload);
   PLUGIN (libcurl_thread) = NULL;
   G_UNLOCK (unload);
   return NULL;

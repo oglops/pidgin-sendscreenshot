@@ -155,7 +155,8 @@ plugin_unload (PurplePlugin * plugin)
    *
    * see upload ()
    */
-  G_LOCK (unload);
+  if (!G_TRYLOCK (unload))
+    return FALSE; /* better let the upload to finish */
 
   host_data = PLUGIN (host_data);
   timeout_handle = PLUGIN (timeout_cb_handle);
