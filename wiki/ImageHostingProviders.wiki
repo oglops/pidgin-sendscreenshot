@@ -5,19 +5,28 @@ How to add your own provider.
 
 Pidgin send-screenshot comes with a list of HTTP image hosting providers and let you upload your screenshots to one of them.
 
-Your screenshots will be available for everyone, so *do not send private data!*
-
 Every month, new providers appear while other unfortunately disappear.
+Also, more and more providers require you to register (for free) before beeing able to upload pictures. That's the reason why we had to remove some providers from our list.
 Please help us to keep this list up-to-date ;-)
 
-The best way is to create your own personal hosting provider.
+*PLEASE REMEMBER*
+
+Your screenshots will be available for everyone, so *do not send private data!*
+
+Rather than using a public provider, the best solution is to add access to your own personal hosting provider.
 The next section teaches you how to do it...
 
 = Add your own =
 
-==Syntax==
+==Prerequisites==
 
 You must have a basic knowledge about [http://www.w3schools.com/htmL/html_forms.asp html forms] and [http://perldoc.perl.org/perlretut.html Perl regular expressions].
+
+We assume you've already build a functional HTML form to upload pictures.
+
+==Syntax==
+
+Now, let's learn how the plugin and your HTML form can communicate.
 Here is the *xml synthax* you have to use:
 
 {{{
