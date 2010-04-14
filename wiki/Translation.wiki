@@ -10,7 +10,7 @@ Don't hesitate to contact me to update, correct or add a translation into your l
  * French, by _Poussin_ *<100%>*.
  * German, by _David Scheffler_ *<71%>*.
  * Polish, by _Odin_ *<71%>*.
- * Russian, by _Ilya S_ *<95%>*.
+ * Russian, by _Ilya S_ *<100%>*.
  * Spanish, by _Alexander Ovalle_ *<19%>*.
 
 =Howto=
