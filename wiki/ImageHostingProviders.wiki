@@ -42,6 +42,7 @@ Here is the *xml synthax* you have to use:
         </host>
 }}}
 
+Note : the regexp shouldn't contain any _spaces_ as they are removed from the HTTP response.
 
 ==Where to ?==
 
