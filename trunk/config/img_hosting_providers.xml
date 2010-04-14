@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 
-<upload_hosts version='0.4' name='/'>
+<upload_hosts version='0.5' name='/'>
   
   <!-- 
        <host name="Host name (as it will appear in the configure dialog)"
@@ -20,14 +20,6 @@
   
   <!-- Recommended -->
 
-  <host name="Megahorst">
-    <param location=""/>
-    <param form_action="http://megahorst.com/Upload.html"/>
-    <param file_input_name="Binary0"/>
-    <param regexp=".*(http:\/\/megahorst\.com\/Get\/[a-z-0-9]{32}).*"/>
-    <param name="UploadRequest" value="Y"/>
-  </host>
-
   <host name="Imgur"> 
     <param location=""/>
     <param form_action="http://imgur.com/api/upload.xml"/>
@@ -38,33 +30,13 @@
 
   <!-- - - - - - - - - - - -->
 
-  <host name="ImageCross">
+
+  <host name="ImageShack">
     <param location="us"/>
-    <param form_action="http://hosting11.imagecross.com/basicg.php"/>
-    <param file_input_name="userfile"/>
-    <param regexp=".*YourImage.*?(http:\/\/www\.imagecross\.com/.*?)'.*"/>
-  </host>
-
-  <host name="Hellameke">
-    <param location="us"/>
-    <param form_action="http://www.hellameke.com/basic.php"/>
-    <param file_input_name="userfile"/>
-    <param regexp=".*DIRECTURL.*?value=&quot;(http://hellameke.com/.*?)&quot;.*"/>
-  </host>
-
-  <host name="TheImghost"> 
-    <param location=""/>
-    <param form_action="http://theimghost.com/inc/uploader.php"/>
-    <param file_input_name="thefile0"/>
-    <param regexp=".*(http:\/\/www\.theimghost.com\/images\/.*?)'.*"/>
-  </host>
-
-  <host name="ImageNerd"> 
-    <param location=""/>
-    <param form_action="http://www.imagenerd.com/"/>
-    <param file_input_name="files[]"/>
-    <param regexp=".*\[IMG\](http:\/\/www\.imagenerd\.com\/uploads\/.*?)\[\/IMG\].*"/>
-    <param name="submit" value="Upload It!" /> <!-- mandatory -->
+    <param form_action="http://www.imageshack.us/"/>
+    <param file_input_name="fileupload"/>
+    <param regexp="\[IMG\](http:\/\/img.*?)\[\/IMG\]"/>
+    <param name="optimage" value="resample"/>
   </host>
 
   <host name="PicyUp">
