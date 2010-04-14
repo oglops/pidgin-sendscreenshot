@@ -172,7 +172,7 @@ timeout_freeze_screen (PurplePlugin * plugin)
 	mygdk_pixbuf_grey (PLUGIN (root_pixbuf_x));
     }
   /* let the user capture an area... */
-  gtk_widget_show (PLUGIN (root_events));	/* focus is grabbed ² */
+  gtk_widget_show (PLUGIN (root_events));	/* focus is grabbed */
   gtk_widget_show (PLUGIN (root_window));
   return 0;
 }
@@ -184,11 +184,24 @@ paint_rectangle (GdkRectangle rect,
   gdk_draw_pixbuf (gdkwin,
 		   PLUGIN (gc),
 		   pixbuf,
-		   rect.x,
-		   rect.y,
-		   rect.x,
-		   rect.y,
-		   rect.width, rect.height, GDK_RGB_DITHER_NONE, 0, 0);
+		   rect.x, rect.y,
+		   rect.x, rect.y,
+		   rect.width, rect.height,
+		   GDK_RGB_DITHER_NONE, 0, 0);
+}
+
+static void
+paint_region (GdkRegion * region,
+	      GdkWindow * gdkwin, GdkPixbuf * pixbuf, PurplePlugin * plugin)
+{
+  GdkRectangle *rectangles = NULL;
+  gint n_rectangles, idx;
+
+  gdk_region_get_rectangles (region, &rectangles, &n_rectangles);
+
+  for (idx = 0; idx < n_rectangles; idx++)
+    paint_rectangle (rectangles[idx], gdkwin, pixbuf, plugin);
+  g_free (rectangles);
 }
 
 /* draw visual cues */
@@ -333,20 +346,6 @@ plugin_cancel (PurplePlugin * plugin)
   plugin_stop (plugin);
 }
 
-static void
-paint_region (GdkRegion * region,
-	      GdkWindow * gdkwin, GdkPixbuf * pixbuf, PurplePlugin * plugin)
-{
-  GdkRectangle *rectangles = NULL;
-  gint n_rectangles, idx;
-
-  gdk_region_get_rectangles (region, &rectangles, &n_rectangles);
-
-  for (idx = 0; idx < n_rectangles; idx++)
-    paint_rectangle (rectangles[idx], gdkwin, pixbuf, plugin);
-  g_free (rectangles);
-}
-
 static gboolean
 on_root_window_motion_notify_cb (GtkWidget * root_window,
 				 GdkEventMotion * event,
@@ -359,6 +358,7 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
       gint oldx1, oldy1;
       GdkRectangle old_r, new_r;
       GdkRegion *border_inter = NULL;
+      GdkRegion *union_r = NULL;
       GdkWindow *gdkwin;
 
       g_assert (PLUGIN(old) == NULL);

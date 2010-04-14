@@ -202,7 +202,6 @@ typedef struct
   GdkPixbuf *root_pixbuf_x;
   GdkRegion *border_new, *border_old, *new, *old;
  
-
   /* where to send capture ? */
   PurpleConnectionFlags conv_features;
   PurpleAccount *account;
