@@ -66,6 +66,9 @@ http_upload (PurplePlugin * plugin)
   static const char buf[] = "Expect:";
   gchar *img_ctype = NULL;
 
+
+  /* prevent the plugin from beeing unloaded */
+  G_LOCK (unload);
   img_ctype =
     g_strdup_printf ("image/%s", purple_prefs_get_string (PREF_IMAGE_TYPE));
   /* fill in extra fields */
@@ -116,11 +119,6 @@ http_upload (PurplePlugin * plugin)
       curl_slist_free_all (headerlist);
       curl_easy_cleanup (curl);
 
-      /* 
-       * Make sure that the plugin is still _loaded_ when entering that block.
-       * see plugin_unload ()
-       */
-      G_LOCK (unload);
       if (plugin->extra != NULL)
 	{
 	  if (res != 0)
@@ -130,10 +128,8 @@ http_upload (PurplePlugin * plugin)
 		g_strdup_printf ("ERR_UPLOAD: %s", curl_error);
 	    }
 	}
-      G_UNLOCK (unload);
     }
-  G_LOCK (unload);
-  if (plugin->extra != NULL)
+   if (plugin->extra != NULL)
     PLUGIN (libcurl_thread) = NULL;
   G_UNLOCK (unload);
   return NULL;
