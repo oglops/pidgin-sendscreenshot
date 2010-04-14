@@ -1,0 +1,18 @@
+#labels Featured
+=Linux distributions=
+
+This page contains a list of known available packages for some Linux distributions.
+
+If your distribution  isn't listed here, you have to compile from source or write the package yourself. In the latter case, please send the link to us and we'll be happy to add one more supported distribution.
+
+==Arch Linux==
+In the [http://aur.archlinux.org/packages.php?ID=25618 AUR]. Thanks to "Bob Day".
+
+==Gentoo Linux==
+[http://overlays.gentoo.org/proj/sunrise/browser/sunrise/x11-plugins/pidgin-sendscreenshot Ebuild].
+
+==Frugalware Linux==
+[http://frugalware.org/packages/86184 Package info]. Thanks to Devil505.
+
+==Ubuntu Linux==
+Available in our [http://code.google.com/p/pidgin-sendscreenshot/downloads/list Downloads] section.
