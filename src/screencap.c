@@ -358,7 +358,6 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
       gint oldx1, oldy1;
       GdkRectangle old_r, new_r;
       GdkRegion *border_inter = NULL;
-      GdkRegion *union_r = NULL;
       GdkWindow *gdkwin;
 
       g_assert (PLUGIN(old) == NULL);
