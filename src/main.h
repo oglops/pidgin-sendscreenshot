@@ -145,8 +145,8 @@ G_LOCK_EXTERN (unload);
   }
 
 #define CLEAR_SEND_INFO_TO_NULL(plugin)\
+  PLUGIN (conv_type) = PURPLE_CONV_TYPE_UNKNOWN;\
   PLUGIN (account) = NULL;\
-  PLUGIN (pconv) = NULL;\
   if (PLUGIN(name)) {\
     g_free (PLUGIN(name));\
     PLUGIN (name) = NULL;\
@@ -162,10 +162,9 @@ G_LOCK_EXTERN (unload);
    (GSourceFunc) timeout_freeze_screen, plugin)
 
 #define REMEMBER_ACCOUNT(conv)\
-  PLUGIN (account) = (conv->active_conv)->account;\
-  PLUGIN (name) = g_strdup_printf ("%s", (conv->active_conv)->name);\
-  PLUGIN (pconv) = conv
-
+  PLUGIN (conv_type) = purple_conversation_get_type (conv->active_conv);\
+  PLUGIN (account) = purple_conversation_get_account (conv->active_conv);\
+  PLUGIN (name) = g_strdup_printf ("%s", purple_conversation_get_name(conv->active_conv))
 
 #ifdef ENABLE_UPLOAD
 typedef enum
@@ -181,7 +180,7 @@ typedef enum
 /* functions */
 
 GtkWidget *get_receiver_window (PurplePlugin * plugin);
-GtkIMHtml *get_receiver_imhtml (PidginConversation * gtkconv);
+GtkIMHtml *get_receiver_imhtml (PurplePlugin * plugin);
 void plugin_stop (PurplePlugin * plugin);
 
 /* main struct holding data */
@@ -206,9 +205,9 @@ typedef struct
  
   /* where to send capture ? */
   PurpleConnectionFlags conv_features;
+  PurpleConversationType conv_type;
   PurpleAccount *account;
   gchar *name;
-  PidginConversation *pconv;
 
   /* conv window is minimized */
   gboolean iconified;

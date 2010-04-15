@@ -557,9 +557,10 @@ on_blist_context_menu_send_capture (PurpleBlistNode * node,
 
       PLUGIN (send_as) = SEND_AS_FILE;
 
+      PLUGIN (conv_type) = PURPLE_CONV_TYPE_UNKNOWN; /* no conv opened */
       PLUGIN (account) = purple_buddy_get_account (buddy);
       PLUGIN (name) = g_strdup_printf ("%s", purple_buddy_get_name (buddy));
-
+     
       /* see on_screenshot_insert_as_image_activate_cb () */
       FREEZE_DESKTOP ();
     }

@@ -38,8 +38,9 @@
 
 #define PLUGIN_SENDING_INFO _("Uploading to \"%s\"...")
 
-#define PLUGIN_UPLOAD_CLOSED_CONV_ERROR _("Failed to insert a link because the"\
-					  "conversation window is now closed.\n"\
+#define PLUGIN_UPLOAD_CLOSED_CONV_ERROR _("Failed to insert a link, possible reasons are:\n"\
+					  " - account not connected,\n"\
+					  " - conversation window closed.\n"\
 					  "\nThe link is:\n%s")
 
 void plugin_curl_set_common_opts (CURL * curl, PurplePlugin * plugin);
