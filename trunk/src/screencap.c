@@ -813,7 +813,7 @@ on_root_window_button_release_cb (GtkWidget * root_window,
 		    GtkTextIter iter;
 		    GtkTextMark *ins = NULL;
 		    gint purple_tmp_id;
-		    GtkIMHtml *imhtml = get_receiver_imhtml (PLUGIN (pconv));
+		    GtkIMHtml *imhtml = get_receiver_imhtml (plugin);
 
 		    basename =
 		      g_path_get_basename (PLUGIN (capture_path_filename));

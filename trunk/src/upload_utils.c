@@ -95,7 +95,7 @@ plugin_curl_set_common_opts (CURL * curl, PurplePlugin * plugin)
 void
 real_insert_link (PurplePlugin * plugin, const gchar * url)
 {
-  GtkIMHtml *imhtml = get_receiver_imhtml (PLUGIN (pconv));
+  GtkIMHtml *imhtml = get_receiver_imhtml (plugin);
 
   if (imhtml == NULL)
     {

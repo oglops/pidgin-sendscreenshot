@@ -35,21 +35,41 @@
 GtkWidget *
 get_receiver_window (PurplePlugin * plugin)
 {
-  if (PLUGIN (pconv))
-    return pidgin_conv_get_window (PLUGIN (pconv))->window;
+  PurpleConversation* target_conv =
+    purple_find_conversation_with_account (PLUGIN (conv_type),
+					   PLUGIN (name),
+					   PLUGIN (account));
+  if (target_conv != NULL && PIDGIN_IS_PIDGIN_CONVERSATION(target_conv))
+    return pidgin_conv_get_window (PIDGIN_CONVERSATION(target_conv))->window;
   else
     return NULL;
 }
 
 GtkIMHtml *
-get_receiver_imhtml (PidginConversation * conv)
+get_receiver_imhtml (PurplePlugin * plugin)
 {
-  if (conv)
+  PurpleConversation* target_conv =
+    purple_find_conversation_with_account (PLUGIN (conv_type),
+					   PLUGIN (name),
+					   PLUGIN (account));
+  
+  if (target_conv != NULL && PIDGIN_IS_PIDGIN_CONVERSATION(target_conv))
     {
-      return GTK_IMHTML (((GtkIMHtmlToolbar *) (conv->toolbar))->imhtml);
+      return GTK_IMHTML (((GtkIMHtmlToolbar *) (PIDGIN_CONVERSATION(target_conv)->toolbar))->imhtml);
     }
   else
-    return NULL;
+    {
+      /* reopen conversation */
+      target_conv = 
+	purple_conversation_new (PLUGIN (conv_type),
+				 PLUGIN (account),
+				 PLUGIN (name));
+      if (target_conv) {
+	purple_conversation_present (target_conv);
+	return get_receiver_imhtml (plugin);
+      }
+    }
+  return NULL;
 }
 
 void
