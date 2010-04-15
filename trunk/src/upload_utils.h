@@ -34,7 +34,7 @@
 
 #include "main.h"
 
-
+#define PLUGIN_UPLOAD_PROGRESS_INTERVAL 50
 
 #define PLUGIN_SENDING_INFO _("Uploading to \"%s\"...")
 

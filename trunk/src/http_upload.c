@@ -50,12 +50,12 @@ write_function (void *ptr, size_t size, size_t nmemb, void *data)
       return nmemb * size;
     }
   else
-    return 0;
+    return CURLE_WRITE_ERROR;
 }
 
 static gpointer
-http_upload (PurplePlugin * plugin)
-{				/* this is a thread */
+http_upload_thread (PurplePlugin * plugin)
+{
   guint i;
   CURL *curl;
   CURLcode res;
@@ -119,18 +119,15 @@ http_upload (PurplePlugin * plugin)
       curl_slist_free_all (headerlist);
       curl_easy_cleanup (curl);
 
-      if (plugin->extra != NULL)
+   
+      if (res != 0)
 	{
-	  if (res != 0)
-	    {
-	      g_assert (PLUGIN (host_data)->htmlcode == NULL);
-	      PLUGIN (host_data)->htmlcode =
-		g_strdup_printf ("ERR_UPLOAD: %s", curl_error);
-	    }
+	  g_assert (PLUGIN (error_message) == NULL);
+	  PLUGIN (error_message) = g_strdup_printf ("%s", curl_error);
 	}
     }
-   if (plugin->extra != NULL)
-    PLUGIN (libcurl_thread) = NULL;
+  
+  PLUGIN (libcurl_thread) = NULL;
   G_UNLOCK (unload);
   return NULL;
 }
@@ -306,7 +303,7 @@ insert_html_link_cb (PurplePlugin * plugin)
       gtk_widget_destroy (PLUGIN (uploading_dialog));
       PLUGIN (uploading_dialog) = NULL;
 
-      if (g_str_has_prefix (PLUGIN (host_data)->htmlcode, "ERR_UPLOAD:"))
+      if (PLUGIN (error_message) != NULL)
 	{
 	  gchar *errmsg_uploadto = g_strdup_printf (PLUGIN_UPLOAD_ERROR,
 						    PLUGIN
@@ -314,10 +311,12 @@ insert_html_link_cb (PurplePlugin * plugin)
 
 	  NotifyError ("%s\n\n%s\n\n%s\n%s",
 		       errmsg_uploadto,
-		       PLUGIN (host_data)->htmlcode,
+		       PLUGIN (error_message),
 		       PLUGIN_UPLOAD_DISCLOC_ERROR,
 		       PLUGIN (capture_path_filename));
 	  g_free (errmsg_uploadto);
+	  g_free (PLUGIN (error_message));
+	  PLUGIN (error_message) = NULL;
 	}
       else
 	{
@@ -547,9 +546,10 @@ http_upload_prepare (PurplePlugin * plugin)
   PLUGIN (uploading_dialog) =
     show_uploading_dialog (plugin, PLUGIN (host_data)->selected_hostname);
   PLUGIN (libcurl_thread) =
-    g_thread_create ((GThreadFunc) http_upload, plugin, FALSE, NULL);
+    g_thread_create ((GThreadFunc) http_upload_thread, plugin, FALSE, NULL);
   PLUGIN (timeout_cb_handle) =
-    g_timeout_add (50, (GSourceFunc) insert_html_link_cb, plugin);
+    g_timeout_add (PLUGIN_UPLOAD_PROGRESS_INTERVAL,
+		   (GSourceFunc) insert_html_link_cb, plugin);
 }
 
 /* end of http_upload.c*/
