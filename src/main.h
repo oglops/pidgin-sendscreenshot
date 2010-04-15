@@ -96,6 +96,8 @@ G_LOCK_EXTERN (unload);
 #define PLUGIN_SIGNATURE_TOOBIG_ERROR _("The image used to sign the screenshot is too big.\n"\
 					"%dx%d is the maximum allowed.")
 
+#define PLUGIN_UNEXPECTED_ERROR _("An unexpected error occured, see debug window...")
+
 /* see on_screenshot_insert_menuitem_activate_cb () */
 #define MSEC_TIMEOUT_VAL 500
 
@@ -224,9 +226,11 @@ typedef struct
   gchar *xml_hosts_filename;
   guint timeout_cb_handle;
 
+  /* ftp stuff */
   off_t read_size;
   off_t total_size;
-
+  gchar *error_message;
+  
   /* host data from xml */
   struct host_param_data
   {

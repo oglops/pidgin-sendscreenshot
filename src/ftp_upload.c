@@ -27,42 +27,62 @@
 G_LOCK_DEFINE (unload);
 
 static size_t
-read_callback (void *ptr, size_t size, size_t nmemb, void *stream)
+read_callback (void *buf, size_t size, size_t nmemb, void *stream)
 {
   PurplePlugin *plugin;
+  GIOChannel *io_chan;
+  GError *error = NULL;
   size_t ret;
 
   plugin = purple_plugins_find_with_id (PLUGIN_ID);
+  io_chan = (GIOChannel*) stream;
 
-  ret = fread (ptr, size, nmemb, stream);
-
-  PLUGIN (read_size) += ret * size;	/* progress bar */
+  g_io_channel_read_chars (io_chan, buf, 
+			   size*nmemb,
+			   &ret,
+			   &error);
+   
+  if (error != NULL) {
+    PLUGIN (error_message) = g_strdup_printf (PLUGIN_UNEXPECTED_ERROR);
+    purple_debug_error (PLUGIN_ID, "g_io_channel_read_chars : %s\n", error->message);
+    g_error_free (error);
+    return CURL_READFUNC_ABORT;
+  }
+  
+  PLUGIN (read_size) += ret;	/* progress bar */
   return ret;
 }
 
+#define THREAD_QUIT\
+  PLUGIN (libcurl_thread) = NULL;\
+  G_UNLOCK (unload);\
+  return NULL
+
+/* inspired from http://curl.haxx.se/libcurl/c/ftpupload.html */
 static gpointer
 ftp_upload (PurplePlugin * plugin)
 {
   CURL *curl;
   CURLcode res;
-  FILE *hd_src;
+  GIOChannel *io_chan;
+  GError *error = NULL;
+
   struct stat file_info;
-  struct curl_slist *headerlist = NULL;
-  gchar *local_file = NULL;
   gchar *remote_url = NULL;
   gchar *basename = NULL;
 
   G_LOCK (unload);
   /* get the file size of the local file */
-  if (g_stat (PLUGIN (capture_path_filename), &file_info))
+  if (g_stat (PLUGIN (capture_path_filename), &file_info) == -1)
     {
-      NotifyError ("Couldnt open '%s'\n", PLUGIN (capture_path_filename));
-      return NULL;
+      PLUGIN (error_message) = g_strdup_printf (PLUGIN_UNEXPECTED_ERROR);
+      purple_debug_error (PLUGIN_ID, "Couldnt open '%s'\n", /* FIXME */
+			  PLUGIN (capture_path_filename));
+      THREAD_QUIT;
     }
   PLUGIN (total_size) = file_info.st_size;
 
   basename = g_path_get_basename (PLUGIN (capture_path_filename));
-  local_file = g_strdup_printf ("RNFR %s", basename);
   remote_url =
     g_strdup_printf ("%s/%s",
 		     purple_prefs_get_string (PREF_FTP_REMOTE_URL), basename);
@@ -70,22 +90,30 @@ ftp_upload (PurplePlugin * plugin)
   g_free (basename);
   basename = NULL;
 
-  /* get a FILE * of the same file */
-  hd_src = fopen (PLUGIN (capture_path_filename), "rb");
+  io_chan = 
+    g_io_channel_new_file (PLUGIN (capture_path_filename), "r", &error);
+  if (error != NULL) {
+    PLUGIN (error_message) = g_strdup_printf (PLUGIN_UNEXPECTED_ERROR);
+    purple_debug_error (PLUGIN_ID, "g_io_channel_new_file (%s) : %s\n",
+			PLUGIN (capture_path_filename),
+			error->message);
+    g_error_free (error);
+    THREAD_QUIT;
+  }
+  /* binary data, this should never fail */
+  g_io_channel_set_encoding (io_chan, NULL, NULL); 
 
   /* get a curl handle */
   curl = curl_easy_init ();
   if (curl != NULL)
     {
       static char curl_error[CURL_ERROR_SIZE];
-
-      /* build a list of commands to pass to libcurl */
-      headerlist = curl_slist_append (headerlist, local_file);
-
+ 
       plugin_curl_set_common_opts (curl, plugin);
 
       /* we want to use our own read function */
       curl_easy_setopt (curl, CURLOPT_READFUNCTION, read_callback);
+      curl_easy_setopt (curl, CURLOPT_READDATA, io_chan);
 
       /* enable uploading */
       curl_easy_setopt (curl, CURLOPT_UPLOAD, 1L);
@@ -100,20 +128,6 @@ ftp_upload (PurplePlugin * plugin)
       curl_easy_setopt (curl, CURLOPT_PASSWORD,
 			purple_prefs_get_string (PREF_FTP_PASSWORD));
 
-
-      /* pass in that last of FTP commands to run after the transfer */
-      curl_easy_setopt (curl, CURLOPT_POSTQUOTE, headerlist);
-
-      /* now specify which file to upload */
-      curl_easy_setopt (curl, CURLOPT_READDATA, hd_src);
-
-      /* Set the size of the file to upload (optional).  If you give a *_LARGE
-         option you MUST make sure that the type of the passed-in argument is a
-         curl_off_t. If you use CURLOPT_INFILESIZE (without _LARGE) you must
-         make sure that to pass in a type 'long' argument. */
-      curl_easy_setopt (curl, CURLOPT_INFILESIZE_LARGE,
-			(curl_off_t) PLUGIN (total_size));
-
       curl_easy_setopt (curl, CURLOPT_ERRORBUFFER, curl_error);
 
       /* Now run off and do what you've been told! */
@@ -121,22 +135,25 @@ ftp_upload (PurplePlugin * plugin)
 
       PLUGIN (read_size) = 0;
 
-      /* clean up the FTP commands list */
-      curl_slist_free_all (headerlist);
-
       /* always cleanup */
       curl_easy_cleanup (curl);
 
-      if (res != 0)
-	PLUGIN (host_data)->htmlcode = g_strdup_printf ("%s", curl_error);
+      if (res != 0) {
+	g_assert (PLUGIN (error_message) == NULL);
+	PLUGIN (error_message) = g_strdup_printf ("%s", curl_error);
+      }
     }
-  fclose (hd_src);		/* close the local file */
-  g_free (local_file);
+ 
+  g_io_channel_shutdown (io_chan, TRUE, &error);
+  if (error != NULL) {
+    /* Don't set PLUGIN (error_message) */
+    purple_debug_error (PLUGIN_ID, "g_io_channel_shutdown : %s\n", error->message);
+    g_error_free (error);
+    THREAD_QUIT;
+  }
   g_free (remote_url);
 
-  PLUGIN (libcurl_thread) = NULL;
-  G_UNLOCK (unload);
-  return NULL;
+  THREAD_QUIT;
 }
 
 static gboolean
@@ -162,12 +179,12 @@ insert_ftp_link_cb (PurplePlugin * plugin)
       gtk_widget_destroy (PLUGIN (uploading_dialog));
       PLUGIN (uploading_dialog) = NULL;
 
-      if (PLUGIN (host_data)->htmlcode != NULL)
+      if (PLUGIN (error_message) != NULL)
 	{
 	  NotifyError ("%s\n\n%s\n",
-		       PLUGIN_FTP_UPLOAD_ERROR, PLUGIN (host_data)->htmlcode);
-	  g_free (PLUGIN (host_data)->htmlcode);
-	  PLUGIN (host_data)->htmlcode = NULL;
+		       PLUGIN_FTP_UPLOAD_ERROR, PLUGIN (error_message));
+	  g_free (PLUGIN (error_message));
+	  PLUGIN (error_message) = NULL;
 	}
       else
 	{
@@ -214,7 +231,8 @@ ftp_upload_prepare (PurplePlugin * plugin)
     g_thread_create ((GThreadFunc) ftp_upload, plugin, FALSE, NULL);
 
   PLUGIN (timeout_cb_handle) =
-    g_timeout_add (500, (GSourceFunc) insert_ftp_link_cb, plugin);
+    g_timeout_add (PLUGIN_UPLOAD_PROGRESS_INTERVAL,
+		   (GSourceFunc) insert_ftp_link_cb, plugin);
 }
 
 /* end of ftp_upload.c */
