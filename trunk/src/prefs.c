@@ -723,9 +723,9 @@ get_plugin_pref_frame (PurplePlugin * plugin)
   vbox = pidgin_make_frame (ret, PREF_UI_FRAME5);
   pidgin_prefs_labeled_spin_button (vbox,
 				    PREF_UI_UPLOAD_CONNECTTIMEOUT,
-				    PREF_UPLOAD_CONNECTTIMEOUT, 1, 30, NULL);
+				    PREF_UPLOAD_CONNECTTIMEOUT, 1, 60, NULL);
   pidgin_prefs_labeled_spin_button (vbox, PREF_UI_UPLOAD_TIMEOUT,
-				    PREF_UPLOAD_TIMEOUT, 1, 30, NULL);
+				    PREF_UPLOAD_TIMEOUT, 1, 60, NULL);
 #endif /* ENABLE_UPLOAD */
   return ret;
 }

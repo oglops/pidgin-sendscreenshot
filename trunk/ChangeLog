@@ -1,8 +1,10 @@
 Pidgin Screenshot Plugin Changelog
 
-Version 0.8-1 04/16/10:
-	* Present conversation if it is closed (instead of showing an error msg).
+Version 0.8-1 04/18/10:
+	* Present conversation to show upload inlik if it is closed 
+	  (instead of showing an error msg).
 	* Use GIOChannel related funcs instead of fread() fclose().
+	* Added unicode support under Win32. 
 Version 0.8 04/15/10:
 	* Don't ignore proxy settings ! (Repported by Paul Matthias Diderichsen and Homolibere).
 	* Faster selection drawing.
