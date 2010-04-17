@@ -84,9 +84,9 @@
     g_free (host_data->regexp);					\
     host_data->regexp = NULL;					\
   }								\
-  if (host_data->htmlcode) {					\
-    g_free (host_data->htmlcode);				\
-    host_data->htmlcode = NULL;					\
+  if (host_data->html_response) {					\
+    g_free (host_data->html_response);				\
+    host_data->html_response = NULL;					\
   }								\
   CLEAR_HOST_PARAM_DATA(host_data)
 

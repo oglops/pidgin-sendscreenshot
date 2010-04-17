@@ -26,6 +26,7 @@
 
 G_LOCK_DEFINE (unload);
 
+/* store screenshot contents in buf */
 static size_t
 read_callback (void *buf, size_t size, size_t nmemb, void *stream)
 {

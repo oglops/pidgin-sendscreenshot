@@ -214,6 +214,11 @@ plugin_unload (PurplePlugin * plugin)
     }
   
 #ifdef ENABLE_UPLOAD
+  if (G_UNLIKELY (PLUGIN (error_message) != NULL))
+    {
+      g_free (PLUGIN (error_message));
+      PLUGIN (error_message = NULL);
+    }
   CLEAR_HOST_PARAM_DATA_FULL (host_data);
   g_free (PLUGIN (xml_hosts_filename));
   g_free (PLUGIN (host_data));

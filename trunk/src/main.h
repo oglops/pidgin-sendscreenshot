@@ -201,6 +201,7 @@ typedef struct
   GdkPixbuf *root_pixbuf_orig;
   /* modified image (highlight mode) */
   GdkPixbuf *root_pixbuf_x;
+  /* regions to paint into */
   GdkRegion *border_new, *border_old, *new, *old;
  
   /* where to send capture ? */
@@ -239,7 +240,7 @@ typedef struct
     gchar *file_input_name;
     gchar *regexp;
 
-    gchar *htmlcode;
+    gchar *html_response;
 
     GArray *host_names;
     GArray *extra_names;

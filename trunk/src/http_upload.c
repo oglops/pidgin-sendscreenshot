@@ -24,12 +24,13 @@
 #include "http_upload.h"
 #include "prefs.h"
 
+/* progressively obtains http response (stored in buf) */
 static size_t
-write_function (void *ptr, size_t size, size_t nmemb, void *data)
+write_function (void *buf, size_t size, size_t nmemb, void *data)
 {
   PurplePlugin *plugin = (PurplePlugin *) data;
 
-  gchar *previous = PLUGIN (host_data)->htmlcode;
+  gchar *previous = PLUGIN (host_data)->html_response;
   gsize previous_size = 0;
 
   if (previous != NULL)
@@ -43,10 +44,10 @@ write_function (void *ptr, size_t size, size_t nmemb, void *data)
       gchar *new = previous + previous_size;
 
       for (c = 0; c < nmemb; c++)
-	*new++ = *((gchar *) ptr++);
+	*new++ = *((gchar *) buf++);
 
       *new = '\0';
-      PLUGIN (host_data)->htmlcode = previous;
+      PLUGIN (host_data)->html_response = previous;
       return nmemb * size;
     }
   else
@@ -347,7 +348,7 @@ insert_html_link_cb (PurplePlugin * plugin)
 	      /* remove every newlines first */
 	      space_regex = g_regex_new ("\\s", G_REGEX_MULTILINE, 0, NULL);
 	      nospace = g_regex_replace_literal (space_regex,
-						 PLUGIN (host_data)->htmlcode,
+						 PLUGIN (host_data)->html_response,
 						 -1, 0, "", 0, NULL);
 	      g_regex_unref (space_regex);
 	      if (g_regex_match (url_regex, nospace, 0, &url_match_info) ==
@@ -368,7 +369,7 @@ insert_html_link_cb (PurplePlugin * plugin)
 				     ("Regexp doesn't match HTTP upload response !\nServer: %s\nRegexp:\n%s\nResponse:\n%s\n"),
 				     PLUGIN (host_data)->selected_hostname,
 				     PLUGIN (host_data)->regexp,
-				     PLUGIN (host_data)->htmlcode);
+				     PLUGIN (host_data)->html_response);
 
 		  NotifyError ("%s\n\n%s\n%s",
 			       errmsg,
@@ -386,8 +387,8 @@ insert_html_link_cb (PurplePlugin * plugin)
 		  real_insert_link (plugin, url);
 		  g_free (url);
 		}
-	      g_free (PLUGIN (host_data)->htmlcode);
-	      PLUGIN (host_data)->htmlcode = NULL;
+	      g_free (PLUGIN (host_data)->html_response);
+	      PLUGIN (host_data)->html_response = NULL;
 	    }
 	}
     }
