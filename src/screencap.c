@@ -45,6 +45,8 @@ timeout_freeze_screen (PurplePlugin * plugin)
   GdkWindow *gdkroot;
   gint x_orig, y_orig, width, height;
 
+  g_assert (plugin != NULL && plugin->extra != NULL);
+
 #ifdef G_OS_WIN32
   GdkScreen *screen;
   GdkRectangle rect;
@@ -323,6 +325,8 @@ on_root_window_realize_cb (GtkWidget * root_window)
 static void
 plugin_cancel (PurplePlugin * plugin)
 {
+  g_assert (plugin != NULL && plugin->extra != NULL);
+
   gtk_widget_hide (PLUGIN (root_events));	/* give back focus */
   gtk_widget_hide (PLUGIN (root_window));
   CLEAR_CAPTURE_AREA (plugin);
@@ -620,6 +624,8 @@ extract_capture (PurplePlugin * plugin)
 {
   GdkPixbuf *capture = NULL;
 
+  g_assert (plugin != NULL && plugin->extra != NULL);
+
   /* 1/ create our new pixbuf */
   g_assert (PLUGIN (root_pixbuf_orig) != NULL);
   capture =
@@ -679,6 +685,8 @@ save_capture (PurplePlugin * plugin, GdkPixbuf * capture)
   GError *error = NULL;
   GTimeVal g_tv;
   const gchar *const extension = purple_prefs_get_string (PREF_IMAGE_TYPE);
+  
+  g_assert (plugin != NULL && plugin->extra != NULL);
 
   if (PLUGIN (capture_path_filename) != NULL)
     g_free (PLUGIN (capture_path_filename));
@@ -739,6 +747,8 @@ on_root_window_button_release_cb (GtkWidget * root_window,
 				  PurplePlugin * plugin)
 {
   GdkPixbuf *capture = NULL;
+  
+  g_assert (plugin != NULL && plugin->extra != NULL);
 
   /* capture not yet defined */
   if (event->button != 1 || PLUGIN (x2) == -1)
@@ -872,6 +882,8 @@ on_root_window_map_event_cb (GtkWidget * root_window, GdkEvent * event,
 			     PurplePlugin * plugin)
 {
   GdkWindow *gdkwin;
+  
+  g_assert (plugin != NULL && plugin->extra != NULL);
 
   gtk_window_move (GTK_WINDOW (root_window), 0, 0);
 
@@ -891,6 +903,7 @@ static gboolean
 on_root_window_expose_cb (GtkWidget * root_window,
 			  GdkEventExpose * event, PurplePlugin * plugin)
 {
+  g_assert (plugin != NULL && plugin->extra != NULL);
   /* no area is selected */
   if (PLUGIN (x1) == -1)
     {
@@ -907,6 +920,7 @@ static gboolean
 on_root_window_key_press_event_cb (GtkWidget * root_events,
 				   GdkEventKey * event, PurplePlugin * plugin)
 {
+  g_assert (plugin != NULL && plugin->extra != NULL);
   switch (event->keyval)
     {
     case GDK_Escape:
@@ -925,6 +939,7 @@ on_root_window_key_release_event_cb (GtkWidget * root_events,
 				     GdkEventKey * event,
 				     PurplePlugin * plugin)
 {
+  g_assert (plugin != NULL && plugin->extra != NULL);
   switch (event->keyval)
     {
     case GDK_Control_L:
@@ -938,6 +953,7 @@ on_root_window_key_release_event_cb (GtkWidget * root_events,
 static void
 on_screen_monitors_changed_cb (GdkScreen * screen, PurplePlugin * plugin)
 {
+  g_assert (plugin != NULL && plugin->extra != NULL);
   gtk_widget_set_size_request (PLUGIN (root_window),
 			       gdk_screen_get_width (screen),
 			       gdk_screen_get_height (screen));
@@ -947,7 +963,9 @@ on_screen_monitors_changed_cb (GdkScreen * screen, PurplePlugin * plugin)
 void
 prepare_root_window (PurplePlugin * plugin)
 {
-  GdkScreen *screen;
+  GdkScreen *screen = NULL;
+
+  g_assert (plugin != NULL && plugin->extra != NULL);
 
   /* From gdk API :
    *   "a screen may consist of multiple monitors which a

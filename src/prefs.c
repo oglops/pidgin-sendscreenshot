@@ -381,6 +381,8 @@ get_plugin_pref_frame (PurplePlugin * plugin)
   GtkWidget *folder_chooser, *file_chooser, *sign_image;
   GtkFileFilter *filter;
 #endif
+  
+  g_assert (plugin != NULL && plugin->extra != NULL);
 
 #ifdef ENABLE_UPLOAD
   GtkWidget *hbox_ftp, *hbox_html;

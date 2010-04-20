@@ -3,7 +3,6 @@
 
 #include "main.h"
 
-
 gboolean mswin_freeze_screen (PurplePlugin * plugin, GdkRectangle gdk_rect);
 
 #endif

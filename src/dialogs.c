@@ -87,7 +87,6 @@ capture_rename (PurplePlugin * plugin, const gchar * entry_init)
   GtkWidget *img;
   GtkWidget *content_area;
 
-
   img =
     gtk_image_new_from_stock (PIDGIN_STOCK_DIALOG_QUESTION,
 			      gtk_icon_size_from_name
@@ -170,6 +169,8 @@ capture_rename (PurplePlugin * plugin, const gchar * entry_init)
 void
 screenshot_maybe_rename (PurplePlugin * plugin, gchar ** basename)
 {
+  g_assert (plugin != NULL && plugin->extra != NULL);
+
   if (purple_prefs_get_bool (PREF_ASK_FILENAME) &&
       (PLUGIN (send_as) == SEND_AS_FILE
 #ifdef ENABLE_UPLOAD

@@ -178,7 +178,6 @@ typedef enum
 { SELECT_REGULAR, SELECT_CENTER_HOLD} SelectionMode;
 
 /* functions */
-
 GtkWidget *get_receiver_window (PurplePlugin * plugin);
 GtkIMHtml *get_receiver_imhtml (PurplePlugin * plugin);
 void plugin_stop (PurplePlugin * plugin);
@@ -195,6 +194,7 @@ typedef struct
   /* to display frozen desktop state */
   GdkGC *gc;
   GtkWidget *root_window;
+  /* used to catch events */
   GtkWidget *root_events;
 
   /* original image */

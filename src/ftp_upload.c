@@ -72,6 +72,8 @@ ftp_upload (PurplePlugin * plugin)
   gchar *remote_url = NULL;
   gchar *basename = NULL;
 
+  g_assert (plugin != NULL && plugin->extra != NULL);
+
   G_LOCK (unload);
   /* get the file size of the local file */
   if (g_stat (PLUGIN (capture_path_filename), &file_info) == -1)
@@ -160,6 +162,8 @@ ftp_upload (PurplePlugin * plugin)
 static gboolean
 insert_ftp_link_cb (PurplePlugin * plugin)
 {
+  g_assert (plugin != NULL && plugin->extra != NULL);
+  
   /* still uploading... */
   if (PLUGIN (libcurl_thread) != NULL)
     {
@@ -217,6 +221,8 @@ void
 ftp_upload_prepare (PurplePlugin * plugin)
 {
   struct host_param_data *host_data;
+
+  g_assert (plugin != NULL && plugin->extra != NULL);
 
   host_data = PLUGIN (host_data);
 

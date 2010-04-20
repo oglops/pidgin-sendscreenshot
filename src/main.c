@@ -35,10 +35,14 @@
 GtkWidget *
 get_receiver_window (PurplePlugin * plugin)
 {
-  PurpleConversation* target_conv =
+  PurpleConversation* target_conv;
+
+  g_assert (plugin != NULL && plugin->extra != NULL);
+  target_conv =
     purple_find_conversation_with_account (PLUGIN (conv_type),
 					   PLUGIN (name),
 					   PLUGIN (account));
+
   if (target_conv != NULL && PIDGIN_IS_PIDGIN_CONVERSATION(target_conv))
     return pidgin_conv_get_window (PIDGIN_CONVERSATION(target_conv))->window;
   else
@@ -48,7 +52,10 @@ get_receiver_window (PurplePlugin * plugin)
 GtkIMHtml *
 get_receiver_imhtml (PurplePlugin * plugin)
 {
-  PurpleConversation* target_conv =
+  PurpleConversation* target_conv;
+
+  g_assert (plugin != NULL && plugin->extra != NULL);
+  target_conv =
     purple_find_conversation_with_account (PLUGIN (conv_type),
 					   PLUGIN (name),
 					   PLUGIN (account));
@@ -76,7 +83,8 @@ void
 plugin_stop (PurplePlugin * plugin)
 {
   GList *convs;
-
+  
+  g_assert (plugin != NULL && plugin->extra != NULL);
   g_assert (PLUGIN (running) == TRUE);
 
   CLEAR_SEND_INFO_TO_NULL (plugin);
@@ -120,7 +128,8 @@ plugin_stop (PurplePlugin * plugin)
 static gboolean
 plugin_load (PurplePlugin * plugin)
 {
-  plugin->extra = NULL;
+ 
+ g_assert (plugin != NULL);
 
   if ((plugin->extra = g_try_malloc0 (sizeof (PluginExtraVars))) == NULL
 #ifdef ENABLE_UPLOAD
@@ -165,6 +174,8 @@ plugin_load (PurplePlugin * plugin)
 static gboolean
 plugin_unload (PurplePlugin * plugin)
 {
+  g_assert (plugin != NULL && plugin->extra != NULL);
+
 #ifdef ENABLE_UPLOAD
   struct host_param_data *host_data;
   guint timeout_handle;
