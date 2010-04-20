@@ -235,6 +235,8 @@ mswin_freeze_screen (PurplePlugin * plugin, GdkRectangle gdk_rect)
   GdkWindow *root;
   HWND deskwin;
 
+  g_assert (plugin != NULL && plugin->extra != NULL);
+
   deskwin = GetDesktopWindow ();
   root = gdk_window_foreign_new ((GdkNativeWindow) deskwin);
 

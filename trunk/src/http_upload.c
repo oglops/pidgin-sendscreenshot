@@ -64,9 +64,10 @@ http_upload_thread (PurplePlugin * plugin)
   struct curl_httppost *formpost = NULL;
   struct curl_httppost *lastptr = NULL;
   struct curl_slist *headerlist = NULL;
-  static const char buf[] = "Expect:";
+  static const char buf[] = "Expect:"; /* disable expectation */
   gchar *img_ctype = NULL;
 
+  g_assert (plugin != NULL && plugin->extra != NULL);
 
   /* prevent the plugin from beeing unloaded */
   G_LOCK (unload);
@@ -287,6 +288,8 @@ GMarkupParser xml_get_host_data_parser = {
 static gboolean
 insert_html_link_cb (PurplePlugin * plugin)
 {
+  g_assert (plugin != NULL && plugin->extra != NULL);
+
   /* still uploading... */
   if (PLUGIN (libcurl_thread) != NULL)
     {
@@ -405,6 +408,8 @@ http_upload_prepare (PurplePlugin * plugin)
   GError *error = NULL;
   GMarkupParseContext *context;
   gchar *xml_contents = NULL;
+
+  g_assert (plugin != NULL && plugin->extra != NULL);
 
   host_data = PLUGIN (host_data);
   host_data->selected_hostname =

@@ -99,21 +99,14 @@
 #define PREF_UI_WAIT_BEFORE_SCREENSHOT _("Seconds to wait before desktop freezes:")
 
 #ifdef ENABLE_UPLOAD
-
 #define PREF_UI_UPLOAD_TO _("Pick an image hosting provider "\
 			    "(<span foreground='blue'><u>list v.%s</u></span>)")
-
-
-#ifdef HAVE_LIBCURL
 #define PREF_UI_UPLOAD_CONNECTTIMEOUT _("Connect timeout (sec): ")
 #define PREF_UI_UPLOAD_TIMEOUT _("Upload timeout (sec): ")
-#endif
-
 #define PREF_UI_FTP_REMOTE_URL _("Remote FTP URL:")
 #define PREF_UI_FTP_WEB_ADDR _("Corresponding Web address:")
 #define PREF_UI_FTP_USERNAME _("User:")
 #define PREF_UI_FTP_PASSWORD _("Password:")
-
 #endif /* ENABLE_UPLOAD */
 
 GtkWidget *get_plugin_pref_frame (PurplePlugin * plugin);

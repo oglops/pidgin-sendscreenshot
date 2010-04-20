@@ -31,6 +31,7 @@ plugin_curl_set_common_opts (CURL * curl, PurplePlugin * plugin)
 {
   const PurpleProxyInfo *gpi = NULL;
 
+  g_assert (plugin != NULL && plugin->extra != NULL);
   g_assert (curl != NULL);
   g_assert (PLUGIN (account) != NULL);
 
@@ -95,9 +96,11 @@ plugin_curl_set_common_opts (CURL * curl, PurplePlugin * plugin)
 void
 real_insert_link (PurplePlugin * plugin, const gchar * url)
 {
-  GtkIMHtml *imhtml = get_receiver_imhtml (plugin);
+  GtkIMHtml *imhtml = NULL;
 
-  if (imhtml == NULL)
+  g_assert (plugin != NULL && plugin->extra != NULL);
+  
+  if ((imhtml = get_receiver_imhtml (plugin)) == NULL)
     {
       NotifyError (PLUGIN_UPLOAD_CLOSED_CONV_ERROR, url);
     }
@@ -144,6 +147,8 @@ show_uploading_dialog (PurplePlugin * plugin, const gchar * str)
   GtkWidget *gtkconv_window;
   GtkWidget *blist_window;
   gchar *send_msg = NULL;
+
+  g_assert (plugin != NULL && plugin->extra != NULL);
 
   progress_bar = gtk_progress_bar_new ();
   img =
