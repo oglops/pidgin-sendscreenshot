@@ -27,6 +27,7 @@
 #include "prefs.h"
 #include "menus.h"
 #include "screencap.h"
+#include "error.h"
 
 #ifdef ENABLE_UPLOAD
 #include "http_upload.h"	/* CLEAR_HOST_PARAM_DATA_FULL() */
@@ -128,8 +129,7 @@ plugin_stop (PurplePlugin * plugin)
 static gboolean
 plugin_load (PurplePlugin * plugin)
 {
- 
- g_assert (plugin != NULL);
+  g_assert (plugin != NULL);
 
   if ((plugin->extra = g_try_malloc0 (sizeof (PluginExtraVars))) == NULL
 #ifdef ENABLE_UPLOAD
@@ -152,6 +152,7 @@ plugin_load (PurplePlugin * plugin)
 			  "img_hosting_providers.xml", NULL);
       curl_global_init (CURL_GLOBAL_ALL);
 #endif
+
       prepare_root_window (plugin);
 
       /* add menuitems each time a conversation is opened */
@@ -225,11 +226,6 @@ plugin_unload (PurplePlugin * plugin)
     }
   
 #ifdef ENABLE_UPLOAD
-  if (G_UNLIKELY (PLUGIN (error_message) != NULL))
-    {
-      g_free (PLUGIN (error_message));
-      PLUGIN (error_message = NULL);
-    }
   CLEAR_HOST_PARAM_DATA_FULL (host_data);
   g_free (PLUGIN (xml_hosts_filename));
   g_free (PLUGIN (host_data));

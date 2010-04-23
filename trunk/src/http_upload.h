@@ -94,8 +94,6 @@
 #define PLUGIN_XML_STUFF_MISSING  _("Something's missing for server \'%s\':")
 #define PLUGIN_PLEASE_REFER_TO _("Please refer to %s to learn how to add your own server.")
 
-#define PLUGIN_UPLOAD_ERROR _("Failed to upload the screenshot to '%s'!")
-
 #define PLUGIN_UPLOAD_BAD_REGEXP_ERROR _("Bad regular expression: '%s'!")
 
 #define PLUGIN_UPLOAD_FETCHURL_ERROR _("Cannot fetch the URL of your screenshot !\n"\

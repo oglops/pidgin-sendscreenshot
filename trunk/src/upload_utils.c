@@ -22,6 +22,7 @@
 
 #include "upload_utils.h"
 #include "prefs.h"
+#include "error.h"
 
 /*
  * Set common curl options for http and ftp upload.

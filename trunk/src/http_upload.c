@@ -23,6 +23,7 @@
 #include "upload_utils.h"
 #include "http_upload.h"
 #include "prefs.h"
+#include "error.h"
 
 /* progressively obtains http response (stored in buf) */
 static size_t
@@ -121,17 +122,18 @@ http_upload_thread (PurplePlugin * plugin)
       curl_slist_free_all (headerlist);
       curl_easy_cleanup (curl);
 
-   
       if (res != 0)
 	{
-	  g_assert (PLUGIN (error_message) == NULL);
-	  PLUGIN (error_message) = g_strdup_printf ("%s", curl_error);
+	  g_assert (PLUGIN(error) == NULL);
+	  g_set_error (&PLUGIN(error),
+		       SENDSCREENSHOT_PLUGIN_ERROR,
+		       PLUGIN_ERROR_HTTP_UPLOAD,
+		       PLUGIN_ERROR_HTTP_UPLOAD_s,
+		       PLUGIN (host_data)->selected_hostname,
+		       curl_error);
 	}
     }
-  
-  PLUGIN (libcurl_thread) = NULL;
-  G_UNLOCK (unload);
-  return NULL;
+  THREAD_QUIT;
 }
 
 /*
@@ -307,20 +309,12 @@ insert_html_link_cb (PurplePlugin * plugin)
       gtk_widget_destroy (PLUGIN (uploading_dialog));
       PLUGIN (uploading_dialog) = NULL;
 
-      if (PLUGIN (error_message) != NULL)
+   
+      if (PLUGIN(error) != NULL)
 	{
-	  gchar *errmsg_uploadto = g_strdup_printf (PLUGIN_UPLOAD_ERROR,
-						    PLUGIN
-						    (host_data)->selected_hostname);
-
-	  NotifyError ("%s\n\n%s\n\n%s\n%s",
-		       errmsg_uploadto,
-		       PLUGIN (error_message),
-		       PLUGIN_UPLOAD_DISCLOC_ERROR,
-		       PLUGIN (capture_path_filename));
-	  g_free (errmsg_uploadto);
-	  g_free (PLUGIN (error_message));
-	  PLUGIN (error_message) = NULL;
+	  NotifyUploadError ("%s",PLUGIN (error)->message);
+	  g_error_free (PLUGIN (error));
+	  PLUGIN (error) = NULL;
 	}
       else
 	{
@@ -331,15 +325,13 @@ insert_html_link_cb (PurplePlugin * plugin)
 	       g_regex_new (PLUGIN (host_data)->regexp,
 			    G_REGEX_MULTILINE, 0, &error)) == NULL)
 	    {
+	      gchar *errmsg;
 
-	      gchar *errmsg = g_strdup_printf (PLUGIN_UPLOAD_BAD_REGEXP_ERROR,
-					       error->message);
+	      g_assert (error != NULL);
+	      errmsg = g_strdup_printf (PLUGIN_UPLOAD_BAD_REGEXP_ERROR,
+					error->message);
 
-	      NotifyError ("%s\n\n%s\n%s",
-			   errmsg,
-			   PLUGIN_UPLOAD_DISCLOC_ERROR,
-			   PLUGIN (capture_path_filename));
-
+	      NotifyUploadError ("%s", errmsg);
 	      g_free (errmsg);
 	      g_error_free (error);
 	    }
@@ -374,10 +366,7 @@ insert_html_link_cb (PurplePlugin * plugin)
 				     PLUGIN (host_data)->regexp,
 				     PLUGIN (host_data)->html_response);
 
-		  NotifyError ("%s\n\n%s\n%s",
-			       errmsg,
-			       PLUGIN_UPLOAD_DISCLOC_ERROR,
-			       PLUGIN (capture_path_filename));
+		  NotifyUploadError ("%s", errmsg);
 		  g_free (errmsg);
 		}
 	      else

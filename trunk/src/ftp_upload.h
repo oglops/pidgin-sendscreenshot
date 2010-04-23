@@ -38,9 +38,6 @@ void ftp_upload_prepare (PurplePlugin * plugin);
 
 #define PLUGIN_FTP_SENDING_INFO _("Uploading %d/%d bytes...")
 
-#define PLUGIN_FTP_UPLOAD_ERROR _("FTP upload failed:")
-
-
 #define SEND_AS_FTP_LINK_TXT _("as a link (_FTP upload)")
 #define SEND_AS_FTP_URL_TXT _("as a URL (_FTP upload)")
 
