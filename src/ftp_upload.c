@@ -23,6 +23,7 @@
 #include "ftp_upload.h"
 #include "prefs.h"
 #include "upload_utils.h"
+#include "error.h"
 
 G_LOCK_DEFINE (unload);
 
@@ -42,22 +43,15 @@ read_callback (void *buf, size_t size, size_t nmemb, void *stream)
 			   size*nmemb,
 			   &ret,
 			   &error);
-   
+  
   if (error != NULL) {
-    PLUGIN (error_message) = g_strdup_printf (PLUGIN_UNEXPECTED_ERROR);
-    purple_debug_error (PLUGIN_ID, "g_io_channel_read_chars : %s\n", error->message);
-    g_error_free (error);
+    g_propagate_error (&PLUGIN(error), error);
     return CURL_READFUNC_ABORT;
   }
   
   PLUGIN (read_size) += ret;	/* progress bar */
   return ret;
 }
-
-#define THREAD_QUIT\
-  PLUGIN (libcurl_thread) = NULL;\
-  G_UNLOCK (unload);\
-  return NULL
 
 /* inspired from http://curl.haxx.se/libcurl/c/ftpupload.html */
 static gpointer
@@ -66,21 +60,25 @@ ftp_upload (PurplePlugin * plugin)
   CURL *curl;
   CURLcode res;
   GIOChannel *io_chan;
-  GError *error = NULL;
+  /* GError *error = NULL; */
 
   struct stat file_info;
   gchar *remote_url = NULL;
   gchar *basename = NULL;
 
   g_assert (plugin != NULL && plugin->extra != NULL);
-
+ 
   G_LOCK (unload);
   /* get the file size of the local file */
   if (g_stat (PLUGIN (capture_path_filename), &file_info) == -1)
     {
-      PLUGIN (error_message) = g_strdup_printf (PLUGIN_UNEXPECTED_ERROR);
-      purple_debug_error (PLUGIN_ID, "Couldnt open '%s'\n", /* FIXME */
-			  PLUGIN (capture_path_filename));
+      g_assert (PLUGIN(error) == NULL);
+      g_set_error (&PLUGIN(error),
+                   SENDSCREENSHOT_PLUGIN_ERROR,
+		   PLUGIN_ERROR_OPEN_SCREENSHOT_FILE,
+		   "%s\n%s",
+		   PLUGIN_ERROR_OPEN_SCREENSHOT_FILE_s,
+                   g_strerror (errno));
       THREAD_QUIT;
     }
   PLUGIN (total_size) = file_info.st_size;
@@ -94,13 +92,10 @@ ftp_upload (PurplePlugin * plugin)
   basename = NULL;
 
   io_chan = 
-    g_io_channel_new_file (PLUGIN (capture_path_filename), "r", &error);
-  if (error != NULL) {
-    PLUGIN (error_message) = g_strdup_printf (PLUGIN_UNEXPECTED_ERROR);
-    purple_debug_error (PLUGIN_ID, "g_io_channel_new_file (%s) : %s\n",
-			PLUGIN (capture_path_filename),
-			error->message);
-    g_error_free (error);
+    g_io_channel_new_file (PLUGIN (capture_path_filename), "r", &PLUGIN(error));
+  if (io_chan == NULL) {
+    g_assert (PLUGIN(error) != NULL);
+    g_free (remote_url);
     THREAD_QUIT;
   }
   /* binary data, this should never fail */
@@ -140,22 +135,24 @@ ftp_upload (PurplePlugin * plugin)
 
       /* always cleanup */
       curl_easy_cleanup (curl);
-
-      if (res != 0) {
-	g_assert (PLUGIN (error_message) == NULL);
-	PLUGIN (error_message) = g_strdup_printf ("%s", curl_error);
+      g_free (remote_url);
+      
+      if (PLUGIN(error) != NULL){ /* read_callback() failed */
+	THREAD_QUIT;
+      } else if (res != 0) {
+	g_assert (PLUGIN(error) == NULL);
+	g_set_error (&PLUGIN(error),
+		     SENDSCREENSHOT_PLUGIN_ERROR,
+		     PLUGIN_ERROR_FTP_UPLOAD,
+		     "%s\n%s",
+		     PLUGIN_ERROR_FTP_UPLOAD_s,
+		     curl_error);
       }
     }
- 
-  g_io_channel_shutdown (io_chan, TRUE, &error);
-  if (error != NULL) {
-    /* Don't set PLUGIN (error_message) */
-    purple_debug_error (PLUGIN_ID, "g_io_channel_shutdown : %s\n", error->message);
-    g_error_free (error);
+  if ( (g_io_channel_shutdown (io_chan, TRUE, &PLUGIN(error))) == G_IO_STATUS_ERROR) {
+    g_assert (PLUGIN(error) != NULL);
     THREAD_QUIT;
   }
-  g_free (remote_url);
-
   THREAD_QUIT;
 }
 
@@ -184,12 +181,12 @@ insert_ftp_link_cb (PurplePlugin * plugin)
       gtk_widget_destroy (PLUGIN (uploading_dialog));
       PLUGIN (uploading_dialog) = NULL;
 
-      if (PLUGIN (error_message) != NULL)
+      /* an error occured */
+      if (PLUGIN(error) != NULL)
 	{
-	  NotifyError ("%s\n\n%s\n",
-		       PLUGIN_FTP_UPLOAD_ERROR, PLUGIN (error_message));
-	  g_free (PLUGIN (error_message));
-	  PLUGIN (error_message) = NULL;
+	  NotifyUploadError ("%s",PLUGIN (error)->message);
+	  g_error_free (PLUGIN (error));
+	  PLUGIN (error) = NULL;
 	}
       else
 	{

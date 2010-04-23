@@ -83,8 +83,6 @@ G_LOCK_EXTERN (unload);
 /* error reporting strings */
 #define PLUGIN_ERROR _("Error")
 
-#define PLUGIN_UPLOAD_DISCLOC_ERROR _("Location of your screenshot on disk:")
-
 #define PLUGIN_LOAD_DATA_ERROR _("Cannot allocate enough memory (%lu bytes) to load plugin data !")
 #define PLUGIN_MEMORY_ERROR _("Failed to allocate enough memory to create the screenshot."\
 			      " You will need to quit some applications and retry.")
@@ -134,15 +132,6 @@ G_LOCK_EXTERN (unload);
 
 #define PLUGIN(what)\
   ((PluginExtraVars*)(plugin->extra))->what
-
-
-#define NotifyError(strval,arg...)				\
-  {								\
-  gchar *strmsg;						\
-  strmsg = g_strdup_printf(strval, arg);			\
-    purple_notify_error(plugin, PLUGIN_NAME, PLUGIN_ERROR, strmsg);	\
-    g_free(strmsg);							\
-  }
 
 #define CLEAR_SEND_INFO_TO_NULL(plugin)\
   PLUGIN (conv_type) = PURPLE_CONV_TYPE_UNKNOWN;\
@@ -220,6 +209,8 @@ typedef struct
   /* screenshot's location */
   gchar *capture_path_filename;
 
+  GError *error;
+
 #ifdef ENABLE_UPLOAD
   GtkWidget *uploading_dialog;
   GThread *libcurl_thread;
@@ -229,8 +220,7 @@ typedef struct
   /* ftp stuff */
   off_t read_size;
   off_t total_size;
-  gchar *error_message;
-  
+   
   /* host data from xml */
   struct host_param_data
   {

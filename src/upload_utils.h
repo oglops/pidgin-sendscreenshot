@@ -1,5 +1,4 @@
  /*
-  *
   *  Pidgin SendScreenshot plugin - common upload funcs, header -
   *
   * This program is free software; you can redistribute it and/or modify
@@ -36,18 +35,30 @@
 
 #define PLUGIN_UPLOAD_PROGRESS_INTERVAL 50
 
-#define PLUGIN_SENDING_INFO _("Uploading to \"%s\"...")
+#define PLUGIN_UPLOAD_DISCLOC_ERROR\
+  _("Location of your screenshot on disk:")
 
-#define PLUGIN_UPLOAD_CLOSED_CONV_ERROR _("Failed to insert a link, possible reasons are:\n"\
-					  " - account not connected,\n"\
-					  " - conversation window closed.\n"\
-					  "\nThe link is:\n%s")
+#define PLUGIN_SENDING_INFO\
+  _("Uploading to \"%s\"...")
 
+#define PLUGIN_UPLOAD_CLOSED_CONV_ERROR\
+  _("Failed to insert a link, possible reasons are:\n"\
+    " - account not connected,\n"\
+    " - conversation window closed.\n"\
+    "\nThe link is:\n%s")
+
+G_LOCK_EXTERN (unload);
+
+#define THREAD_QUIT\
+  PLUGIN (libcurl_thread) = NULL;\
+  G_UNLOCK (unload);\
+  return NULL
+
+/* protos */
 void plugin_curl_set_common_opts (CURL * curl, PurplePlugin * plugin);
 void real_insert_link (PurplePlugin * plugin, const gchar * url);
 GtkWidget *show_uploading_dialog (PurplePlugin * plugin, const gchar * str);
 
-#endif
-
+#endif /* __UPLOAD_UTILS_H__ */
 
 /* end of upload_utils.h */

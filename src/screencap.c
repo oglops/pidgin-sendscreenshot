@@ -25,6 +25,7 @@
 #include "prefs.h"
 #include "pixbuf_utils.h"
 #include "dialogs.h"
+#include "error.h"
 
 #ifdef ENABLE_UPLOAD
 #include "upload_utils.h"

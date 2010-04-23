@@ -7,15 +7,16 @@
 EXTRA_DIST = \
 	prefs.h \
 	main.h \
+	pixbuf_utils.h \
 	screencap.h \
+	upload_utils.h \
 	http_upload.h \
 	ftp_upload.h \
-	upload_utils.h \
-	pixbuf_utils.h \
 	menus.h \
 	dialogs.h \
 	mswin-freeze.c \
-	mswin-freeze.h
+	mswin-freeze.h \
+	error.h
 
 ardir = $(PIDGIN_LIBDIR)/pidgin
 
