@@ -133,7 +133,6 @@ real_insert_link (PurplePlugin * plugin, const gchar * url)
     }
 }
 
-
 /*
  * Let the user know that we are uploading...
  */

@@ -60,7 +60,6 @@ ftp_upload (PurplePlugin * plugin)
   CURL *curl;
   CURLcode res;
   GIOChannel *io_chan;
-  /* GError *error = NULL; */
 
   struct stat file_info;
   gchar *remote_url = NULL;
