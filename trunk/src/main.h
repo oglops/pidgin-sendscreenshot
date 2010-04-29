@@ -83,6 +83,9 @@ G_LOCK_EXTERN (unload);
 /* error reporting strings */
 #define PLUGIN_ERROR _("Error")
 
+#define PLUGIN_ALREADY_RUNNING_ERROR _("Another instance of %s is already running.\n"\
+                                       "Please wait before sending an other screenshot.")
+
 #define PLUGIN_LOAD_DATA_ERROR _("Cannot allocate enough memory (%lu bytes) to load plugin data !")
 #define PLUGIN_MEMORY_ERROR _("Failed to allocate enough memory to create the screenshot."\
 			      " You will need to quit some applications and retry.")

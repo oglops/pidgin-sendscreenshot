@@ -24,8 +24,10 @@
 #include "menus.h"
 #include "prefs.h"
 #include "screencap.h"
+#include "error.h"
 
 #ifdef ENABLE_UPLOAD
+
 #include "upload_utils.h"
 #include "http_upload.h"
 #include "ftp_upload.h"
@@ -271,7 +273,11 @@ static GtkWidget *
 create_plugin_submenu (PidginConversation * gtkconv, gboolean multiconv)
 {
   GtkWidget *submenu;
-  GtkWidget *as_image, *as_link, *as_ftp_link;
+  GtkWidget *as_image;
+
+#ifdef ENABLE_UPLOAD
+  GtkWidget *as_link, *as_ftp_link;
+#endif
 
   submenu = gtk_menu_new ();
 
@@ -303,7 +309,10 @@ create_plugin_submenu (PidginConversation * gtkconv, gboolean multiconv)
 				G_CALLBACK
 				(on_screenshot_insert_as_image_fromwin_activate_cb),
 				win);
+      g_object_set_data (G_OBJECT (conversation_menu),
+			 "img_menuitem", as_image);
 
+#ifdef ENABLE_UPLOAD
       g_signal_connect_swapped (G_OBJECT (as_link), "activate",
 				G_CALLBACK
 				(on_screenshot_insert_as_link_fromwin_activate_cb),
@@ -313,11 +322,7 @@ create_plugin_submenu (PidginConversation * gtkconv, gboolean multiconv)
 				G_CALLBACK
 				(on_screenshot_insert_as_ftp_link_fromwin_activate_cb),
 				win);
-
-
-      g_object_set_data (G_OBJECT (conversation_menu),
-			 "img_menuitem", as_image);
-#ifdef ENABLE_UPLOAD
+      
       g_object_set_data (G_OBJECT (conversation_menu),
 			 "link_menuitem", as_link);
       g_object_set_data (G_OBJECT (conversation_menu),
@@ -329,18 +334,16 @@ create_plugin_submenu (PidginConversation * gtkconv, gboolean multiconv)
       g_signal_connect (G_OBJECT (as_image), "show",
 			G_CALLBACK
 			(on_screenshot_insert_as_image_show_cb), gtkconv);
-
-#ifdef ENABLE_UPLOAD
-      g_signal_connect (G_OBJECT (as_link), "show",
-			G_CALLBACK
-			(on_screenshot_insert_as_link_show_cb), gtkconv);
-
+      
       g_signal_connect_swapped (G_OBJECT (as_image),
 				"activate",
 				G_CALLBACK
 				(on_screenshot_insert_as_image_activate_cb),
 				gtkconv);
-
+#ifdef ENABLE_UPLOAD
+      g_signal_connect (G_OBJECT (as_link), "show",
+			G_CALLBACK
+			(on_screenshot_insert_as_link_show_cb), gtkconv);
       g_signal_connect_swapped (G_OBJECT (as_link), "activate",
 				G_CALLBACK
 				(on_screenshot_insert_as_link_activate_cb),
@@ -349,7 +352,6 @@ create_plugin_submenu (PidginConversation * gtkconv, gboolean multiconv)
 				G_CALLBACK
 				(on_screenshot_insert_as_ftp_link_activate_cb),
 				gtkconv);
-
       g_signal_connect (G_OBJECT (as_ftp_link), "show",
 			G_CALLBACK
 			(on_screenshot_insert_as_ftp_link_show_cb), gtkconv);
@@ -548,21 +550,26 @@ static void
 on_blist_context_menu_send_capture (PurpleBlistNode * node,
 				    PurplePlugin * plugin)
 {
-  g_assert (PLUGIN (running) == FALSE);
-  PLUGIN (running) = TRUE;
-
-  if (PURPLE_BLIST_NODE_IS_BUDDY (node))
+  if (PLUGIN (running))
     {
-      PurpleBuddy *buddy = (PurpleBuddy *) node;
-
-      PLUGIN (send_as) = SEND_AS_FILE;
-
-      PLUGIN (conv_type) = PURPLE_CONV_TYPE_UNKNOWN; /* no conv opened */
-      PLUGIN (account) = purple_buddy_get_account (buddy);
-      PLUGIN (name) = g_strdup_printf ("%s", purple_buddy_get_name (buddy));
-     
-      /* see on_screenshot_insert_as_image_activate_cb () */
-      FREEZE_DESKTOP ();
+      NotifyError (PLUGIN_ALREADY_RUNNING_ERROR, PLUGIN_NAME);
+    }
+  else
+    {
+      PLUGIN (running) = TRUE;
+      if (PURPLE_BLIST_NODE_IS_BUDDY (node))
+	{
+	  PurpleBuddy *buddy = (PurpleBuddy *) node;
+	  
+	  PLUGIN (send_as) = SEND_AS_FILE;
+	  
+	  PLUGIN (conv_type) = PURPLE_CONV_TYPE_UNKNOWN; /* no conv opened */
+	  PLUGIN (account) = purple_buddy_get_account (buddy);
+	  PLUGIN (name) = g_strdup_printf ("%s", purple_buddy_get_name (buddy));
+	  
+	  /* see on_screenshot_insert_as_image_activate_cb () */
+	  FREEZE_DESKTOP ();
+	}
     }
 }
 
@@ -578,7 +585,6 @@ buddy_context_menu_add_item (PurpleBlistNode * node, GList ** menu,
       prpl_info =
 	PURPLE_PLUGIN_PROTOCOL_INFO (((PurpleBuddy *) node)->account->
 				     gc->prpl);
-
       if (prpl_info && prpl_info->send_file)
 	{
 	  if (!prpl_info->can_receive_file ||
