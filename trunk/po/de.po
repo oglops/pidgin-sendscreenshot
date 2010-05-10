@@ -1,85 +1,97 @@
+
 #
 # German translations for pidgin-screenshot package.
 #
 # This file is distributed under the same license as the pidgin-screenshot package.
 #   Translation by David Scheffler <david.scheffler+translation@gmail.com>, 2009.
+#   Translation by Siggi, 2010.
 #
-#
+
 msgid ""
 msgstr ""
-"Project-Id-Version: pidgin-screenshot 0.6-0\n"
+"Project-Id-Version: pidgin-screenshot 0.8-1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-03-10 14:04+0100\n"
-"PO-Revision-Date: 2009-08-10 11:03+0200\n"
-"Last-Translator: David Scheffler <david.scheffler+translation@gmail.com>\n"
+"POT-Creation-Date: 2010-05-10 17:05+0200\n"
+"PO-Revision-Date: 2010-05-10 17:13+0200\n"
+"Last-Translator: Siggi\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/ftp_upload.h:51
+#: src/error.h:56
 msgid "FTP upload failed:"
+msgstr "FTP Upload fehlgeschlagen:"
+
+#: src/error.h:59
+#, c-format
+msgid ""
+"Failed to upload the screenshot to '%s'!\n"
+"%s"
 msgstr ""
 
-#: src/ftp_upload.h:54
+#: src/error.h:62
+msgid "Failed to open screenshot file:"
+msgstr ""
+
+#: src/ftp_upload.h:39
+#, c-format
+msgid "Uploading %d/%d bytes..."
+msgstr ""
+
+#: src/ftp_upload.h:41
 msgid "as a link (_FTP upload)"
-msgstr ""
+msgstr "als Link (_FTP Upload)"
 
-#: src/ftp_upload.h:55
+#: src/ftp_upload.h:42
 msgid "as a URL (_FTP upload)"
+msgstr "als URL (_FTP Upload)"
+
+#: src/http_upload.c:364
+#, c-format
+msgid ""
+"Regexp doesn't match HTTP upload response !\n"
+"Server: %s\n"
+"Regexp:\n"
+"%s\n"
+"Response:\n"
+"%s\n"
 msgstr ""
 
-#: src/http_upload.h:94
+#: src/http_upload.h:93
 #, c-format
 msgid "Error on line %d char %d:\n"
 msgstr "Fehler in Zeile %d, Zeichen %d:\n"
 
-#: src/http_upload.h:95
+#: src/http_upload.h:94
 #, c-format
 msgid "Something's missing for server '%s':"
 msgstr "Für den Server '%s' fehlt etwas:"
 
-#: src/http_upload.h:96
+#: src/http_upload.h:95
 #, c-format
 msgid "Please refer to %s to learn how to add your own server."
 msgstr "Unter %s wird beschrieben, wie man eigene Anbieter hinzufügt."
 
 #: src/http_upload.h:97
-msgid "Regular expression doesn't match !"
+#, fuzzy, c-format
+msgid "Bad regular expression: '%s'!"
 msgstr "Der reguläre Ausdruck hat keinen Treffer erzielt."
 
 #: src/http_upload.h:99
 #, c-format
-msgid "Failed to upload the screenshot to '%s'!"
-msgstr "Konnte das Bildschirmfoto nicht zu '%s' hochladen!"
-
-#: src/http_upload.h:101
-#, c-format
 msgid ""
-"Your screenshot has been uploaded to '%s' but the link cannot be "
-"extracted :\n"
-"***%s.\n"
-"\n"
-"Posible reasons are:\n"
-" - the server has been updated\n"
-" - cannot load the server response into memory\n"
-" - bad regular expression (if you are intending to add your own server)"
+"Cannot fetch the URL of your screenshot !\n"
+"Regular expression doesn't match (see debug window).\n"
+"Most likeley '%s' has been updated...\n"
 msgstr ""
-"Das Bildschirmfoto wurde zu '%s' hochgeladen, aber der Link konnte nicht "
-"ermittelt werden:\n"
-"***%s.\n"
-"\n"
-"Mögliche Ursachen:\n"
-" - der Server wurde aktualisiert\n"
-" - die Antwort des Servers konnte nicht gespeichert werden\n"
-" - falscher regulärer Ausdruck (falls ein eigener verwendet wurde)"
 
-#: src/http_upload.h:108
+#: src/http_upload.h:103
 msgid "Incorrect xml host config file"
 msgstr "Ungültige xml Server Datei"
 
-#: src/http_upload.h:110
+#: src/http_upload.h:105
 #, c-format
 msgid ""
 "%s.\n"
@@ -92,7 +104,7 @@ msgstr ""
 "Diese Datei enthält eine Liste von Bilder-Hochlade-Anbietern.\n"
 "Sie ist auf %s verfügbar."
 
-#: src/http_upload.h:114
+#: src/http_upload.h:109
 msgid ""
 "You haven't selected any image hosting provider yet.\n"
 "Please select one from the configure dialog."
@@ -100,211 +112,77 @@ msgstr ""
 "Es wurde noch kein Bilder-Upload-Anbieter ausgewählt.\n"
 "Bitte in den Einstellungen einen auswählen."
 
-#: src/http_upload.h:117
+#: src/http_upload.h:112
 #, c-format
 msgid ""
 "Failed to parse the contents of:\n"
 "%s"
 msgstr "Konnte den Inhalt von %s nicht korrekt lesen."
 
-#: src/http_upload.h:120
+#: src/http_upload.h:115
 msgid "Selected host not met !"
 msgstr "Server Name fehlt!"
 
-#: src/http_upload.h:121
+#: src/http_upload.h:116
 msgid "No server-side form handler !"
 msgstr "Angaben zum Server-Formular fehlen!"
 
-#: src/http_upload.h:122
+#: src/http_upload.h:117
 msgid "No file-select control name !"
 msgstr "Name des Anbieters fehlt!"
 
-#: src/http_upload.h:123
+#: src/http_upload.h:118
 msgid "No regular expression to extract html link !"
 msgstr "Kein regulärer Ausdruck zur Extraktion des html-Links angegeben!"
 
-#: src/http_upload.h:125
+#: src/http_upload.h:120
 #, c-format
 msgid "\"%s\" is not a valid element name!\n"
 msgstr "\"%s\" ist kein gültiger Element-Name!\n"
 
-#: src/http_upload.h:126
+#: src/http_upload.h:121
 #, c-format
 msgid "\"%s\" is not a valid attribute for element \"%s\"!\n"
 msgstr "\"%s\" ist kein gültiger Wert für das Element \"%s\"!\n"
 
-#: src/http_upload.h:127
+#: src/http_upload.h:122
 #, c-format
 msgid "element \"%s\" is missing an attribute !\n"
 msgstr "Dem Element \"%s\" fehlt ein Attribut!\n"
 
-#: src/http_upload.h:128
+#: src/http_upload.h:123
 msgid "a \"value\" attribute is missing !\n"
 msgstr "ein \"Wert\" Attribut fehlt!\n"
 
-#: src/http_upload.h:135
-#, fuzzy
+#: src/http_upload.h:130
 msgid "as a link (_HTML upload)"
-msgstr "als Text-Link..."
+msgstr "als Link (_HTML Upload)"
 
-#: src/http_upload.h:136
+#: src/http_upload.h:131
 msgid "as a URL (_HTML upload)"
-msgstr ""
+msgstr "als URL (_HTML Upload)"
 
-#: src/http_upload.h:137
+#: src/http_upload.h:132
 msgid "More info"
 msgstr "Mehr Informationen"
 
-#: src/prefs.h:67
-msgid "Image parameters"
-msgstr "Bildformat"
-
-#: src/prefs.h:68
-msgid "Plugin behaviour"
-msgstr "Allgemeines Verhalten"
-
-#: src/prefs.h:69
-msgid "HTTP upload"
-msgstr ""
-
-#: src/prefs.h:70
-msgid "FTP upload"
-msgstr ""
-
-#: src/prefs.h:72
-msgid "Image format: "
-msgstr "Bildformat:"
-
-#: src/prefs.h:78
-msgid "JPEG quality level:"
-msgstr "JPEG Qualitätsstufe:"
-
-#: src/prefs.h:80
-msgid "PNG compression level:"
-msgstr "PNG Komprimierungsstufe:"
-
-#: src/prefs.h:85
-msgid "Highlight mode:"
-msgstr "Hervorhebungsart:"
-
-#: src/prefs.h:86
-msgid "lighten up desktop"
-msgstr "Desktop aufhellen"
-
-#: src/prefs.h:87
-msgid "darken desktop"
-msgstr "Desktop verdunkeln"
-
-#: src/prefs.h:88
-msgid "invert selection only"
-msgstr "ausgewählten Bereich invertieren"
-
-#: src/prefs.h:89
-msgid "borders only"
-msgstr "nur einen Rahmen anzeigen"
-
-#: src/prefs.h:90
-msgid "grayscale desktop"
-msgstr "Desktop in Graustufen anzeigen"
-
-#: src/prefs.h:92
-msgid "Folder to store captures in:"
-msgstr "Lokaler Speicherort:"
-
-#: src/prefs.h:94
-msgid "Always ask for filename when sending as a file."
-msgstr "Vor dem Senden immer nach einem Dateinamen fragen."
-
-#: src/prefs.h:97
-msgid "Show visual cues."
-msgstr "Zeige Hilfslinien"
-
-#: src/prefs.h:98
-msgid "Seconds to wait before desktop freezes:"
-msgstr ""
-
-#: src/prefs.h:102
-#, fuzzy, c-format
-msgid ""
-"Pick an image hosting provider (<span foreground='blue'><u>list v.%s</u></"
-"span>)"
-msgstr "Bilder-Upload-Anbieter auswählen (Liste v. %s):"
-
-#: src/prefs.h:107
-msgid "Connect timeout (sec): "
-msgstr "Verbindungs-Zeitüberschreitung (Sek.):"
-
-#: src/prefs.h:108
-msgid "Upload timeout (sec): "
-msgstr "Upload-Zeitüberschreitung (Sek.):"
-
-#: src/prefs.h:111
-msgid "Remote FTP URL:"
-msgstr ""
-
-#: src/prefs.h:112
-msgid "Corresponding Web address:"
-msgstr ""
-
-#: src/prefs.h:113
-msgid "User:"
-msgstr ""
-
-#: src/prefs.h:114
-msgid "Password:"
-msgstr ""
-
-#: src/screenshot.h:72
+#: src/main.h:73
 msgid "Send Screenshot"
 msgstr "Bildschirmfoto senden"
 
-#: src/screenshot.h:73
+#: src/main.h:74
 msgid "Capture and send a screenshot."
 msgstr "Bildschirmfoto aufnehmen und senden"
 
-#: src/screenshot.h:74
+#: src/main.h:75
 msgid "This plugin will capture a screenshot given a rectangular area."
 msgstr "Dieses Plugin nimmt einen rechteckigen Bereich des Bildschirms auf."
 
-#: src/screenshot.h:81
+#: src/main.h:84
 msgid "Error"
 msgstr "Fehler"
 
-#: src/screenshot.h:83
-msgid "Location of your screenshot on disk:"
-msgstr "Speicherort des Bildschirmfotos:"
-
-#: src/screenshot.h:85
-#, c-format
-msgid "Cannot allocate enough memory (%lu bytes) to load plugin data !"
-msgstr ""
-"Kann nicht genug Arbeitsspeicher (%lu Bytes) reservieren um das Plugin zu "
-"laden!"
-
-#: src/screenshot.h:86
-msgid ""
-"Failed to allocate enough memory to create the screenshot. You will need to "
-"quit some applications and retry."
-msgstr ""
-"Das Plugin kann nicht genug Arbeitsspeicher reservieren um das "
-"Bildschirmfoto zu erstellen. Schließen Sie Anwendungen und versuchen Sie es "
-"erneut."
-
-#: src/screenshot.h:88
-#, c-format
-msgid "Failed to save your screenshot to '%s'."
-msgstr "Konnte das Bildschirmfoto nicht in '%s' speichern."
-
-#: src/screenshot.h:90
-#, c-format
-msgid "Failed to get '%s' data."
-msgstr "Konnte die '%s'-Daten nicht erhalten."
-
-#: src/screenshot.h:91
-msgid "Failed to insert your screenshot in the text area."
-msgstr "Konnte das Bildschirmfoto nicht in den Textbereich einfügen."
-
-#: src/screenshot.h:93
+#: src/main.h:86
 #, c-format
 msgid ""
 "Another instance of %s is already running.\n"
@@ -313,59 +191,215 @@ msgstr ""
 "Eine weitere Instanz von %s läuft bereits.\n"
 "Bitte mit dem Senden eines weiteren Screenshots warten."
 
-#: src/screenshot.h:102
+#: src/main.h:89
+#, c-format
+msgid "Cannot allocate enough memory (%lu bytes) to load plugin data !"
+msgstr ""
+"Kann nicht genug Arbeitsspeicher (%lu Bytes) reservieren um das Plugin zu "
+"laden!"
+
+#: src/main.h:90
+msgid ""
+"Failed to allocate enough memory to create the screenshot. You will need to "
+"quit some applications and retry."
+msgstr ""
+"Das Plugin kann nicht genug Arbeitsspeicher reservieren um das "
+"Bildschirmfoto zu erstellen. Schließen Sie Anwendungen und versuchen Sie es "
+"erneut."
+
+#: src/main.h:92
+#, c-format
+msgid "Failed to save your screenshot to '%s'."
+msgstr "Konnte das Bildschirmfoto nicht in '%s' speichern."
+
+#: src/main.h:94
+#, c-format
+msgid "Failed to get '%s' data."
+msgstr "Konnte die '%s'-Daten nicht erhalten."
+
+#: src/main.h:95
+msgid "Failed to insert your screenshot in the text area."
+msgstr "Konnte das Bildschirmfoto nicht in den Textbereich einfügen."
+
+#: src/main.h:97
+#, c-format
+msgid ""
+"The image used to sign the screenshot is too big.\n"
+"%dx%d is the maximum allowed."
+msgstr ""
+
+#: src/main.h:100
+msgid "An unexpected error occured, see debug window..."
+msgstr ""
+
+#: src/main.h:108
 msgid "No selection"
 msgstr "nichts ausgewählt"
 
-#: src/screenshot.h:103
+#: src/main.h:109
 msgid "Terms Of Service"
 msgstr "Nutzungsbedingungen"
 
-#: src/screenshot.h:111
-#, fuzzy
+#: src/main.h:119
 msgid "_Screenshot"
 msgstr "Bildschirmfoto senden"
 
-#: src/screenshot.h:112
-#, fuzzy
+#: src/main.h:120
 msgid "Insert _Screenshot..."
 msgstr "Bildschirm_foto einfügen..."
 
-#: src/screenshot.h:113
-#, fuzzy
+#: src/main.h:121
 msgid "Send a _Screenshot..."
 msgstr "Bildschirmfoto senden"
 
-#: src/screenshot.h:115
+#: src/main.h:123
 msgid "capture"
-msgstr "aufnahme"
+msgstr "Aufnahme"
 
-#: src/screenshot.h:118
-#, fuzzy
+#: src/main.h:126
 msgid "as an _Image"
 msgstr "als Bild..."
 
-#: src/screenshot.h:120
+#: src/main.h:128
 msgid "Set capture name"
 msgstr "Namen auswählen"
 
-#: src/screenshot.h:121
+#: src/main.h:129
 msgid "Capture name:"
 msgstr "Name des Bildschirmfotos:"
 
-#: src/screenshot.h:122
+#: src/main.h:130
 msgid "File already exists!"
 msgstr "Datei existiert schon!"
 
-#: src/upload_utils.h:39
+#: src/prefs.c:443
+msgid "Image"
+msgstr "Bild"
+
+#: src/prefs.h:68
+msgid "Image parameters"
+msgstr "Bildformat"
+
+#: src/prefs.h:69
+msgid "Plugin behaviour"
+msgstr "Allgemeines Verhalten"
+
+#: src/prefs.h:70
+msgid "HTTP upload"
+msgstr "HTTP Upload"
+
+#: src/prefs.h:71
+msgid "FTP upload"
+msgstr "FTP Upload"
+
+#: src/prefs.h:72
+msgid "Upload options"
+msgstr "Upload-Zeitüberschreitung (Sek.):"
+
+#: src/prefs.h:74
+msgid "Image format: "
+msgstr "Bildformat:"
+
+#: src/prefs.h:80
+msgid "JPEG quality level:"
+msgstr "JPEG Qualitätsstufe:"
+
+#: src/prefs.h:82
+msgid "PNG compression level:"
+msgstr "PNG Komprimierungsstufe:"
+
+#: src/prefs.h:84
+msgid "Always add this signature:"
+msgstr "Immer diese Signatur hinzufügen:"
+
+#: src/prefs.h:86
+msgid "Highlight mode:"
+msgstr "Hervorhebungsart:"
+
+#: src/prefs.h:87
+msgid "lighten up desktop"
+msgstr "Desktop aufhellen"
+
+#: src/prefs.h:88
+msgid "darken desktop"
+msgstr "Desktop verdunkeln"
+
+#: src/prefs.h:89
+msgid "invert selection only"
+msgstr "ausgewählten Bereich invertieren"
+
+#: src/prefs.h:90
+msgid "borders only"
+msgstr "nur einen Rahmen anzeigen"
+
+#: src/prefs.h:91
+msgid "grayscale desktop"
+msgstr "Desktop in Graustufen anzeigen"
+
+#: src/prefs.h:93
+msgid "Folder to store captures in:"
+msgstr "Lokaler Speicherort:"
+
+#: src/prefs.h:95
+msgid "Always ask for filename when sending as a file."
+msgstr "Vor dem Senden immer nach einem Dateinamen fragen."
+
+#: src/prefs.h:98
+msgid "Show visual cues."
+msgstr "Zeige Hilfslinien"
+
+#: src/prefs.h:99
+msgid "Seconds to wait before desktop freezes:"
+msgstr "Sekunden, die gewartet wird, bis der Desktop eingefrohren wird:"
+
+#: src/prefs.h:102
 #, c-format
-msgid "Uploading the screenshot to \"%s\"..."
+msgid ""
+"Pick an image hosting provider (<span foreground='blue'><u>list v.%s</u></"
+"span>)"
+msgstr ""
+"Bilder-Upload-Anbieter auswählen (<span foreground='blue'><u>(Liste v. %s):</"
+"u></span>)"
+
+#: src/prefs.h:104
+msgid "Connect timeout (sec): "
+msgstr "Verbindungs-Zeitüberschreitung (Sek.):"
+
+#: src/prefs.h:105
+msgid "Upload timeout (sec): "
+msgstr "Upload-Zeitüberschreitung (Sek.):"
+
+#: src/prefs.h:106
+msgid "Remote FTP URL:"
+msgstr "FTP URL:"
+
+#: src/prefs.h:107
+msgid "Corresponding Web address:"
+msgstr "Entsprechende Web-Adresse:"
+
+#: src/prefs.h:108
+msgid "User:"
+msgstr "Benutzer:"
+
+#: src/prefs.h:109
+msgid "Password:"
+msgstr "Passwort:"
+
+#: src/upload_utils.h:39
+msgid "Location of your screenshot on disk:"
+msgstr "Speicherort des Bildschirmfotos:"
+
+#: src/upload_utils.h:42
+#, c-format
+msgid "Uploading to \"%s\"..."
 msgstr "Bildschirmfoto zu \"%s\" hochladen..."
 
-#: src/upload_utils.h:41
+#: src/upload_utils.h:45
 #, fuzzy, c-format
 msgid ""
-"Failed to insert a link because theconversation window is now closed.\n"
+"Failed to insert a link, possible reasons are:\n"
+" - account not connected,\n"
+" - conversation window closed.\n"
 "\n"
 "The link is:\n"
 "%s"
@@ -374,56 +408,3 @@ msgstr ""
 "\n"
 "Der Link lautet:\n"
 "%s"
-
-#, fuzzy
-#~ msgid "as a _FTP link..."
-#~ msgstr "als html-Link..."
-
-#, fuzzy
-#~ msgid "as a plain text _FTP link..."
-#~ msgstr "als Text-Link..."
-
-#~ msgid "Regular expression compilation error"
-#~ msgstr "Regulärer Ausdruck konnte nicht kompiliert werden."
-
-#, fuzzy
-#~ msgid ""
-#~ "Failed to run the Perl subprogram to upload your screenshot!Is Perl "
-#~ "installed on your operating system ?"
-#~ msgstr ""
-#~ "Konnte das Perl-Unterprogramm zum Hochladen des Bildschirmfotos nicht "
-#~ "starten. Ist Perl auf dem System verfügbar?\n"
-#~ "\n"
-#~ "%s\n"
-#~ "\n"
-
-#, fuzzy
-#~ msgid "as a _HTML link..."
-#~ msgstr "als html-Link..."
-
-#~ msgid "Abort if no activity for (sec): "
-#~ msgstr "Abbrechen, falls keine Aktivität nach (Sek.):"
-
-#~ msgid "Screenshot upload"
-#~ msgstr "Bildschirmfoto hochladen"
-
-#~ msgid "_Screen capture"
-#~ msgstr "Bildschirm_foto"
-
-#~ msgid "Send screen ca_pture..."
-#~ msgstr "Bildschirm_foto senden..."
-
-#~ msgid "Go to <i>%s</i> to get this file."
-#~ msgstr "Gehe zu <i>%s</i> um diese Datei zu erhalten."
-
-#~ msgid "Screenshot plugin"
-#~ msgstr "Bildschirmfoto-Plugin"
-
-#~ msgid "%s failed to get %s data. Your system returned : '%s'"
-#~ msgstr "Das %s-Plugin konnte nicht von %s lesen. Der Fehler lautet: '%s'"
-
-#~ msgid "%s failed to store image: %s\n"
-#~ msgstr "Das %s-Plugin konnte das Bildschirmfoto nicht speichern: '%s'.\n"
-
-#~ msgid "Screenshot plugin parameters"
-#~ msgstr "Einstellungen zum Bildschirmfoto-Plugin"
