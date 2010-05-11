@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: pidgin-screenshot 0.8-1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-05-10 17:05+0200\n"
-"PO-Revision-Date: 2010-05-10 17:13+0200\n"
+"PO-Revision-Date: 2010-05-10 19:30+0200\n"
 "Last-Translator: Siggi\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -30,15 +30,17 @@ msgid ""
 "Failed to upload the screenshot to '%s'!\n"
 "%s"
 msgstr ""
+"Upload des Bildschrimfotos nach '%s' fehlgeschlagen!\n"
+"%s"
 
 #: src/error.h:62
 msgid "Failed to open screenshot file:"
-msgstr ""
+msgstr "Das Öffnen der Bildschirmfoto-Datei fehlgeschlagen:"
 
 #: src/ftp_upload.h:39
 #, c-format
 msgid "Uploading %d/%d bytes..."
-msgstr ""
+msgstr "Lade %d/%d Bytes hoch..."
 
 #: src/ftp_upload.h:41
 msgid "as a link (_FTP upload)"
@@ -58,6 +60,12 @@ msgid ""
 "Response:\n"
 "%s\n"
 msgstr ""
+"Regexp passt nicht zur HTTP-Upload Antwort!\n"
+"Server: %s\n"
+"Regexp:\n"
+"%s\n"
+"Antwort:\n"
+"%s\n"
 
 #: src/http_upload.h:93
 #, c-format
@@ -75,9 +83,9 @@ msgid "Please refer to %s to learn how to add your own server."
 msgstr "Unter %s wird beschrieben, wie man eigene Anbieter hinzufügt."
 
 #: src/http_upload.h:97
-#, fuzzy, c-format
+#, c-format
 msgid "Bad regular expression: '%s'!"
-msgstr "Der reguläre Ausdruck hat keinen Treffer erzielt."
+msgstr "Der reguläre Ausdruck ist falsch:"
 
 #: src/http_upload.h:99
 #, c-format
@@ -86,6 +94,9 @@ msgid ""
 "Regular expression doesn't match (see debug window).\n"
 "Most likeley '%s' has been updated...\n"
 msgstr ""
+"Kann die Bildschirmfoto-URL nicht abrufen!\n"
+"Der reguläre Ausdruck stimmt nicht überein (Beachte Debug-Fenster).\n"
+"Höchstwahrscheinlich wurde '%s' aktualisiert...\n"
 
 #: src/http_upload.h:103
 msgid "Incorrect xml host config file"
@@ -121,7 +132,7 @@ msgstr "Konnte den Inhalt von %s nicht korrekt lesen."
 
 #: src/http_upload.h:115
 msgid "Selected host not met !"
-msgstr "Server Name fehlt!"
+msgstr "Servername fehlt!"
 
 #: src/http_upload.h:116
 msgid "No server-side form handler !"
@@ -195,8 +206,8 @@ msgstr ""
 #, c-format
 msgid "Cannot allocate enough memory (%lu bytes) to load plugin data !"
 msgstr ""
-"Kann nicht genug Arbeitsspeicher (%lu Bytes) reservieren um das Plugin zu "
-"laden!"
+"Kann nicht genug Arbeitsspeicher (%lu Bytes) reservieren"
+"um das Plugin zu laden!"
 
 #: src/main.h:90
 msgid ""
@@ -226,11 +237,12 @@ msgstr "Konnte das Bildschirmfoto nicht in den Textbereich einfügen."
 msgid ""
 "The image used to sign the screenshot is too big.\n"
 "%dx%d is the maximum allowed."
-msgstr ""
+msgstr "Die Signaturgrafik ist zu groß.\n"
+"%dx%d ist maximal erlaubt."
 
 #: src/main.h:100
 msgid "An unexpected error occured, see debug window..."
-msgstr ""
+msgstr "Ein unerwarteter Fehler ist aufgetreten, bitte im Debug Fenster nachsehen..."
 
 #: src/main.h:108
 msgid "No selection"
@@ -395,7 +407,7 @@ msgid "Uploading to \"%s\"..."
 msgstr "Bildschirmfoto zu \"%s\" hochladen..."
 
 #: src/upload_utils.h:45
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Failed to insert a link, possible reasons are:\n"
 " - account not connected,\n"
@@ -404,7 +416,9 @@ msgid ""
 "The link is:\n"
 "%s"
 msgstr ""
-"Konnte den Link nicht einfügen, weil das Chatfenster geschlossen wurde.\n"
+"Konnte den Link nicht einfügen, mögliche Gründe sind:\n"
+" - Konto ist nicht verbunden,\n"
+" - Chatfenster wurde geschlossen.\n"
 "\n"
 "Der Link lautet:\n"
 "%s"
