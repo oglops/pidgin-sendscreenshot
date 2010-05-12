@@ -66,7 +66,10 @@
 
 /* prefs UI strings */
 #define PREF_UI_FRAME1 _("Image parameters")
-#define PREF_UI_FRAME2 _("Plugin behaviour")
+#define PREF_UI_FRAME2 _("Display behaviour")
+#define PREF_UI_FRAME6 _("Saving")
+#define PREF_UI_FRAME7 _("Misc")
+
 #define PREF_UI_FRAME3 _("HTTP upload")
 #define PREF_UI_FRAME4 _("FTP upload")
 #define PREF_UI_FRAME5 _("Upload options")

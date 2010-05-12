@@ -418,6 +418,7 @@ get_plugin_pref_frame (PurplePlugin * plugin)
   /* =========================================================================
    *      IMAGE PARAMETERS
    * ========================================================================= */
+
   vbox = pidgin_make_frame (frame1, PREF_UI_FRAME1);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 4);
 
@@ -481,7 +482,7 @@ get_plugin_pref_frame (PurplePlugin * plugin)
 
 
   /* =========================================================================
-   *      PLUGIN BEHAVIOUR
+   *      GENERAL
    * ========================================================================= */
 
   vbox = pidgin_make_frame (frame1, PREF_UI_FRAME2);
@@ -495,11 +496,8 @@ get_plugin_pref_frame (PurplePlugin * plugin)
 			 PREF_HIGHLIGHT_MODE_05, 5, NULL);
   pidgin_prefs_checkbox (PREF_UI_SHOW_VISUAL_CUES, PREF_SHOW_VISUAL_CUES,
 			 vbox);
-  pidgin_prefs_labeled_spin_button_custom (vbox,
-					   PREF_UI_WAIT_BEFORE_SCREENSHOT,
-					   PREF_WAIT_BEFORE_SCREENSHOT, 0, 30,
-					   5, NULL);
-
+ 
+  vbox = pidgin_make_frame (frame1, PREF_UI_FRAME6);
 #if GTK_CHECK_VERSION(2,6,0)
   folder_chooser = gtk_file_chooser_button_new (PREF_UI_STORE_FOLDER,
 						GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
@@ -521,6 +519,11 @@ get_plugin_pref_frame (PurplePlugin * plugin)
   pidgin_prefs_checkbox (PREF_UI_ASK_FILENAME, PREF_ASK_FILENAME, vbox);
   pidgin_prefs_checkbox (PREF_UI_ONLY_SAVE_WHEN, PREF_ONLY_SAVE_WHEN, vbox);
 
+  vbox = pidgin_make_frame (frame1, PREF_UI_FRAME7);
+  pidgin_prefs_labeled_spin_button_custom (vbox,
+					   PREF_UI_WAIT_BEFORE_SCREENSHOT,
+					   PREF_WAIT_BEFORE_SCREENSHOT, 0, 30,
+					   5, NULL);
 #ifdef ENABLE_UPLOAD
 
   gtk_notebook_append_page (GTK_NOTEBOOK(prefs_book), frame2,   gtk_label_new (TAB_2));
