@@ -88,6 +88,9 @@ plugin_stop (PurplePlugin * plugin)
   g_assert (plugin != NULL && plugin->extra != NULL);
   g_assert (PLUGIN (running) == TRUE);
 
+  if (!need_save())
+    g_unlink(PLUGIN (capture_path_filename));
+  
   CLEAR_SEND_INFO_TO_NULL (plugin);
   PLUGIN (running) = FALSE;
 
@@ -314,6 +317,7 @@ init_plugin (PurplePlugin * plugin)
 #endif
 
   purple_prefs_add_bool (PREF_ASK_FILENAME, FALSE);
+  purple_prefs_add_bool (PREF_ONLY_SAVE_WHEN, TRUE);
   purple_prefs_add_bool (PREF_SHOW_VISUAL_CUES, TRUE);
 
   purple_prefs_add_string (PREF_STORE_FOLDER, g_get_tmp_dir ());

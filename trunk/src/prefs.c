@@ -368,12 +368,12 @@ change_signature_cb (GtkFileChooser * file_chooser, GtkImage * sign_image)
       g_free (new_signature);
     }
 }
-#endif
+#endif /* GTK_CHECK_VERSION(2,6,0) */
 
 GtkWidget *
 get_plugin_pref_frame (PurplePlugin * plugin)
 {
-  GtkWidget *ret = NULL;
+  GtkWidget *frame1, *frame2;
   GtkWidget *vbox;
   GtkWidget *dropdown_imgtype;
   GtkWidget *hbox_imgtype, *hbox_sign;
@@ -387,6 +387,7 @@ get_plugin_pref_frame (PurplePlugin * plugin)
 
 #ifdef ENABLE_UPLOAD
   GtkWidget *hbox_ftp, *hbox_html;
+  GtkWidget *prefs_book;
   enum
   { COLUMN_PIXBUF, COLUMN_STRING, N_COLUMNS };
   GtkListStore *list_store;
@@ -401,31 +402,32 @@ get_plugin_pref_frame (PurplePlugin * plugin)
   GError *error = NULL;
 #else
   (void) plugin;
-#endif
+#endif /* ENABLE_UPLOAD */
 
+  frame1 = gtk_vbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
+  gtk_container_set_border_width (GTK_CONTAINER (frame1), PIDGIN_HIG_BORDER);
+
+#ifdef ENABLE_UPLOAD
+  frame2 = gtk_vbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
+  gtk_container_set_border_width (GTK_CONTAINER (frame2), PIDGIN_HIG_BORDER);
+  prefs_book = gtk_notebook_new ();
+  gtk_notebook_append_page (GTK_NOTEBOOK(prefs_book), frame1,   gtk_label_new (TAB_1));
+#endif /* ENABLE_UPLOAD */
+ 
 
   /* =========================================================================
    *      IMAGE PARAMETERS
    * ========================================================================= */
-  ret = gtk_vbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
-  gtk_container_set_border_width (GTK_CONTAINER (ret), PIDGIN_HIG_BORDER);
-
-  vbox = pidgin_make_frame (ret, PREF_UI_FRAME1);
-
+  vbox = pidgin_make_frame (frame1, PREF_UI_FRAME1);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 4);
-
 
   hbox_imgtype = gtk_hbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
   hbox_sign = gtk_hbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
-
-
 
   dropdown_imgtype =
     pidgin_prefs_dropdown (vbox, PREF_UI_IMAGE_TYPE, PURPLE_PREF_STRING,
 			   PREF_IMAGE_TYPE, PREF_TYPE_JPG, "jpeg",
 			   PREF_TYPE_PNG, "png", NULL);
-
-
 
   gtk_box_pack_start (GTK_BOX (vbox), hbox_imgtype, TRUE, FALSE, 0);
   pidgin_prefs_labeled_spin_button (hbox_imgtype,
@@ -434,7 +436,6 @@ get_plugin_pref_frame (PurplePlugin * plugin)
   pidgin_prefs_labeled_spin_button (hbox_imgtype,
 				    PREF_UI_JPEG_QUALITY,
 				    PREF_JPEG_QUALITY, 0, 100, NULL);
-
 
 #if GTK_CHECK_VERSION(2,6,0)
   filter = gtk_file_filter_new ();
@@ -483,7 +484,7 @@ get_plugin_pref_frame (PurplePlugin * plugin)
    *      PLUGIN BEHAVIOUR
    * ========================================================================= */
 
-  vbox = pidgin_make_frame (ret, PREF_UI_FRAME2);
+  vbox = pidgin_make_frame (frame1, PREF_UI_FRAME2);
 
   pidgin_prefs_dropdown (vbox, PREF_UI_HIGHLIGHT_MODE, PURPLE_PREF_INT,
 			 PREF_HIGHLIGHT_MODE,
@@ -518,13 +519,16 @@ get_plugin_pref_frame (PurplePlugin * plugin)
 #endif
 
   pidgin_prefs_checkbox (PREF_UI_ASK_FILENAME, PREF_ASK_FILENAME, vbox);
+  pidgin_prefs_checkbox (PREF_UI_ONLY_SAVE_WHEN, PREF_ONLY_SAVE_WHEN, vbox);
 
 #ifdef ENABLE_UPLOAD
+
+  gtk_notebook_append_page (GTK_NOTEBOOK(prefs_book), frame2,   gtk_label_new (TAB_2));
 
   /* =========================================================================
    *      FTP UPLOAD
    * ========================================================================= */
-  vbox = pidgin_make_frame (ret, PREF_UI_FRAME4);
+  vbox = pidgin_make_frame (frame2, PREF_UI_FRAME4);
 
   pidgin_prefs_labeled_entry (vbox, PREF_UI_FTP_REMOTE_URL,
 			      PREF_FTP_REMOTE_URL, NULL);
@@ -544,7 +548,7 @@ get_plugin_pref_frame (PurplePlugin * plugin)
    *      HTTP UPLOAD
    * ========================================================================= */
 
-  vbox = pidgin_make_frame (ret, PREF_UI_FRAME3);
+  vbox = pidgin_make_frame (frame2, PREF_UI_FRAME3);
 
   if (g_file_get_contents (PLUGIN (xml_hosts_filename),
 			   &contents, &length, &error) == FALSE)
@@ -723,14 +727,16 @@ get_plugin_pref_frame (PurplePlugin * plugin)
   /* =========================================================================
    *   GENERAL UPLOAD OPTIONS
    * ========================================================================= */
-  vbox = pidgin_make_frame (ret, PREF_UI_FRAME5);
+  vbox = pidgin_make_frame (frame2, PREF_UI_FRAME5);
   pidgin_prefs_labeled_spin_button (vbox,
 				    PREF_UI_UPLOAD_CONNECTTIMEOUT,
 				    PREF_UPLOAD_CONNECTTIMEOUT, 1, 60, NULL);
   pidgin_prefs_labeled_spin_button (vbox, PREF_UI_UPLOAD_TIMEOUT,
 				    PREF_UPLOAD_TIMEOUT, 1, 60, NULL);
+  return prefs_book;
+#else
+  return frame1;
 #endif /* ENABLE_UPLOAD */
-  return ret;
 }
 
 /* end of prefs.c */

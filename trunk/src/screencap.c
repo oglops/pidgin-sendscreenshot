@@ -708,16 +708,17 @@ save_capture (PurplePlugin * plugin, GdkPixbuf * capture)
   /* create default name */
   g_get_current_time (&g_tv);
   basename = g_strdup_printf ("%s_%ld.%s", CAPTURE, g_tv.tv_sec, extension);
-
+      
   /* eventually ask the user for a new name */
   screenshot_maybe_rename (plugin, &basename);
 
   PLUGIN (capture_path_filename) =
-    g_build_filename (purple_prefs_get_string (PREF_STORE_FOLDER),
+    g_build_filename (need_save()?
+		      purple_prefs_get_string (PREF_STORE_FOLDER):g_get_tmp_dir(),
 		      basename, NULL);
   g_free (basename);
   basename = NULL;
-
+  
   /* store capture in a file */
   gdk_pixbuf_save (capture, PLUGIN (capture_path_filename), extension,
 		   &error, param_name, param_value, NULL);
