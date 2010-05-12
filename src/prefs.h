@@ -42,6 +42,7 @@
 #define PREF_HIGHLIGHT_MODE PREF_PREFIX "/highlight-mode"
 #define PREF_STORE_FOLDER PREF_PREFIX "/store-folder"
 #define PREF_ASK_FILENAME PREF_PREFIX "/ask-filename"
+#define PREF_ONLY_SAVE_WHEN PREF_PREFIX "/only-save-when"
 #define PREF_SHOW_VISUAL_CUES PREF_PREFIX "/show_visualcues"
 #define PREF_WAIT_BEFORE_SCREENSHOT PREF_PREFIX "/wait_time"
 #define PREF_ADD_SIGNATURE PREF_PREFIX "/add-signature"
@@ -51,10 +52,8 @@
 
 /* http upload prefs */
 #define PREF_UPLOAD_TO PREF_PREFIX "/upload-to"
-#ifdef HAVE_LIBCURL
 #define PREF_UPLOAD_TIMEOUT PREF_PREFIX "/upload-timeout"
 #define PREF_UPLOAD_CONNECTTIMEOUT PREF_PREFIX "/upload-connecttimeout"
-#endif
 
 /* ftp upload prefs */
 #define PREF_FTP_REMOTE_URL PREF_PREFIX "/ftp-remote-url"
@@ -63,6 +62,7 @@
 #define PREF_FTP_PASSWORD PREF_PREFIX "/ftp-password"
 
 #endif /* ENABLE_UPLOAD */
+
 
 /* prefs UI strings */
 #define PREF_UI_FRAME1 _("Image parameters")
@@ -93,12 +93,14 @@
 #define PREF_UI_STORE_FOLDER _("Folder to store captures in:")
 
 #define PREF_UI_ASK_FILENAME _("Always ask for filename when sending as a file.")
-
+#define PREF_UI_ONLY_SAVE_WHEN _("Only save when sending as a File.")
 
 #define PREF_UI_SHOW_VISUAL_CUES _("Show visual cues.")
 #define PREF_UI_WAIT_BEFORE_SCREENSHOT _("Seconds to wait before desktop freezes:")
 
 #ifdef ENABLE_UPLOAD
+#define TAB_1 _("General")
+#define TAB_2 _("Upload")
 #define PREF_UI_UPLOAD_TO _("Pick an image hosting provider "\
 			    "(<span foreground='blue'><u>list v.%s</u></span>)")
 #define PREF_UI_UPLOAD_CONNECTTIMEOUT _("Connect timeout (sec): ")
@@ -110,6 +112,10 @@
 #endif /* ENABLE_UPLOAD */
 
 GtkWidget *get_plugin_pref_frame (PurplePlugin * plugin);
+
+#define need_save()\
+  ((purple_prefs_get_bool (PREF_ONLY_SAVE_WHEN) && PLUGIN (send_as) == SEND_AS_FILE) || \
+   !purple_prefs_get_bool (PREF_ONLY_SAVE_WHEN))
 
 #endif
 
