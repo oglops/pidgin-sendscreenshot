@@ -170,7 +170,8 @@ typedef enum
 { SELECT_REGULAR, SELECT_CENTER_HOLD} SelectionMode;
 
 typedef enum {
-  ResizeReset,
+  ResizeAny,
+  ResizeNone,
   ResizeBottomLeft,
   ResizeBottomRight,
   ResizeTopLeft,

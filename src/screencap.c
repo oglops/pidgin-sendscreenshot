@@ -413,8 +413,8 @@ change_arrow (gint x, gint y, PurplePlugin * plugin)
     }
   else
     {
-      cursor = gdk_cursor_new (GDK_CROSS);
-      PLUGIN (resize_mode) = ResizeReset;
+      cursor = gdk_cursor_new (GDK_LEFT_PTR);
+      PLUGIN (resize_mode) = ResizeNone;
     }
 
   gdk_window_set_cursor (gdkwin, cursor);
@@ -431,7 +431,7 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
 
   /* mouse button pressed */
   if ((event->state & GDK_BUTTON1_MASK) == GDK_BUTTON1_MASK &&
-      PLUGIN (x1) != -1)
+      PLUGIN (x1) != -1 && PLUGIN (resize_mode) != ResizeNone)
     {
       gint oldx1, oldy1;
       GdkRectangle old_r, new_r;
@@ -466,7 +466,7 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
 	    GdkScreen *screen;
 	    gint xdiff, ydiff;
 
-	    g_assert (PLUGIN (resize_mode) <= 4);
+	    g_assert (PLUGIN (resize_mode) <= 5);
 	    screen = gdk_screen_get_default ();
 
 	    xdiff = (gint) event->x - PLUGIN (_x);
@@ -617,6 +617,8 @@ static void
 clear_selection (PurplePlugin * plugin)
 {
   GdkRectangle area;
+  GdkWindow *gdkwin = PLUGIN (root_window)->window;
+  GdkCursor *cursor = gdk_cursor_new (GDK_CROSSHAIR);
 
   /* cancel current selection to try a new one */
   area.x = MIN_X (plugin);
@@ -625,7 +627,13 @@ clear_selection (PurplePlugin * plugin)
   area.height = CAPTURE_HEIGHT (plugin);
 
   paint_rectangle (area,
-		   PLUGIN (root_window)->window, BACKGROUND_PIXBUF, plugin);
+		   gdkwin, BACKGROUND_PIXBUF, plugin);
+  CLEAR_CAPTURE_AREA (plugin);
+  PLUGIN (resize_mode) = ResizeAny;
+  PLUGIN (resize_allow) = FALSE;
+  
+  gdk_window_set_cursor (gdkwin, cursor);
+  gdk_cursor_unref (cursor);
 }
 
 #define SWAP_X()\
@@ -644,84 +652,81 @@ static gboolean
 on_root_window_button_press_cb (GtkWidget * root_window,
 				GdkEventButton * event, PurplePlugin * plugin)
 {
-
   PLUGIN (resize_allow) = FALSE;
 
-  if ((PLUGIN (resize_mode) == ResizeLeft && PLUGIN (x1) < PLUGIN (x2))
-      || (PLUGIN (resize_mode) == ResizeRight && PLUGIN (x2) < PLUGIN (x1))
-      || (PLUGIN (resize_mode) == ResizeTop && PLUGIN (y1) < PLUGIN (y2))
-      || (PLUGIN (resize_mode) == ResizeBottom && PLUGIN (y2) < PLUGIN (y1)))
-    {
-      SWAP_X ();
-      SWAP_Y ();
-    }
-  else if (PLUGIN (resize_mode) == ResizeTopLeft)
-    {
-      if (PLUGIN (x1) < PLUGIN (x2))
+  if (event->button == 1) {
+    if ((PLUGIN (resize_mode) == ResizeLeft && PLUGIN (x1) < PLUGIN (x2))
+	|| (PLUGIN (resize_mode) == ResizeRight && PLUGIN (x2) < PLUGIN (x1))
+	|| (PLUGIN (resize_mode) == ResizeTop && PLUGIN (y1) < PLUGIN (y2))
+	|| (PLUGIN (resize_mode) == ResizeBottom && PLUGIN (y2) < PLUGIN (y1)))
+      {
 	SWAP_X ();
-
-      if (PLUGIN (y1) < PLUGIN (y2))
 	SWAP_Y ();
-    }
-  else if (PLUGIN (resize_mode) == ResizeBottomLeft)
-    {
-      if (PLUGIN (x1) < PLUGIN (x2))
-	SWAP_X ();
-
-      if (PLUGIN (y1) > PLUGIN (y2))
-	SWAP_Y ();
-    }
-  else if (PLUGIN (resize_mode) == ResizeTopRight)
-    {
-      if (PLUGIN (x1) > PLUGIN (x2))
-	SWAP_X ();
-
-      if (PLUGIN (y1) < PLUGIN (y2))
-	SWAP_Y ();
-    }
-  else if (PLUGIN (resize_mode) == ResizeBottomRight)
-    {
-      if (PLUGIN (x1) > PLUGIN (x2))
-	SWAP_X ();
-      if (PLUGIN (y1) > PLUGIN (y2))
-	SWAP_Y ();
-    }
-
-  else if (event->button == 1 && PLUGIN (resize_mode) == ResizeReset)
-    {				/* start defining the capture area */
-      GdkRegion *region = NULL;
-      GdkRectangle rect;
-
-      clear_selection (plugin);
-
-      PLUGIN (x1) = (gint) event->x;
-      PLUGIN (y1) = (gint) event->y;
-      PLUGIN (x2) = (gint) event->x;
-      PLUGIN (y2) = (gint) event->y;
-      PLUGIN (_x) = PLUGIN (x2);
-      PLUGIN (_y) = PLUGIN (y2);
-
-      if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES))
-	draw_cues (root_window, event->x, event->y, TRUE, plugin);
-
-      /* draw upper-left pixel */
-      rect.x = PLUGIN (x1);
-      rect.y = PLUGIN (y1);
-      rect.width = 1;
-      rect.height = 1;
-
-      region = gdk_region_rectangle (&rect);
-
-      gdk_gc_set_function (PLUGIN (gc), GDK_COPY_INVERT);
-      paint_region (region, root_window->window, PLUGIN (root_pixbuf_orig),
-		    plugin);
-      gdk_gc_set_function (PLUGIN (gc), GDK_COPY);
-
-      gdk_region_destroy (region);
-      region = NULL;
-
-    }
-
+      }
+    else if (PLUGIN (resize_mode) == ResizeTopLeft)
+      {
+	if (PLUGIN (x1) < PLUGIN (x2))
+	  SWAP_X ();
+	
+	if (PLUGIN (y1) < PLUGIN (y2))
+	  SWAP_Y ();
+      }
+    else if (PLUGIN (resize_mode) == ResizeBottomLeft)
+      {
+	if (PLUGIN (x1) < PLUGIN (x2))
+	  SWAP_X ();
+	
+	if (PLUGIN (y1) > PLUGIN (y2))
+	  SWAP_Y ();
+      }
+    else if (PLUGIN (resize_mode) == ResizeTopRight)
+      {
+	if (PLUGIN (x1) > PLUGIN (x2))
+	  SWAP_X ();
+	
+	if (PLUGIN (y1) < PLUGIN (y2))
+	  SWAP_Y ();
+      }
+    else if (PLUGIN (resize_mode) == ResizeBottomRight)
+      {
+	if (PLUGIN (x1) > PLUGIN (x2))
+	  SWAP_X ();
+	if (PLUGIN (y1) > PLUGIN (y2))
+	  SWAP_Y ();
+      }
+    else if (PLUGIN(x1) == -1)
+      {				/* start defining the capture area */
+	GdkRegion *region = NULL;
+	GdkRectangle rect;
+	
+	PLUGIN (x1) = (gint) event->x;
+	PLUGIN (y1) = (gint) event->y;
+	PLUGIN (x2) = (gint) event->x;
+	PLUGIN (y2) = (gint) event->y;
+	PLUGIN (_x) = PLUGIN (x2);
+	PLUGIN (_y) = PLUGIN (y2);
+	
+	if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES))
+	  draw_cues (root_window, event->x, event->y, TRUE, plugin);
+	
+	/* draw upper-left pixel */
+	rect.x = PLUGIN (x1);
+	rect.y = PLUGIN (y1);
+	rect.width = 1;
+	rect.height = 1;
+	
+	region = gdk_region_rectangle (&rect);
+	
+	gdk_gc_set_function (PLUGIN (gc), GDK_COPY_INVERT);
+	paint_region (region, root_window->window, PLUGIN (root_pixbuf_orig),
+		      plugin);
+	gdk_gc_set_function (PLUGIN (gc), GDK_COPY);
+	
+	gdk_region_destroy (region);
+	region = NULL;
+	
+      }
+  }
   else if (event->button == 2 &&	/* hide the current conversation window  */
 	   get_receiver_window (plugin) && !PLUGIN (iconified))
     {
@@ -1079,6 +1084,9 @@ on_root_window_key_press_event_cb (GtkWidget * root_events,
       break;
     case GDK_Return:
       fetch_capture (plugin);
+      break;
+    case GDK_BackSpace:
+      clear_selection(plugin);
       break;
     }
   (void) root_events;
