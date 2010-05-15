@@ -309,7 +309,6 @@ init_plugin (PurplePlugin * plugin)
 
 #ifdef ENABLE_UPLOAD
   purple_prefs_add_string (PREF_UPLOAD_TO, HOST_DISABLED);
-  purple_prefs_add_int (PREF_WAIT_BEFORE_SCREENSHOT, 0);
   purple_prefs_add_string (PREF_FTP_REMOTE_URL, "ftp://");
   purple_prefs_add_string (PREF_FTP_WEB_ADDR, "");
   purple_prefs_add_int (PREF_UPLOAD_TIMEOUT, 30);
@@ -319,6 +318,9 @@ init_plugin (PurplePlugin * plugin)
   purple_prefs_add_bool (PREF_ASK_FILENAME, FALSE);
   purple_prefs_add_bool (PREF_ONLY_SAVE_WHEN, TRUE);
   purple_prefs_add_bool (PREF_SHOW_VISUAL_CUES, TRUE);
+
+  purple_prefs_add_int (PREF_WAIT_BEFORE_SCREENSHOT, 0);
+  purple_prefs_add_bool (PREF_RETURN_IMMEDIATELY, TRUE);
 
   purple_prefs_add_string (PREF_STORE_FOLDER, g_get_tmp_dir ());
 

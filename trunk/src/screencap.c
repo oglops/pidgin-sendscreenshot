@@ -182,15 +182,15 @@ timeout_freeze_screen (PurplePlugin * plugin)
 
 static void
 paint_rectangle (GdkRectangle rect,
-		 GdkWindow * gdkwin, GdkPixbuf * pixbuf, PurplePlugin * plugin)
+		 GdkWindow * gdkwin, GdkPixbuf * pixbuf,
+		 PurplePlugin * plugin)
 {
   gdk_draw_pixbuf (gdkwin,
 		   PLUGIN (gc),
 		   pixbuf,
 		   rect.x, rect.y,
 		   rect.x, rect.y,
-		   rect.width, rect.height,
-		   GDK_RGB_DITHER_NONE, 0, 0);
+		   rect.width, rect.height, GDK_RGB_DITHER_NONE, 0, 0);
 }
 
 static void
@@ -271,15 +271,9 @@ draw_cues (GtkWidget * root_window,
   /* erase old cues */
   if (PLUGIN (_y) >= 0 && PLUGIN (_x) >= 0)
     {
-      paint_rectangle (h,
-		       root_window->window,
-		       BACKGROUND_PIXBUF,
-		       plugin);
+      paint_rectangle (h, root_window->window, BACKGROUND_PIXBUF, plugin);
 
-      paint_rectangle (v,
-		       root_window->window,
-		       BACKGROUND_PIXBUF,
-		       plugin);
+      paint_rectangle (v, root_window->window, BACKGROUND_PIXBUF, plugin);
     }
 
   /* draw cues */
@@ -351,11 +345,90 @@ plugin_cancel (PurplePlugin * plugin)
   plugin_stop (plugin);
 }
 
+#define DETECT_THRESHOLD 7
+
+static void
+change_arrow (gint x, gint y, PurplePlugin * plugin)
+{
+  GdkWindow *gdkwin;
+  GdkCursor *cursor;
+
+  gint x1, x2, y1, y2;
+
+  x1 = MIN_X (plugin);
+  y1 = MIN_Y (plugin);
+
+  x2 = x1 + CAPTURE_WIDTH (plugin) - 1;
+  y2 = y1 + CAPTURE_HEIGHT (plugin) - 1;
+
+  gdkwin = gtk_widget_get_window (PLUGIN (root_window));
+
+  /* top left */
+  if (ABS (y - y1) < DETECT_THRESHOLD && ABS (x - x1) < DETECT_THRESHOLD)
+    {
+      cursor = gdk_cursor_new (GDK_TOP_LEFT_CORNER);
+      PLUGIN (resize_mode) = ResizeTopLeft;
+    }
+  /* bottom right */
+  else if (ABS (y - y2) < DETECT_THRESHOLD && ABS (x - x2) < DETECT_THRESHOLD)
+    {
+      cursor = gdk_cursor_new (GDK_BOTTOM_RIGHT_CORNER);
+      PLUGIN (resize_mode) = ResizeBottomRight;
+    }
+  /* bottom left */
+  else if (ABS (y - y2) < DETECT_THRESHOLD && ABS (x - x1) < DETECT_THRESHOLD)
+    {
+      cursor = gdk_cursor_new (GDK_BOTTOM_LEFT_CORNER);
+      PLUGIN (resize_mode) = ResizeBottomLeft;
+    }
+  /* top right */
+  else if (ABS (y - y1) < DETECT_THRESHOLD && ABS (x - x2) < DETECT_THRESHOLD)
+    {
+      cursor = gdk_cursor_new (GDK_TOP_RIGHT_CORNER);
+      PLUGIN (resize_mode) = ResizeTopRight;
+    }
+  /* left */
+  else if (ABS (x - x1) < DETECT_THRESHOLD && y >= y1 && y <= y2)
+    {
+      cursor = gdk_cursor_new (GDK_LEFT_SIDE);
+      PLUGIN (resize_mode) = ResizeLeft;
+    }
+  /* right */
+  else if (ABS (x - x2) < DETECT_THRESHOLD && y >= y1 && y <= y2)
+    {
+      cursor = gdk_cursor_new (GDK_RIGHT_SIDE);
+      PLUGIN (resize_mode) = ResizeRight;
+    }
+  /* top */
+  else if (ABS (y - y1) < DETECT_THRESHOLD && x >= x1 && x <= x2)
+    {
+      cursor = gdk_cursor_new (GDK_TOP_SIDE);
+      PLUGIN (resize_mode) = ResizeTop;
+    }
+  /* bottom */
+  else if (ABS (y - y2) < DETECT_THRESHOLD && x >= x1 && x <= x2)
+    {
+      cursor = gdk_cursor_new (GDK_BOTTOM_SIDE);
+      PLUGIN (resize_mode) = ResizeBottom;
+    }
+  else
+    {
+      cursor = gdk_cursor_new (GDK_CROSS);
+      PLUGIN (resize_mode) = ResizeReset;
+    }
+
+  gdk_window_set_cursor (gdkwin, cursor);
+  gdk_cursor_unref (cursor);
+}
+
 static gboolean
 on_root_window_motion_notify_cb (GtkWidget * root_window,
 				 GdkEventMotion * event,
 				 PurplePlugin * plugin)
 {
+  if (PLUGIN (resize_allow))
+    change_arrow (event->x, event->y, plugin);
+
   /* mouse button pressed */
   if ((event->state & GDK_BUTTON1_MASK) == GDK_BUTTON1_MASK &&
       PLUGIN (x1) != -1)
@@ -365,19 +438,23 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
       GdkRegion *border_inter = NULL;
       GdkWindow *gdkwin;
 
-      g_assert (PLUGIN(old) == NULL);
-      g_assert (PLUGIN(new) == NULL);
-      g_assert (PLUGIN(border_old) == NULL);
-      g_assert (PLUGIN(border_new) == NULL);
-      
+      g_assert (PLUGIN (old) == NULL);
+      g_assert (PLUGIN (new) == NULL);
+      g_assert (PLUGIN (border_old) == NULL);
+      g_assert (PLUGIN (border_new) == NULL);
+
 #if GTK_CHECK_VERSION(2,14,0)
       gdkwin = gtk_widget_get_window (root_window);
 #else
       gdkwin = root_window->window;
 #endif
 
-      PLUGIN (x2) = (gint) event->x;
-      PLUGIN (y2) = (gint) event->y;
+      if (PLUGIN (resize_mode) != ResizeTop &&
+	  PLUGIN (resize_mode) != ResizeBottom)
+	PLUGIN (x2) = (gint) event->x;
+      if (PLUGIN (resize_mode) != ResizeLeft &&
+	  PLUGIN (resize_mode) != ResizeRight)
+	PLUGIN (y2) = (gint) event->y;
 
       oldx1 = PLUGIN (x1);
       oldy1 = PLUGIN (y1);
@@ -389,6 +466,7 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
 	    GdkScreen *screen;
 	    gint xdiff, ydiff;
 
+	    g_assert (PLUGIN (resize_mode) <= 4);
 	    screen = gdk_screen_get_default ();
 
 	    xdiff = (gint) event->x - PLUGIN (_x);
@@ -448,7 +526,7 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
 
       if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != BordersOnly)
 	{
-	  GdkRegion  * inter;
+	  GdkRegion *inter;
 
 	  PLUGIN (old) = gdk_region_rectangle (&old_r);
 	  PLUGIN (new) = gdk_region_rectangle (&new_r);
@@ -517,7 +595,7 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
 	  gdk_region_destroy (PLUGIN (border_new));
 	  PLUGIN (border_new) = NULL;
 	}
-      
+
       if (border_inter != NULL)
 	gdk_region_destroy (border_inter);
 
@@ -528,21 +606,93 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
   /* make sure our frozen root window is visible
      before drawing visual cues */
   else if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)
-	   && GTK_WIDGET_MAPPED (root_window))
+	   && GTK_WIDGET_MAPPED (root_window) && PLUGIN (x1) == -1)
     {
       draw_cues (root_window, event->x, event->y, FALSE, plugin);
     }
   return TRUE;
 }
 
+static void
+clear_selection (PurplePlugin * plugin)
+{
+  GdkRectangle area;
+
+  /* cancel current selection to try a new one */
+  area.x = MIN_X (plugin);
+  area.y = MIN_Y (plugin);
+  area.width = CAPTURE_WIDTH (plugin);
+  area.height = CAPTURE_HEIGHT (plugin);
+
+  paint_rectangle (area,
+		   PLUGIN (root_window)->window, BACKGROUND_PIXBUF, plugin);
+}
+
+#define SWAP_X()\
+  {gint tmp =  PLUGIN (x1);\
+   PLUGIN (x1) =  PLUGIN (x2);\
+   PLUGIN (x2) = tmp;\
+   PLUGIN (_x) = PLUGIN (x2);}
+
+#define SWAP_Y()\
+  {gint tmp =  PLUGIN (y1);\
+   PLUGIN (y1) =  PLUGIN (y2);\
+   PLUGIN (y2) = tmp;\
+   PLUGIN (_y) = PLUGIN (y2);}
+
 static gboolean
 on_root_window_button_press_cb (GtkWidget * root_window,
 				GdkEventButton * event, PurplePlugin * plugin)
 {
-  if (event->button == 1)
+
+  PLUGIN (resize_allow) = FALSE;
+
+  if ((PLUGIN (resize_mode) == ResizeLeft && PLUGIN (x1) < PLUGIN (x2))
+      || (PLUGIN (resize_mode) == ResizeRight && PLUGIN (x2) < PLUGIN (x1))
+      || (PLUGIN (resize_mode) == ResizeTop && PLUGIN (y1) < PLUGIN (y2))
+      || (PLUGIN (resize_mode) == ResizeBottom && PLUGIN (y2) < PLUGIN (y1)))
+    {
+      SWAP_X ();
+      SWAP_Y ();
+    }
+  else if (PLUGIN (resize_mode) == ResizeTopLeft)
+    {
+      if (PLUGIN (x1) < PLUGIN (x2))
+	SWAP_X ();
+
+      if (PLUGIN (y1) < PLUGIN (y2))
+	SWAP_Y ();
+    }
+  else if (PLUGIN (resize_mode) == ResizeBottomLeft)
+    {
+      if (PLUGIN (x1) < PLUGIN (x2))
+	SWAP_X ();
+
+      if (PLUGIN (y1) > PLUGIN (y2))
+	SWAP_Y ();
+    }
+  else if (PLUGIN (resize_mode) == ResizeTopRight)
+    {
+      if (PLUGIN (x1) > PLUGIN (x2))
+	SWAP_X ();
+
+      if (PLUGIN (y1) < PLUGIN (y2))
+	SWAP_Y ();
+    }
+  else if (PLUGIN (resize_mode) == ResizeBottomRight)
+    {
+      if (PLUGIN (x1) > PLUGIN (x2))
+	SWAP_X ();
+      if (PLUGIN (y1) > PLUGIN (y2))
+	SWAP_Y ();
+    }
+
+  else if (event->button == 1 && PLUGIN (resize_mode) == ResizeReset)
     {				/* start defining the capture area */
       GdkRegion *region = NULL;
       GdkRectangle rect;
+
+      clear_selection (plugin);
 
       PLUGIN (x1) = (gint) event->x;
       PLUGIN (y1) = (gint) event->y;
@@ -571,6 +721,7 @@ on_root_window_button_press_cb (GtkWidget * root_window,
       region = NULL;
 
     }
+
   else if (event->button == 2 &&	/* hide the current conversation window  */
 	   get_receiver_window (plugin) && !PLUGIN (iconified))
     {
@@ -600,22 +751,7 @@ on_root_window_button_press_cb (GtkWidget * root_window,
 	  plugin_cancel (plugin);
 	}
       else if (PLUGIN (x1) != -1)
-	{
-	  GdkRectangle area;
-
-	  /* cancel current selection to try a new one */
-	  area.x = MIN_X (plugin);
-	  area.y = MIN_Y (plugin);
-	  area.width = CAPTURE_WIDTH (plugin);
-	  area.height = CAPTURE_HEIGHT (plugin);
-
-	  paint_rectangle (area,
-			   root_window->window,
-			   BACKGROUND_PIXBUF,
-			   plugin);
-	  
-	  CLEAR_CAPTURE_AREA (plugin);
-	}
+	clear_selection (plugin);
     }
   return TRUE;
 }
@@ -686,7 +822,7 @@ save_capture (PurplePlugin * plugin, GdkPixbuf * capture)
   GError *error = NULL;
   GTimeVal g_tv;
   const gchar *const extension = purple_prefs_get_string (PREF_IMAGE_TYPE);
-  
+
   g_assert (plugin != NULL && plugin->extra != NULL);
 
   if (PLUGIN (capture_path_filename) != NULL)
@@ -708,17 +844,17 @@ save_capture (PurplePlugin * plugin, GdkPixbuf * capture)
   /* create default name */
   g_get_current_time (&g_tv);
   basename = g_strdup_printf ("%s_%ld.%s", CAPTURE, g_tv.tv_sec, extension);
-      
+
   /* eventually ask the user for a new name */
   screenshot_maybe_rename (plugin, &basename);
 
   PLUGIN (capture_path_filename) =
-    g_build_filename (need_save()?
-		      purple_prefs_get_string (PREF_STORE_FOLDER):g_get_tmp_dir(),
-		      basename, NULL);
+    g_build_filename (need_save ()?
+		      purple_prefs_get_string (PREF_STORE_FOLDER) :
+		      g_get_tmp_dir (), basename, NULL);
   g_free (basename);
   basename = NULL;
-  
+
   /* store capture in a file */
   gdk_pixbuf_save (capture, PLUGIN (capture_path_filename), extension,
 		   &error, param_name, param_value, NULL);
@@ -743,18 +879,14 @@ save_capture (PurplePlugin * plugin, GdkPixbuf * capture)
   return TRUE;
 }
 
-static gboolean
-on_root_window_button_release_cb (GtkWidget * root_window,
-				  GdkEventButton * event,
-				  PurplePlugin * plugin)
+static void
+fetch_capture (PurplePlugin * plugin)
 {
   GdkPixbuf *capture = NULL;
-  
-  g_assert (plugin != NULL && plugin->extra != NULL);
+  GtkWidget *root_window = NULL;
 
-  /* capture not yet defined */
-  if (event->button != 1 || PLUGIN (x2) == -1)
-    return TRUE;
+  g_assert (plugin != NULL && plugin->extra != NULL);
+  root_window = PLUGIN (root_window);
 
   /* come back to the real world */
   gtk_widget_hide (PLUGIN (root_events));
@@ -876,6 +1008,21 @@ on_root_window_button_release_cb (GtkWidget * root_window,
 	    }
 	}
     }
+}
+
+static gboolean
+on_root_window_button_release_cb (PurplePlugin * plugin,
+				  GdkEventButton * event)
+{
+  /* capture not yet defined */
+  if (event->button != 1 || PLUGIN (x2) == -1)
+    return TRUE;
+
+  if (purple_prefs_get_bool (PREF_RETURN_IMMEDIATELY))
+    fetch_capture (plugin);
+  else
+    PLUGIN (resize_allow) = TRUE;
+
   return TRUE;
 }
 
@@ -884,7 +1031,7 @@ on_root_window_map_event_cb (GtkWidget * root_window, GdkEvent * event,
 			     PurplePlugin * plugin)
 {
   GdkWindow *gdkwin;
-  
+
   g_assert (plugin != NULL && plugin->extra != NULL);
 
   gtk_window_move (GTK_WINDOW (root_window), 0, 0);
@@ -910,9 +1057,7 @@ on_root_window_expose_cb (GtkWidget * root_window,
   if (PLUGIN (x1) == -1)
     {
       paint_rectangle (event->area,
-		       root_window->window,
-		       BACKGROUND_PIXBUF,
-		       plugin);
+		       root_window->window, BACKGROUND_PIXBUF, plugin);
       gtk_window_move (GTK_WINDOW (root_window), 0, 0);
     }
   return TRUE;
@@ -929,7 +1074,11 @@ on_root_window_key_press_event_cb (GtkWidget * root_events,
       plugin_cancel (plugin);
       break;
     case GDK_Control_L:
-      PLUGIN (select_mode) = SELECT_CENTER_HOLD;
+      if (PLUGIN (resize_mode) <= 4)
+	PLUGIN (select_mode) = SELECT_CENTER_HOLD;
+      break;
+    case GDK_Return:
+      fetch_capture (plugin);
       break;
     }
   (void) root_events;
@@ -977,7 +1126,7 @@ prepare_root_window (PurplePlugin * plugin)
 
   g_assert (PLUGIN (root_window) == NULL);
   g_assert (PLUGIN (root_events) == NULL);
-  
+
   /* No toplevel otherwise some desktops (say Xfce4),
    * won't allow us to cover the entire screen. */
   PLUGIN (root_window) = gtk_window_new (GTK_WINDOW_POPUP);
@@ -1007,9 +1156,10 @@ prepare_root_window (PurplePlugin * plugin)
   g_signal_connect (GTK_OBJECT (PLUGIN (root_window)),
 		    "button-press-event",
 		    G_CALLBACK (on_root_window_button_press_cb), plugin);
-  g_signal_connect (GTK_OBJECT (PLUGIN (root_window)),
-		    "button-release-event",
-		    G_CALLBACK (on_root_window_button_release_cb), plugin);
+  g_signal_connect_swapped (GTK_OBJECT (PLUGIN (root_window)),
+			    "button-release-event",
+			    G_CALLBACK (on_root_window_button_release_cb),
+			    plugin);
 
   g_signal_connect (GTK_OBJECT (PLUGIN (root_window)),
 		    "expose-event",

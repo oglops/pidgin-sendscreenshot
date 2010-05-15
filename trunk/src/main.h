@@ -169,6 +169,19 @@ typedef enum
 typedef enum
 { SELECT_REGULAR, SELECT_CENTER_HOLD} SelectionMode;
 
+typedef enum {
+  ResizeReset,
+  ResizeBottomLeft,
+  ResizeBottomRight,
+  ResizeTopLeft,
+  ResizeTopRight,
+  ResizeLeft,
+  ResizeRight,
+  ResizeTop,
+  ResizeBottom
+} ResizeMode;
+
+
 /* functions */
 GtkWidget *get_receiver_window (PurplePlugin * plugin);
 GtkIMHtml *get_receiver_imhtml (PurplePlugin * plugin);
@@ -208,6 +221,8 @@ typedef struct
   /* capture area */
   gint x1, y1, x2, y2, _x, _y;
   SelectionMode select_mode;
+  ResizeMode resize_mode;
+  gboolean resize_allow;
 
   /* screenshot's location */
   gchar *capture_path_filename;

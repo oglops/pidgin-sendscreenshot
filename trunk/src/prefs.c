@@ -524,6 +524,7 @@ get_plugin_pref_frame (PurplePlugin * plugin)
 					   PREF_UI_WAIT_BEFORE_SCREENSHOT,
 					   PREF_WAIT_BEFORE_SCREENSHOT, 0, 30,
 					   5, NULL);
+  pidgin_prefs_checkbox (PREF_UI_RETURN_IMMEDIATELY, PREF_RETURN_IMMEDIATELY, vbox);
 #ifdef ENABLE_UPLOAD
 
   gtk_notebook_append_page (GTK_NOTEBOOK(prefs_book), frame2,   gtk_label_new (TAB_2));
