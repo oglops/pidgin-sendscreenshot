@@ -44,6 +44,7 @@ guint
 timeout_freeze_screen (PurplePlugin * plugin)
 {
   GdkWindow *gdkroot;
+  GdkCursor *cursor;
   gint x_orig, y_orig, width, height;
 
   g_assert (plugin != NULL && plugin->extra != NULL);
@@ -177,6 +178,11 @@ timeout_freeze_screen (PurplePlugin * plugin)
   /* let the user capture an area... */
   gtk_widget_show (PLUGIN (root_events));	/* focus is grabbed */
   gtk_widget_show (PLUGIN (root_window));
+
+  cursor = gdk_cursor_new (GDK_CROSSHAIR);
+  gdk_window_set_cursor (PLUGIN (root_window)->window, cursor);
+  gdk_cursor_unref (cursor);
+  
   return 0;
 }
 
@@ -300,8 +306,7 @@ static void
 on_root_window_realize_cb (GtkWidget * root_window)
 {
   GdkWindow *gdkwin;
-  GdkCursor *cursor = gdk_cursor_new (GDK_CROSSHAIR);
-
+ 
 #if GTK_CHECK_VERSION(2,14,0)
   gdkwin = gtk_widget_get_window (root_window);
 #else
@@ -311,10 +316,9 @@ on_root_window_realize_cb (GtkWidget * root_window)
   gdk_window_set_events (gdkwin, GDK_EXPOSURE_MASK |
 			 GDK_BUTTON_PRESS_MASK |
 			 GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK);
-  gdk_window_set_cursor (gdkwin, cursor);
   gdk_window_set_back_pixmap (gdkwin, NULL, FALSE);
-  gdk_cursor_unref (cursor);
 }
+
 
 /* cancel whole screenshot process and come back to Pidgin */
 static void
@@ -322,8 +326,6 @@ plugin_cancel (PurplePlugin * plugin)
 {
   g_assert (plugin != NULL && plugin->extra != NULL);
 
-  gtk_widget_hide (PLUGIN (root_events));	/* give back focus */
-  gtk_widget_hide (PLUGIN (root_window));
   CLEAR_CAPTURE_AREA (plugin);
   if (PLUGIN (iconified) == TRUE)
     {
@@ -332,16 +334,7 @@ plugin_cancel (PurplePlugin * plugin)
     }
   CLEAR_SEND_INFO_TO_NULL (plugin);
 
-  if (PLUGIN (root_pixbuf_orig) != NULL)
-    {
-      g_object_unref (PLUGIN (root_pixbuf_orig));
-      PLUGIN (root_pixbuf_orig) = NULL;
-    }
-  if (PLUGIN (root_pixbuf_x) != NULL)
-    {
-      g_object_unref (PLUGIN (root_pixbuf_x));
-      PLUGIN (root_pixbuf_x) = NULL;
-    }
+  THAW_DESKTOP();
   plugin_stop (plugin);
 }
 
@@ -730,19 +723,7 @@ on_root_window_button_press_cb (GtkWidget * root_window,
   else if (event->button == 2 &&	/* hide the current conversation window  */
 	   get_receiver_window (plugin) && !PLUGIN (iconified))
     {
-      gtk_widget_hide (PLUGIN (root_events));
-      gtk_widget_hide (root_window);
-
-      if (PLUGIN (root_pixbuf_x) != NULL)
-	{
-	  g_object_unref (PLUGIN (root_pixbuf_x));
-	  PLUGIN (root_pixbuf_x) = NULL;
-	}
-      if (PLUGIN (root_pixbuf_orig) != NULL)
-	{
-	  g_object_unref (PLUGIN (root_pixbuf_orig));
-	  PLUGIN (root_pixbuf_orig) = NULL;
-	}
+      THAW_DESKTOP();
 
       gtk_window_iconify (GTK_WINDOW (get_receiver_window (plugin)));
 
@@ -808,13 +789,6 @@ extract_capture (PurplePlugin * plugin)
 	    }
 	}
     }
-
-  if (G_LIKELY (PLUGIN (root_pixbuf_orig) != NULL))
-    {
-      g_object_unref (PLUGIN (root_pixbuf_orig));
-      PLUGIN (root_pixbuf_orig) = NULL;
-    }
-
   return capture;
 }
 
@@ -893,15 +867,6 @@ fetch_capture (PurplePlugin * plugin)
   g_assert (plugin != NULL && plugin->extra != NULL);
   root_window = PLUGIN (root_window);
 
-  /* come back to the real world */
-  gtk_widget_hide (PLUGIN (root_events));
-  gtk_widget_hide (root_window);
-
-  if (PLUGIN (root_pixbuf_x) != NULL)
-    {
-      g_object_unref (PLUGIN (root_pixbuf_x));
-      PLUGIN (root_pixbuf_x) = NULL;
-    }
   if (PLUGIN (iconified) && get_receiver_window (plugin))
     {
       gtk_window_deiconify (GTK_WINDOW (get_receiver_window (plugin)));
@@ -913,6 +878,7 @@ fetch_capture (PurplePlugin * plugin)
     {
       purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
 			   PLUGIN_MEMORY_ERROR);
+      THAW_DESKTOP();
       plugin_stop (plugin);
     }
   else
@@ -1013,6 +979,7 @@ fetch_capture (PurplePlugin * plugin)
 	    }
 	}
     }
+  THAW_DESKTOP();
 }
 
 static gboolean
