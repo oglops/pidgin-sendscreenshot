@@ -144,15 +144,6 @@ G_LOCK_EXTERN (unload);
     PLUGIN (name) = NULL;\
   }
 
-/*
- * If we immediately freeze the screen, then the menuitem we just
- * click on may remain. That's we wait for a small timeout.
- */
-#define FREEZE_DESKTOP()\
-  purple_timeout_add\
-  (MAX(MSEC_TIMEOUT_VAL, purple_prefs_get_int(PREF_WAIT_BEFORE_SCREENSHOT) * 1000), \
-   (GSourceFunc) timeout_freeze_screen, plugin)
-
 #define REMEMBER_ACCOUNT(conv)\
   PLUGIN (conv_type) = purple_conversation_get_type (conv->active_conv);\
   PLUGIN (account) = purple_conversation_get_account (conv->active_conv);\
