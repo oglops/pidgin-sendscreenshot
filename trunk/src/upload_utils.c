@@ -107,12 +107,14 @@ real_insert_link (PurplePlugin * plugin, const gchar * url)
     }
   else
     {
-      GtkTextMark *mark =
-	gtk_text_buffer_get_insert
-	(gtk_text_view_get_buffer (GTK_TEXT_VIEW (imhtml)));
+      GtkTextBuffer *textbf;
+      GtkTextMark *mark;
+      
+      textbf =
+	gtk_text_view_get_buffer (GTK_TEXT_VIEW (imhtml));
+      mark = gtk_text_buffer_get_insert (textbf);
 
-      g_assert (mark != NULL);
-
+      /* support for HTML-formatted messages */
       if (PLUGIN (conv_features) & PURPLE_CONNECTION_HTML)
 	{
 	  gtk_imhtml_insert_link (imhtml, mark, url,
@@ -121,14 +123,24 @@ real_insert_link (PurplePlugin * plugin, const gchar * url)
 	}
       else
 	{
-	  GtkTextIter iter;
+	  GtkTextIter iter, bw_iter;
+	  gchar * last_char;
 
-	  gtk_text_buffer_get_iter_at_mark
-	    (gtk_text_view_get_buffer (GTK_TEXT_VIEW (imhtml)), &iter, mark);
+	  gtk_text_buffer_get_iter_at_mark (textbf, &iter, mark);
+	  bw_iter = iter;
 
-	  gtk_text_buffer_insert (gtk_text_view_get_buffer
-				  (GTK_TEXT_VIEW (imhtml)), &iter,
-				  url, (gint) strlen (url));
+	  /* add a space to prevent messing up with previous text */
+	  if (gtk_text_iter_backward_char (&bw_iter))
+	    {
+	      last_char = gtk_text_iter_get_slice  (&bw_iter, &iter);
+	      /* not a space nor a tabulation */
+	      if (last_char[0] != 0x20 && last_char[0] != 0x9) {
+		gtk_text_buffer_insert (textbf, &iter, " ", 1);
+		mark = gtk_text_buffer_get_insert (textbf);
+		gtk_text_buffer_get_iter_at_mark (textbf, &iter, mark);
+	      }
+	    }
+	  gtk_text_buffer_insert (textbf, &iter, url, (gint) strlen (url));
 	}
     }
 }
