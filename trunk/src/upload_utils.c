@@ -124,7 +124,7 @@ real_insert_link (PurplePlugin * plugin, const gchar * url)
       else
 	{
 	  GtkTextIter iter, bw_iter;
-	  gchar * last_char;
+	  gchar * last_char = NULL;
 
 	  gtk_text_buffer_get_iter_at_mark (textbf, &iter, mark);
 	  bw_iter = iter;
@@ -134,7 +134,7 @@ real_insert_link (PurplePlugin * plugin, const gchar * url)
 	    {
 	      last_char = gtk_text_iter_get_slice  (&bw_iter, &iter);
 	      /* not a space nor a tabulation */
-	      if (last_char[0] != 0x20 && last_char[0] != 0x9) {
+	      if (last_char && last_char[0] != 0x20 && last_char[0] != 0x9) {
 		gtk_text_buffer_insert (textbf, &iter, " ", 1);
 		mark = gtk_text_buffer_get_insert (textbf);
 		gtk_text_buffer_get_iter_at_mark (textbf, &iter, mark);
