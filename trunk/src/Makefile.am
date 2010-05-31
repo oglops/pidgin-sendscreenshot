@@ -16,7 +16,8 @@ EXTRA_DIST = \
 	dialogs.h \
 	mswin-freeze.c \
 	mswin-freeze.h \
-	error.h
+	error.h \
+	cues.h
 
 ardir = $(PIDGIN_LIBDIR)/pidgin
 
@@ -33,7 +34,8 @@ screenshot_la_SOURCES = \
 	screencap.c \
 	pixbuf_utils.c \
 	menus.c \
-	dialogs.c
+	dialogs.c \
+	cues.c
 
 if ENABLE_UPLOAD
 screenshot_la_SOURCES += \

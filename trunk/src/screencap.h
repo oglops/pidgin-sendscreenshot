@@ -31,11 +31,11 @@
 #define BORDER_WIDTH 1
 
 typedef enum {
-  LighenUp=1,
-  Darken=2,
-  InvertOnly=3,
-  BordersOnly=4,
-  Grayscale=5
+    LighenUp = 1,
+    Darken = 2,
+    InvertOnly = 3,
+    BordersOnly = 4,
+    Grayscale = 5
 } HighlightMode;
 
 /*

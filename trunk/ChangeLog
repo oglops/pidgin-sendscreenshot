@@ -1,7 +1,9 @@
 Pidgin Screenshot Plugin Changelog
 
 Version 0.9
-
+	* New design for preferences window (tabs).
+	* Add a space before inserting a link, if necessary.
+	
 	
 Version 0.8-1 04/18/10:
 	* Present conversation to show upload link if it is closed 
