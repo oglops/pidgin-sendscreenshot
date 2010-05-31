@@ -1,5 +1,6 @@
- /*
-  * Pidgin SendScreenshot third-party plugin - menus and menuitems-
+
+/*
+  *  Pidgin SendScreenshot plugin - cues funcs, header -
   *
   * This program is free software; you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -20,24 +21,17 @@
   *
   */
 
-#ifndef __MENUS_H__
-#define __MENUS_H__ 1
+#ifndef __CUES_H__
+#define __CUES_H__ 1
+
+#define CUE_LENGTH 16
 
 #include "main.h"
 
-void create_plugin_menuitems (PurpleConversation * conv);
+void draw_cues (gboolean double_buff, PurplePlugin * plugin);
 
-void remove_pidgin_menuitems (PurpleConversation * conv);
+void erase_cues (PurplePlugin * plugin);
 
-void
+#endif /* __CUES_H__ */
 
-
-
-
-
-
-buddy_context_menu_add_item (PurpleBlistNode * node,
-			     GList ** menu, PurplePlugin * plugin);
-#endif
-
-/* end of menus.h */
+/* end of cues.h */

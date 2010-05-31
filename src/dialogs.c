@@ -25,141 +25,138 @@
 
 /* stolen from gtkfilechooserentry.c */
 static gboolean
-entry_select_filename_in_focus_cb (GtkWidget * entry, GdkEventFocus * event)
-{
-  const gchar *str, *ext;
-  glong len = -1;
+entry_select_filename_in_focus_cb (GtkWidget * entry, GdkEventFocus * event) {
+    const gchar *str, *ext;
+    glong len = -1;
 
-  str = gtk_entry_get_text (GTK_ENTRY (entry));
-  ext = g_strrstr (str, ".");
+    str = gtk_entry_get_text (GTK_ENTRY (entry));
+    ext = g_strrstr (str, ".");
 
-  if (ext)
-    len = g_utf8_pointer_to_offset (str, ext);
+    if (ext)
+	len = g_utf8_pointer_to_offset (str, ext);
 
-  gtk_editable_select_region (GTK_EDITABLE (entry), 0, (gint) len);
+    gtk_editable_select_region (GTK_EDITABLE (entry), 0, (gint) len);
 
-  (void) event;
-  return TRUE;
+    (void) event;
+    return TRUE;
 }
 
 /* part stolen from gtkutils.c */
 static void
 set_sensitive_if_input_and_noexist (GtkWidget * entry,
-				    GtkWidget * dlgbox_rename)
-{
-  GtkWidget *warn_label;
-  gchar *capture_path_filename = NULL;
-  const gchar *text;
+				    GtkWidget * dlgbox_rename) {
+    GtkWidget *warn_label;
+    gchar *capture_path_filename = NULL;
+    const gchar *text;
 
-  warn_label = g_object_get_data (G_OBJECT (dlgbox_rename), "warn-label");
+    warn_label = g_object_get_data (G_OBJECT (dlgbox_rename), "warn-label");
 
-  text = gtk_entry_get_text (GTK_ENTRY (entry));
+    text = gtk_entry_get_text (GTK_ENTRY (entry));
 
-  capture_path_filename =
-    g_build_filename (purple_prefs_get_string (PREF_STORE_FOLDER),
-		      text, NULL);
+    capture_path_filename =
+	g_build_filename (purple_prefs_get_string (PREF_STORE_FOLDER),
+			  text, NULL);
 
-  gtk_dialog_set_response_sensitive (GTK_DIALOG (dlgbox_rename),
-				     GTK_RESPONSE_OK, (*text != '\0'));
-  /* warn user if file already exists */
-  if (g_file_test (capture_path_filename, G_FILE_TEST_EXISTS)
-      && (*text != '\0'))
-    gtk_widget_show (warn_label);
-  else
-    gtk_widget_hide (warn_label);
+    gtk_dialog_set_response_sensitive (GTK_DIALOG (dlgbox_rename),
+				       GTK_RESPONSE_OK, (*text != '\0'));
+    /* warn user if file already exists */
+    if (g_file_test (capture_path_filename, G_FILE_TEST_EXISTS)
+	&& (*text != '\0'))
+	gtk_widget_show (warn_label);
+    else
+	gtk_widget_hide (warn_label);
 
-  if (capture_path_filename != NULL)
-    g_free (capture_path_filename);
+    if (capture_path_filename != NULL)
+	g_free (capture_path_filename);
 }
 
 /* part stolen from pidgin/gtkconv.c */
 static GtkWidget *
-capture_rename (PurplePlugin * plugin, const gchar * entry_init)
-{
-  GdkColor red = { 0, 65535, 0, 0 };
-  GtkWidget *dlgbox_rename;
-  GtkWidget *hbox;
-  GtkWidget *label;
-  GtkWidget *entry;
-  GtkWidget *warn_label;
-  GtkWidget *gtkconv_window;
-  GtkWidget *blist_window;
-  GtkWidget *img;
-  GtkWidget *content_area;
+capture_rename (PurplePlugin * plugin, const gchar * entry_init) {
+    GdkColor red = { 0, 65535, 0, 0 };
+    GtkWidget *dlgbox_rename;
+    GtkWidget *hbox;
+    GtkWidget *label;
+    GtkWidget *entry;
+    GtkWidget *warn_label;
+    GtkWidget *gtkconv_window;
+    GtkWidget *blist_window;
+    GtkWidget *img;
+    GtkWidget *content_area;
 
-  img =
-    gtk_image_new_from_stock (PIDGIN_STOCK_DIALOG_QUESTION,
-			      gtk_icon_size_from_name
-			      (PIDGIN_ICON_SIZE_TANGO_HUGE));
-  gtkconv_window = get_receiver_window (plugin);
-  blist_window = pidgin_blist_get_default_gtk_blist ()->window;
+    img =
+	gtk_image_new_from_stock (PIDGIN_STOCK_DIALOG_QUESTION,
+				  gtk_icon_size_from_name
+				  (PIDGIN_ICON_SIZE_TANGO_HUGE));
+    gtkconv_window = get_receiver_window (plugin);
+    blist_window = pidgin_blist_get_default_gtk_blist ()->window;
 
-  dlgbox_rename = gtk_dialog_new_with_buttons (DLGBOX_CAPNAME_TITLE,
-					       GTK_WINDOW ((gtkconv_window) ?
-							   gtkconv_window :
-							   blist_window),
-					       GTK_DIALOG_MODAL |
-					       GTK_DIALOG_DESTROY_WITH_PARENT,
-					       GTK_STOCK_OK, GTK_RESPONSE_OK,
-					       NULL);
+    dlgbox_rename = gtk_dialog_new_with_buttons (DLGBOX_CAPNAME_TITLE,
+						 GTK_WINDOW ((gtkconv_window)
+							     ? gtkconv_window
+							     : blist_window),
+						 GTK_DIALOG_MODAL |
+						 GTK_DIALOG_DESTROY_WITH_PARENT,
+						 GTK_STOCK_OK,
+						 GTK_RESPONSE_OK, NULL);
 
 #if GTK_CHECK_VERSION(2,14,0)
-  content_area = gtk_dialog_get_content_area (GTK_DIALOG (dlgbox_rename));
+    content_area = gtk_dialog_get_content_area (GTK_DIALOG (dlgbox_rename));
 #else
-  content_area = GTK_DIALOG (dlgbox_rename)->vbox;
+    content_area = GTK_DIALOG (dlgbox_rename)->vbox;
 #endif
 
-  gtk_dialog_set_default_response (GTK_DIALOG (dlgbox_rename),
-				   GTK_RESPONSE_OK);
+    gtk_dialog_set_default_response (GTK_DIALOG (dlgbox_rename),
+				     GTK_RESPONSE_OK);
 
-  gtk_container_set_border_width (GTK_CONTAINER
-				  (dlgbox_rename), PIDGIN_HIG_BOX_SPACE);
-  gtk_window_set_resizable (GTK_WINDOW (dlgbox_rename), FALSE);
-  gtk_dialog_set_has_separator (GTK_DIALOG (dlgbox_rename), FALSE);
-  gtk_box_set_spacing (GTK_BOX (content_area), PIDGIN_HIG_BORDER);
-  gtk_container_set_border_width (GTK_CONTAINER (content_area),
-				  PIDGIN_HIG_BOX_SPACE);
+    gtk_container_set_border_width (GTK_CONTAINER
+				    (dlgbox_rename), PIDGIN_HIG_BOX_SPACE);
+    gtk_window_set_resizable (GTK_WINDOW (dlgbox_rename), FALSE);
+    gtk_dialog_set_has_separator (GTK_DIALOG (dlgbox_rename), FALSE);
+    gtk_box_set_spacing (GTK_BOX (content_area), PIDGIN_HIG_BORDER);
+    gtk_container_set_border_width (GTK_CONTAINER (content_area),
+				    PIDGIN_HIG_BOX_SPACE);
 
-  hbox = gtk_hbox_new (FALSE, PIDGIN_HIG_BORDER);
-  gtk_container_add (GTK_CONTAINER (content_area), hbox);
-  gtk_box_pack_start (GTK_BOX (hbox), img, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new (FALSE, PIDGIN_HIG_BORDER);
+    gtk_container_add (GTK_CONTAINER (content_area), hbox);
+    gtk_box_pack_start (GTK_BOX (hbox), img, FALSE, FALSE, 0);
 
-  gtk_misc_set_alignment (GTK_MISC (img), 0, 0);
-  label = gtk_label_new (DLGBOX_CAPNAME_LABEL);
+    gtk_misc_set_alignment (GTK_MISC (img), 0, 0);
+    label = gtk_label_new (DLGBOX_CAPNAME_LABEL);
 
-  warn_label = gtk_label_new (NULL);
+    warn_label = gtk_label_new (NULL);
 
-  gtk_widget_modify_fg (warn_label, GTK_STATE_NORMAL, &red);
-  gtk_label_set_text (GTK_LABEL (warn_label), DLGBOX_CAPNAME_WARNEXISTS);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
-  gtk_box_pack_start (GTK_BOX (content_area), warn_label, FALSE, FALSE, 0);
-  entry = gtk_entry_new ();
+    gtk_widget_modify_fg (warn_label, GTK_STATE_NORMAL, &red);
+    gtk_label_set_text (GTK_LABEL (warn_label), DLGBOX_CAPNAME_WARNEXISTS);
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (content_area), warn_label, FALSE, FALSE, 0);
+    entry = gtk_entry_new ();
 
-  gtk_entry_set_text (GTK_ENTRY (entry), entry_init);
+    gtk_entry_set_text (GTK_ENTRY (entry), entry_init);
 
-  gtk_entry_set_activates_default (GTK_ENTRY (entry), TRUE);
+    gtk_entry_set_activates_default (GTK_ENTRY (entry), TRUE);
 
-  g_object_set (gtk_widget_get_settings (entry),
-		"gtk-entry-select-on-focus", FALSE, NULL);
-  g_signal_connect (G_OBJECT (entry), "changed",
-		    G_CALLBACK (set_sensitive_if_input_and_noexist),
-		    dlgbox_rename /* plugin */ );
-  g_signal_connect (G_OBJECT (entry), "focus-out-event",
-		    G_CALLBACK (entry_select_filename_in_focus_cb), plugin);
+    g_object_set (gtk_widget_get_settings (entry),
+		  "gtk-entry-select-on-focus", FALSE, NULL);
+    g_signal_connect (G_OBJECT (entry), "changed",
+		      G_CALLBACK (set_sensitive_if_input_and_noexist),
+		      dlgbox_rename /* plugin */ );
+    g_signal_connect (G_OBJECT (entry), "focus-out-event",
+		      G_CALLBACK (entry_select_filename_in_focus_cb), plugin);
 
-  g_signal_connect (G_OBJECT (entry), "focus-in-event",
-		    G_CALLBACK (entry_select_filename_in_focus_cb), plugin);
-  gtk_box_pack_start (GTK_BOX (hbox), entry, FALSE, FALSE, 0);
+    g_signal_connect (G_OBJECT (entry), "focus-in-event",
+		      G_CALLBACK (entry_select_filename_in_focus_cb), plugin);
+    gtk_box_pack_start (GTK_BOX (hbox), entry, FALSE, FALSE, 0);
 
-  gtk_widget_show (label);
-  gtk_widget_show (entry);
-  gtk_widget_show (img);
-  gtk_widget_show (hbox);
-  gtk_widget_show (content_area);
+    gtk_widget_show (label);
+    gtk_widget_show (entry);
+    gtk_widget_show (img);
+    gtk_widget_show (hbox);
+    gtk_widget_show (content_area);
 
-  g_object_set_data (G_OBJECT (dlgbox_rename), "entry", entry);
-  g_object_set_data (G_OBJECT (dlgbox_rename), "warn-label", warn_label);
-  return dlgbox_rename;
+    g_object_set_data (G_OBJECT (dlgbox_rename), "entry", entry);
+    g_object_set_data (G_OBJECT (dlgbox_rename), "warn-label", warn_label);
+    return dlgbox_rename;
 }
 
 /** Eventually ask for a custom capture name when sending :
@@ -167,35 +164,32 @@ capture_rename (PurplePlugin * plugin, const gchar * entry_init)
     - to a remote FTP server
 */
 void
-screenshot_maybe_rename (PurplePlugin * plugin, gchar ** basename)
-{
-  g_assert (plugin != NULL && plugin->extra != NULL);
+screenshot_maybe_rename (PurplePlugin * plugin, gchar ** basename) {
+    g_assert (plugin != NULL && plugin->extra != NULL);
 
-  if (purple_prefs_get_bool (PREF_ASK_FILENAME) &&
-      (PLUGIN (send_as) == SEND_AS_FILE
+    if (purple_prefs_get_bool (PREF_ASK_FILENAME) &&
+	(PLUGIN (send_as) == SEND_AS_FILE
 #ifdef ENABLE_UPLOAD
-       || PLUGIN (send_as) == SEND_AS_FTP_LINK)
+	 || PLUGIN (send_as) == SEND_AS_FTP_LINK)
 #else
-      )
+	)
 #endif
-    )
-    {
-      GtkWidget *dlgbox_rename = NULL;
-      gint result = 0;
+	) {
+	GtkWidget *dlgbox_rename = NULL;
+	gint result = 0;
 
-      dlgbox_rename = capture_rename (plugin, *basename);
-      result = gtk_dialog_run (GTK_DIALOG (dlgbox_rename));
+	dlgbox_rename = capture_rename (plugin, *basename);
+	result = gtk_dialog_run (GTK_DIALOG (dlgbox_rename));
 
-      if (result == GTK_RESPONSE_OK)
-	{
-	  GtkWidget *entry = NULL;
+	if (result == GTK_RESPONSE_OK) {
+	    GtkWidget *entry = NULL;
 
-	  entry = g_object_get_data (G_OBJECT (dlgbox_rename), "entry");
+	    entry = g_object_get_data (G_OBJECT (dlgbox_rename), "entry");
 
-	  g_free (*basename);
-	  *basename = g_strdup (gtk_entry_get_text (GTK_ENTRY (entry)));
+	    g_free (*basename);
+	    *basename = g_strdup (gtk_entry_get_text (GTK_ENTRY (entry)));
 	}
-      gtk_widget_destroy (dlgbox_rename);
+	gtk_widget_destroy (dlgbox_rename);
     }
 }
 

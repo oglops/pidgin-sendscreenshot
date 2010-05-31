@@ -150,107 +150,112 @@ G_LOCK_EXTERN (unload);
   PLUGIN (name) = g_strdup_printf ("%s", purple_conversation_get_name(conv->active_conv))
 
 #ifdef ENABLE_UPLOAD
-typedef enum
-{ SEND_AS_FILE, SEND_AS_IMAGE, SEND_AS_HTTP_LINK, SEND_AS_FTP_LINK } SendType;
+typedef enum { SEND_AS_FILE, SEND_AS_IMAGE, SEND_AS_HTTP_LINK,
+    SEND_AS_FTP_LINK
+} SendType;
 #else
-typedef enum
-{ SEND_AS_FILE, SEND_AS_IMAGE } SendType;
+typedef enum { SEND_AS_FILE, SEND_AS_IMAGE } SendType;
 #endif
 
-typedef enum
-{ SELECT_REGULAR, SELECT_CENTER_HOLD} SelectionMode;
+typedef enum { SELECT_REGULAR, SELECT_CENTER_HOLD } SelectionMode;
 
 typedef enum {
-  ResizeAny,
-  ResizeNone,
-  ResizeBottomLeft,
-  ResizeBottomRight,
-  ResizeTopLeft,
-  ResizeTopRight,
-  ResizeLeft,
-  ResizeRight,
-  ResizeTop,
-  ResizeBottom
+    ResizeAny,
+    ResizeNone,
+    ResizeBottomLeft,
+    ResizeBottomRight,
+    ResizeTopLeft,
+    ResizeTopRight,
+    ResizeLeft,
+    ResizeRight,
+    ResizeTop,
+    ResizeBottom
 } ResizeMode;
-
 
 /* functions */
 GtkWidget *get_receiver_window (PurplePlugin * plugin);
 GtkIMHtml *get_receiver_imhtml (PurplePlugin * plugin);
 void plugin_stop (PurplePlugin * plugin);
 
+#define selection_defined(plugin)\
+  PLUGIN (x1) != -1
+
 /* main struct holding data */
-typedef struct
-{
-  /* prevent two instances of SndScreenshot to run
-     simultenaously */
-  gboolean running;
+typedef struct {
+    /* prevent two instances of SndScreenshot to run
+       simultenaously */
+    gboolean running;
 
-  SendType send_as;
+    SendType send_as;
 
-  /* to display frozen desktop state */
-  GdkGC *gc;
-  GtkWidget *root_window;
-  /* used to catch events */
-  GtkWidget *root_events;
+    /* to display frozen desktop state */
+    GdkGC *gc;
+    GtkWidget *root_window;
+    /* used to catch events */
+    GtkWidget *root_events;
 
-  /* original image */
-  GdkPixbuf *root_pixbuf_orig;
-  /* modified image (highlight mode) */
-  GdkPixbuf *root_pixbuf_x;
-  /* regions to paint into */
-  GdkRegion *border_new, *border_old, *new, *old;
- 
-  /* where to send capture ? */
-  PurpleConnectionFlags conv_features;
-  PurpleConversationType conv_type;
-  PurpleAccount *account;
-  gchar *name;
+    /* original image */
+    GdkPixbuf *root_pixbuf_orig;
+    /* modified image (highlight mode) */
+    GdkPixbuf *root_pixbuf_x;
+    /* regions to paint into */
 
-  /* conv window is minimized */
-  gboolean iconified;
+    GdkRegion *border_new, *border_old, *new, *old;
 
-  /* capture area */
-  gint x1, y1, x2, y2, _x, _y;
-  SelectionMode select_mode;
-  ResizeMode resize_mode;
-  gboolean resize_allow;
+    /* where to send capture ? */
+    PurpleConnectionFlags conv_features;
+    PurpleConversationType conv_type;
+    PurpleAccount *account;
+    gchar *name;
 
-  /* screenshot's location */
-  gchar *capture_path_filename;
+    /* conv window is minimized */
+    gboolean iconified;
 
-  GError *error;
+    /* capture area */
+    gint x1, y1, x2, y2, _x, _y;
+    SelectionMode select_mode;
+    ResizeMode resize_mode;
+    gboolean resize_allow;
+    /* to see animated cues */
+    gint cue_offset;
+    gint cue_x, cue_y, __cue_x, __cue_y;
+
+    guint timeout_source;
+
+    /* screenshot's location */
+    gchar *capture_path_filename;
+
+    GError *error;
 
 #ifdef ENABLE_UPLOAD
-  GtkWidget *uploading_dialog;
-  GThread *libcurl_thread;
-  gchar *xml_hosts_filename;
-  guint timeout_cb_handle;
+    GtkWidget *uploading_dialog;
+    GThread *libcurl_thread;
+    gchar *xml_hosts_filename;
+    guint timeout_cb_handle;
 
-  /* ftp stuff */
-  off_t read_size;
-  off_t total_size;
-   
-  /* host data from xml */
-  struct host_param_data
-  {
-    gchar *xml_hosts_version;
-    gchar *selected_hostname;
-    gchar *form_action;
-    gchar *file_input_name;
-    gchar *regexp;
+    /* ftp stuff */
+    off_t read_size;
+    off_t total_size;
 
-    gchar *html_response;
+    /* host data from xml */
+    struct host_param_data {
+	gchar *xml_hosts_version;
+	gchar *selected_hostname;
+	gchar *form_action;
+	gchar *file_input_name;
+	gchar *regexp;
 
-    GArray *host_names;
-    GArray *extra_names;
-    GArray *extra_values;
+	gchar *html_response;
 
-    gboolean is_inside;
-    gboolean quit_handlers;
+	GArray *host_names;
+	GArray *extra_names;
+	GArray *extra_values;
 
-    /* needed by conf dialog */
-  } *host_data;
+	gboolean is_inside;
+	gboolean quit_handlers;
+
+	/* needed by conf dialog */
+    } *host_data;
 #endif
 
 } PluginExtraVars;

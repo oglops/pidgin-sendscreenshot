@@ -25,7 +25,7 @@
 
 #include "main.h"
 
-void screenshot_maybe_rename (PurplePlugin * plugin, gchar **  basename);
+void screenshot_maybe_rename (PurplePlugin * plugin, gchar ** basename);
 
 #endif
 

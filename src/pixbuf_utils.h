@@ -19,7 +19,7 @@ mygdk_pixbuf_check_maxsize (GdkPixbuf * pixbuf,
 			    gint max_width, gint max_height);
 
 void
-mask_monitors (GdkPixbuf * pixbuf, GdkWindow * root_window, gint x, gint y);
+  mask_monitors (GdkPixbuf * pixbuf, GdkWindow * root_window, gint x, gint y);
 
 #define BEGIN_PIXBUF_FORALL(pixbuf)\
   guchar *pixels;\

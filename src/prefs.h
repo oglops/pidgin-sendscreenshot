@@ -45,7 +45,6 @@
 #define PREF_ONLY_SAVE_WHEN PREF_PREFIX "/only-save-when"
 #define PREF_SHOW_VISUAL_CUES PREF_PREFIX "/show_visualcues"
 #define PREF_WAIT_BEFORE_SCREENSHOT PREF_PREFIX "/wait_time"
-#define PREF_RETURN_IMMEDIATELY PREF_PREFIX "return-immediately"
 #define PREF_ADD_SIGNATURE PREF_PREFIX "/add-signature"
 #define PREF_SIGNATURE_FILENAME PREF_PREFIX "/signature-filename"
 
@@ -102,7 +101,6 @@
 #define PREF_UI_SHOW_VISUAL_CUES _("Show visual cues.")
 
 #define PREF_UI_WAIT_BEFORE_SCREENSHOT _("Seconds to wait before desktop freezes:")
-#define PREF_UI_RETURN_IMMEDIATELY _("Immediately return after mouse release.")
 
 #ifdef ENABLE_UPLOAD
 #define TAB_1 _("General")
