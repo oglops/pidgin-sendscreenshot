@@ -167,7 +167,7 @@ __private_f_cues (gboolean on, gboolean double_buff,	/* see expose-event handler
 	PLUGIN (__cue_x) = PLUGIN (cue_x);
 	PLUGIN (__cue_y) = PLUGIN (cue_y);
 
-	if (!PLUGIN (timeout_source)) {
+	if (PLUGIN (timeout_source) == 0) {
 	    PLUGIN (timeout_source) =
 		g_timeout_add (32, update_cue_offset, plugin);
 	}
@@ -188,7 +188,6 @@ draw_cues (gboolean double_buff, PurplePlugin * plugin) {
 
 void
 erase_cues (PurplePlugin * plugin) {
-
     g_assert (plugin != NULL);
 
     if (PLUGIN (timeout_source) != 0) {
@@ -197,8 +196,6 @@ erase_cues (PurplePlugin * plugin) {
     }
 
     __private_f_cues (FALSE, TRUE, plugin);
-
-
 }
 
 /* end of cues.c */

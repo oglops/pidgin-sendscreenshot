@@ -34,14 +34,17 @@
     g_free(strmsg);\
   }
 
-#define NotifyUploadError(strval,arg...)\
-  {\
-    gchar *strmsg;\
-    strmsg = g_strdup_printf(strval"\n\n%s\n%s", arg,\
-                             PLUGIN_UPLOAD_DISCLOC_ERROR,\
-                             PLUGIN (capture_path_filename));\
-    purple_notify_error(plugin, PLUGIN_NAME, PLUGIN_ERROR, strmsg);\
-    g_free(strmsg);\
+#define NotifyUploadError(strval,arg...)				\
+  {									\
+  gchar *strmsg;							\
+  if (need_save())							\
+      strmsg = g_strdup_printf(strval"\n\n%s\n%s", arg,			\
+			       PLUGIN_UPLOAD_DISCLOC_ERROR,		\
+			       PLUGIN (capture_path_filename));		\
+  else									\
+    strmsg = g_strdup_printf(strval, arg);				\
+  purple_notify_error(plugin, PLUGIN_NAME, PLUGIN_ERROR, strmsg);	\
+  g_free(strmsg);							\
   }
 
 typedef enum {

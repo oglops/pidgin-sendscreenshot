@@ -117,6 +117,7 @@
 
 GtkWidget *get_plugin_pref_frame (PurplePlugin * plugin);
 
+/* should we save or discard the screenshot file ? */
 #define need_save()\
   ((purple_prefs_get_bool (PREF_ONLY_SAVE_WHEN) && PLUGIN (send_as) == SEND_AS_FILE) || \
    !purple_prefs_get_bool (PREF_ONLY_SAVE_WHEN))

@@ -22,7 +22,7 @@
  */
 
 #ifndef __SCREENSHOT_H__
-#define __SCREENSHOT_H__
+#define __SCREENSHOT_H__ 1
 
 #ifdef HAVE_CONFIG_H
 # include "../config.h"
@@ -50,6 +50,8 @@
 #include <gtkblist.h>
 #include <glib/gstdio.h>
 
+
+
 #ifdef HAVE_LIBCURL
 #include <curl/curl.h>
 #include <curl/types.h>
@@ -64,6 +66,8 @@
 #ifndef G_MARKUP_ERROR_MISSING_ATTRIBUTE
 #define G_MARKUP_ERROR_MISSING_ATTRIBUTE G_MARKUP_ERROR_PARSE
 #endif
+
+
 
 #define gettext_noop(String) String
 
@@ -157,7 +161,9 @@ typedef enum { SEND_AS_FILE, SEND_AS_IMAGE, SEND_AS_HTTP_LINK,
 typedef enum { SEND_AS_FILE, SEND_AS_IMAGE } SendType;
 #endif
 
-typedef enum { SELECT_REGULAR, SELECT_CENTER_HOLD } SelectionMode;
+typedef enum { SELECT_REGULAR, SELECT_CENTER_HOLD,
+    SELECT_MOVE
+} SelectionMode;
 
 typedef enum {
     ResizeAny,
@@ -169,8 +175,9 @@ typedef enum {
     ResizeLeft,
     ResizeRight,
     ResizeTop,
-    ResizeBottom
+    ResizeBottom,
 } ResizeMode;
+
 
 /* functions */
 GtkWidget *get_receiver_window (PurplePlugin * plugin);
@@ -207,20 +214,25 @@ typedef struct {
     PurpleConversationType conv_type;
     PurpleAccount *account;
     gchar *name;
+    gint val;
+    guint source;
 
     /* conv window is minimized */
     gboolean iconified;
 
     /* capture area */
-    gint x1, y1, x2, y2, _x, _y;
+    gint x1, y1, x2, y2;
+
     SelectionMode select_mode;
     ResizeMode resize_mode;
     gboolean resize_allow;
-    /* to see animated cues */
+
+    /* cues */
     gint cue_offset;
     gint cue_x, cue_y, __cue_x, __cue_y;
-
     guint timeout_source;
+
+    gint pressed_x, pressed_y;
 
     /* screenshot's location */
     gchar *capture_path_filename;
@@ -257,8 +269,8 @@ typedef struct {
 	/* needed by conf dialog */
     } *host_data;
 #endif
-
 } PluginExtraVars;
-#endif
+
+#endif /* __SCREENSHOT_H__ */
 
 /* end of main.h */
