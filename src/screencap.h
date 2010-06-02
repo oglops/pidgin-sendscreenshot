@@ -23,7 +23,10 @@
 #ifndef __SCREENCAP_H__
 #define __SCREENCAP_H__ 1
 
+
 #include "main.h"
+
+
 #include "debug.h"
 
 /* selection border width :
@@ -37,6 +40,7 @@ typedef enum {
     BordersOnly = 4,
     Grayscale = 5
 } HighlightMode;
+
 
 /*
  * If we immediately freeze the screen, then the menuitem we just
@@ -64,14 +68,10 @@ typedef enum {
   PLUGIN (resize_mode) = ResizeAny;			\
   PLUGIN (resize_allow) = FALSE
 
-#define MIN_X(plugin)\
+#define CAPTURE_X0(plugin)\
   MIN(PLUGIN (x1), PLUGIN (x2))
-#define MAX_X(plugin)\
-  MAX(PLUGIN (x1), PLUGIN (x2))
-#define MIN_Y(plugin)\
+#define CAPTURE_Y0(plugin)\
   MIN(PLUGIN (y1), PLUGIN (y2))
-#define MAX_Y(plugin)\
-  MAX(PLUGIN (y1), PLUGIN (y2))
 #define CAPTURE_WIDTH(plugin)\
   ABS(PLUGIN (x2) - PLUGIN (x1)) + 1
 #define CAPTURE_HEIGHT(plugin)\
@@ -85,9 +85,7 @@ typedef enum {
   PLUGIN (x1) = -1;\
   PLUGIN (y1) = -1;\
   PLUGIN (x2) = -1;\
-  PLUGIN (y2) = -1;\
-  PLUGIN (_x) = -1;\
-  PLUGIN (_y) = -1
+  PLUGIN (y2) = -1
 
 /* prototypes */
 void prepare_root_window (PurplePlugin * plugin);

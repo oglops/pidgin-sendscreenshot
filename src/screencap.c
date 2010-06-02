@@ -233,19 +233,22 @@ plugin_cancel (PurplePlugin * plugin) {
 #define DETECT_THRESHOLD 7
 
 static void
-change_arrow (gint x, gint y, PurplePlugin * plugin) {
+maybe_change_cursor (gint x, gint y, PurplePlugin * plugin) {
     GdkWindow *gdkwin;
     GdkCursor *cursor;
 
     gint x1, x2, y1, y2;
 
-    x1 = MIN_X (plugin);
-    y1 = MIN_Y (plugin);
+    x1 = CAPTURE_X0 (plugin);
+    y1 = CAPTURE_Y0 (plugin);
 
     x2 = x1 + CAPTURE_WIDTH (plugin) - 1;
     y2 = y1 + CAPTURE_HEIGHT (plugin) - 1;
 
     gdkwin = gtk_widget_get_window (PLUGIN (root_window));
+
+
+    PLUGIN (select_mode) = SELECT_REGULAR;
 
     /* top left */
     if (ABS (y - y1) < DETECT_THRESHOLD && ABS (x - x1) < DETECT_THRESHOLD) {
@@ -290,6 +293,12 @@ change_arrow (gint x, gint y, PurplePlugin * plugin) {
 	cursor = gdk_cursor_new (GDK_BOTTOM_SIDE);
 	PLUGIN (resize_mode) = ResizeBottom;
     }
+    /* inside */
+    else if (x > x1 && x < x2 && y > y1 && y < y2) {
+	cursor = gdk_cursor_new (GDK_FLEUR);
+	PLUGIN (resize_mode) = ResizeAny;
+	PLUGIN (select_mode) = SELECT_MOVE;
+    }
     else {
 	cursor = gdk_cursor_new (GDK_LEFT_PTR);
 	PLUGIN (resize_mode) = ResizeNone;
@@ -302,16 +311,21 @@ static gboolean
 on_root_window_motion_notify_cb (GtkWidget * root_window,
 				 GdkEventMotion * event,
 				 PurplePlugin * plugin) {
-    PLUGIN (cue_x) = event->x;
-    PLUGIN (cue_y) = event->y;
 
+    if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)) {
+	PLUGIN (cue_x) = event->x;
+	PLUGIN (cue_y) = event->y;
+    }
+
+    /* select approriate mouse cursos */
     if (PLUGIN (resize_allow) && (event->state & GDK_BUTTON1_MASK) == 0)
-	change_arrow (event->x, event->y, plugin);
+	maybe_change_cursor (event->x, event->y, plugin);
 
     /* mouse button pressed */
     if ((event->state & GDK_BUTTON1_MASK) == GDK_BUTTON1_MASK &&
 	selection_defined (plugin) && PLUGIN (resize_mode) != ResizeNone) {
-	gint oldx1, oldy1;
+	gint _x1, _y1, _x2, _y2;
+
 	GdkRectangle old_r, new_r;
 	GdkRegion *border_inter = NULL;
 	GdkWindow *gdkwin;
@@ -327,26 +341,30 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
 	gdkwin = root_window->window;
 #endif
 
-	if (PLUGIN (resize_mode) != ResizeTop &&
-	    PLUGIN (resize_mode) != ResizeBottom)
-	    PLUGIN (x2) = (gint) event->x;
-	if (PLUGIN (resize_mode) != ResizeLeft &&
-	    PLUGIN (resize_mode) != ResizeRight)
-	    PLUGIN (y2) = (gint) event->y;
+	/* remember previous coordinates */
+	_x1 = PLUGIN (x1);
+	_y1 = PLUGIN (y1);
+	_x2 = PLUGIN (x2);
+	_y2 = PLUGIN (y2);
 
-	oldx1 = PLUGIN (x1);
-	oldy1 = PLUGIN (y1);
+	if (PLUGIN (select_mode) != SELECT_MOVE) {
+	    /* allow horizontal resizing */
+	    if (PLUGIN (resize_mode) != ResizeTop &&
+		PLUGIN (resize_mode) != ResizeBottom)
+		PLUGIN (x2) = (gint) event->x;
+	    /* allow vertical resizing */
+	    if (PLUGIN (resize_mode) != ResizeLeft &&
+		PLUGIN (resize_mode) != ResizeRight)
+		PLUGIN (y2) = (gint) event->y;
 
-	switch (PLUGIN (select_mode)) {
-	case SELECT_CENTER_HOLD:
-	    {
+	    if (PLUGIN (select_mode) == SELECT_CENTER_HOLD) {
 		GdkScreen *screen;
 		gint xdiff, ydiff;
 
 		screen = gdk_screen_get_default ();
 
-		xdiff = (gint) event->x - PLUGIN (_x);
-		ydiff = (gint) event->y - PLUGIN (_y);
+		xdiff = (gint) event->x - _x2;
+		ydiff = (gint) event->y - _y2;
 
 		if (PLUGIN (resize_mode) != ResizeTop &&
 		    PLUGIN (resize_mode) != ResizeBottom)
@@ -359,26 +377,45 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
 		    PLUGIN (y1) =
 			MIN (MAX (PLUGIN (y1) - ydiff, 0),
 			     gdk_screen_get_height (screen) - 1);
-		break;
 	    }
-	case SELECT_REGULAR:
-	    break;
-	default:
-	    purple_debug_error (PLUGIN_ID,
-				"%d isn't a correct select mode !\n",
-				PLUGIN (select_mode));
-	    return TRUE;
+	} else  {
+	    GdkScreen *screen;
+
+	    screen = gdk_screen_get_default ();
+
+	    gint dx, dy;
+
+	    dx = ((gint) event->x) - PLUGIN (pressed_x);
+	    dy = ((gint) event->y) - PLUGIN (pressed_y);
+
+	    if (PLUGIN (x1) + dx >= 0 &&
+		PLUGIN (x1) + dx < gdk_screen_get_width (screen) &&
+		PLUGIN (x2) + dx >= 0 &&
+		PLUGIN (x2) + dx < gdk_screen_get_width (screen)) {
+		PLUGIN (x1) += dx;
+		PLUGIN (x2) += dx;
+	    }
+
+	    if (PLUGIN (y1) + dy >= 0 &&
+		PLUGIN (y1) + dy < gdk_screen_get_height (screen) &&
+		PLUGIN (y2) + dy >= 0 &&
+		PLUGIN (y2) + dy < gdk_screen_get_height (screen)) {
+		PLUGIN (y1) += dy;
+		PLUGIN (y2) += dy;
+	    }
+	    PLUGIN (pressed_x) = (gint) event->x;
+	    PLUGIN (pressed_y) = (gint) event->y;
 	}
 
-	old_r.x = MIN (oldx1, PLUGIN (_x));
-	old_r.y = MIN (oldy1, PLUGIN (_y));
-	old_r.width = ABS (oldx1 - PLUGIN (_x)) + 1;
-	old_r.height = ABS (oldy1 - PLUGIN (_y)) + 1;
+	old_r.x = MIN (_x1, _x2);
+	old_r.y = MIN (_y1, _y2);
+	old_r.width = ABS (_x1 - _x2) + 1;
+	old_r.height = ABS (_y1 - _y2) + 1;
 
 	new_r.width = CAPTURE_WIDTH (plugin);
 	new_r.height = CAPTURE_HEIGHT (plugin);
-	new_r.x = MIN_X (plugin);
-	new_r.y = MIN_Y (plugin);
+	new_r.x = CAPTURE_X0 (plugin);
+	new_r.y = CAPTURE_Y0 (plugin);
 
 	if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != InvertOnly) {
 	    PLUGIN (old) = gdk_region_rectangle (&old_r);
@@ -473,10 +510,6 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
 
 	if (border_inter != NULL)
 	    gdk_region_destroy (border_inter);
-
-	/* remeber old coords */
-	PLUGIN (_x) = PLUGIN (x2);
-	PLUGIN (_y) = PLUGIN (y2);
     }
     return TRUE;
 }
@@ -489,8 +522,8 @@ clear_selection (PurplePlugin * plugin) {
 	GdkCursor *cursor = gdk_cursor_new (GDK_CROSSHAIR);
 
 	/* cancel current selection to try a new one */
-	area.x = MIN_X (plugin);
-	area.y = MIN_Y (plugin);
+	area.x = CAPTURE_X0 (plugin);
+	area.y = CAPTURE_Y0 (plugin);
 	area.width = CAPTURE_WIDTH (plugin);
 	area.height = CAPTURE_HEIGHT (plugin);
 
@@ -503,12 +536,13 @@ clear_selection (PurplePlugin * plugin) {
 	CLEAR_CAPTURE_AREA (plugin);
 	PLUGIN (resize_mode) = ResizeAny;
 	PLUGIN (resize_allow) = FALSE;
+	PLUGIN (select_mode) = SELECT_REGULAR;
 
 	gdk_window_set_cursor (gdkwin, cursor);
 	gdk_cursor_unref (cursor);
 
 	if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)) {
-	    g_assert (!PLUGIN (timeout_source));
+	    g_assert (PLUGIN (timeout_source) == 0);
 	    draw_cues (TRUE, plugin);
 	}
 
@@ -518,14 +552,12 @@ clear_selection (PurplePlugin * plugin) {
 #define SWAP_X()\
   {gint tmp =  PLUGIN (x1);\
    PLUGIN (x1) =  PLUGIN (x2);\
-   PLUGIN (x2) = tmp;\
-   PLUGIN (_x) = PLUGIN (x2);}
+   PLUGIN (x2) = tmp;}
 
 #define SWAP_Y()\
   {gint tmp =  PLUGIN (y1);\
    PLUGIN (y1) =  PLUGIN (y2);\
-   PLUGIN (y2) = tmp;\
-   PLUGIN (_y) = PLUGIN (y2);}
+   PLUGIN (y2) = tmp;}
 
 static gboolean
 on_root_window_button_press_cb (GtkWidget * root_window,
@@ -569,6 +601,11 @@ on_root_window_button_press_cb (GtkWidget * root_window,
 	    if (PLUGIN (y1) > PLUGIN (y2))
 		SWAP_Y ();
 	}
+	else if (PLUGIN (resize_mode) == ResizeAny &&
+		 PLUGIN (select_mode) == SELECT_MOVE) {
+	    PLUGIN (pressed_x) = (gint) event->x;
+	    PLUGIN (pressed_y) = (gint) event->y;
+	}
 	else if (PLUGIN (x1) == -1) {	/* start defining the capture area */
 	    GdkRegion *region = NULL;
 	    GdkRectangle rect;
@@ -577,8 +614,6 @@ on_root_window_button_press_cb (GtkWidget * root_window,
 	    PLUGIN (y1) = (gint) event->y;
 	    PLUGIN (x2) = (gint) event->x;
 	    PLUGIN (y2) = (gint) event->y;
-	    PLUGIN (_x) = PLUGIN (x2);
-	    PLUGIN (_y) = PLUGIN (y2);
 
 	    if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES))
 		erase_cues (plugin);
@@ -630,8 +665,8 @@ extract_capture (PurplePlugin * plugin) {
     g_assert (PLUGIN (root_pixbuf_orig) != NULL);
     capture =
 	gdk_pixbuf_new_subpixbuf (PLUGIN (root_pixbuf_orig),
-				  MIN_X (plugin),
-				  MIN_Y (plugin),
+				  CAPTURE_X0 (plugin),
+				  CAPTURE_Y0 (plugin),
 				  CAPTURE_WIDTH (plugin),
 				  CAPTURE_HEIGHT (plugin));
 
@@ -639,7 +674,7 @@ extract_capture (PurplePlugin * plugin) {
 	/* 2/ make invisible areas black */
 	mask_monitors (capture,
 		       gdk_get_default_root_window (),
-		       MIN_X (plugin), MIN_Y (plugin));
+		       CAPTURE_X0 (plugin), CAPTURE_Y0 (plugin));
 
 	/* 3/ add a signature to the bottom-right corner */
 	if (purple_prefs_get_bool (PREF_ADD_SIGNATURE)) {
@@ -912,7 +947,7 @@ on_root_window_expose_cb (GtkWidget * root_window,
 	if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)) {
 	    GdkDisplay *display = gdk_display_get_default ();
 
-	    g_assert (!PLUGIN (timeout_source));
+	    g_assert (PLUGIN (timeout_source) == 0);
 
 	    gdk_display_get_pointer (display, NULL, &PLUGIN (cue_x),
 				     &PLUGIN (cue_y), NULL);
@@ -934,7 +969,8 @@ on_root_window_key_press_event_cb (GtkWidget * root_events,
 	plugin_cancel (plugin);
 	break;
     case GDK_Control_L:
-	PLUGIN (select_mode) = SELECT_CENTER_HOLD;
+	if (PLUGIN (select_mode) != SELECT_MOVE)
+	    PLUGIN (select_mode) = SELECT_CENTER_HOLD;
 	break;
     case GDK_Return:
 	fetch_capture (plugin);

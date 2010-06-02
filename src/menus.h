@@ -36,6 +36,10 @@ void
 
 
 
+
+
+
+
 buddy_context_menu_add_item (PurpleBlistNode * node,
 			     GList ** menu, PurplePlugin * plugin);
 #endif
