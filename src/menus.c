@@ -563,12 +563,12 @@ buddy_context_menu_add_item (PurpleBlistNode * node, GList ** menu,
 
     if (PURPLE_BLIST_NODE_IS_BUDDY (node)) {
 	prpl_info =
-	    PURPLE_PLUGIN_PROTOCOL_INFO (((PurpleBuddy *) node)->account->
-					 gc->prpl);
+	    PURPLE_PLUGIN_PROTOCOL_INFO (((PurpleBuddy *) node)->account->gc->
+					 prpl);
 	if (prpl_info && prpl_info->send_file) {
 	    if (!prpl_info->can_receive_file ||
-		prpl_info->can_receive_file (((PurpleBuddy *) node)->
-					     account->gc,
+		prpl_info->can_receive_file (((PurpleBuddy *) node)->account->
+					     gc,
 					     ((PurpleBuddy *) node)->name)) {
 		PurpleMenuAction *action;
 

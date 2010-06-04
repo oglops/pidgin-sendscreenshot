@@ -222,10 +222,8 @@ static void
 plugin_cancel (PurplePlugin * plugin) {
     g_assert (plugin != NULL && plugin->extra != NULL);
 
-    if (PLUGIN (iconified) == TRUE) {
+    if (receiver_window_is_iconified (plugin))
 	gtk_window_deiconify (GTK_WINDOW (get_receiver_window (plugin)));
-	PLUGIN (iconified) = FALSE;
-    }
 
     THAW_DESKTOP ();
     plugin_stop (plugin);
@@ -633,12 +631,9 @@ on_root_window_button_press_cb (GtkWidget * root_window,
 	}
     }
     else if (event->button == 2 &&	/* hide the current conversation window  */
-	     get_receiver_window (plugin) && !PLUGIN (iconified)) {
+	     !receiver_window_is_iconified (plugin)) {
 	THAW_DESKTOP ();
-
 	gtk_window_iconify (GTK_WINDOW (get_receiver_window (plugin)));
-
-	PLUGIN (iconified) = TRUE;
 	FREEZE_DESKTOP ();
     }
     else if (event->button == 3) {
@@ -774,10 +769,8 @@ fetch_capture (PurplePlugin * plugin) {
 
     root_window = PLUGIN (root_window);
 
-    if (PLUGIN (iconified) && get_receiver_window (plugin)) {
+    if (receiver_window_is_iconified (plugin))
 	gtk_window_deiconify (GTK_WINDOW (get_receiver_window (plugin)));
-	PLUGIN (iconified) = FALSE;
-    }
 
     /* process screenshot */
     if ((capture = extract_capture (plugin)) == NULL) {

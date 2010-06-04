@@ -51,6 +51,21 @@ get_receiver_window (PurplePlugin * plugin) {
 	return NULL;
 }
 
+gboolean
+receiver_window_is_iconified (PurplePlugin * plugin) {
+    GtkWidget *win = NULL;
+    gboolean ret = FALSE;
+
+    g_assert (plugin != NULL && plugin->extra != NULL);
+
+    if ((win = get_receiver_window (plugin)) != NULL) {
+	ret =
+	    (gdk_window_get_state (win->window) & GDK_WINDOW_STATE_ICONIFIED)
+	    == GDK_WINDOW_STATE_ICONIFIED;
+    }
+    return ret;
+}
+
 GtkIMHtml *
 get_receiver_imhtml (PurplePlugin * plugin) {
     PurpleConversation *target_conv;
@@ -64,8 +79,8 @@ get_receiver_imhtml (PurplePlugin * plugin) {
     if (target_conv != NULL && PIDGIN_IS_PIDGIN_CONVERSATION (target_conv)) {
 	return
 	    GTK_IMHTML (((GtkIMHtmlToolbar
-			  *) (PIDGIN_CONVERSATION (target_conv)->
-			      toolbar))->imhtml);
+			  *) (PIDGIN_CONVERSATION (target_conv)->toolbar))->
+			imhtml);
     }
     else {
 	/* reopen conversation */

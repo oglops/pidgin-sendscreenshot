@@ -420,7 +420,8 @@ http_upload_prepare (PurplePlugin * plugin) {
 
 	    errmsg_uploadto = g_strdup_printf (PLUGIN_XML_STUFF_MISSING,
 					       PLUGIN
-					       (host_data)->selected_hostname);
+					       (host_data)->
+					       selected_hostname);
 	    errmsg_referto =
 		g_strdup_printf (PLUGIN_PLEASE_REFER_TO, PLUGIN_WEBSITE);
 
@@ -438,7 +439,8 @@ http_upload_prepare (PurplePlugin * plugin) {
 
 	    errmsg_uploadto = g_strdup_printf (PLUGIN_XML_STUFF_MISSING,
 					       PLUGIN
-					       (host_data)->selected_hostname);
+					       (host_data)->
+					       selected_hostname);
 	    errmsg_referto =
 		g_strdup_printf (PLUGIN_PLEASE_REFER_TO, PLUGIN_WEBSITE);
 
@@ -456,7 +458,8 @@ http_upload_prepare (PurplePlugin * plugin) {
 
 	    errmsg_uploadto = g_strdup_printf (PLUGIN_XML_STUFF_MISSING,
 					       PLUGIN
-					       (host_data)->selected_hostname);
+					       (host_data)->
+					       selected_hostname);
 	    errmsg_referto =
 		g_strdup_printf (PLUGIN_PLEASE_REFER_TO, PLUGIN_WEBSITE);
 
@@ -474,7 +477,8 @@ http_upload_prepare (PurplePlugin * plugin) {
 
 	    errmsg_uploadto = g_strdup_printf (PLUGIN_XML_STUFF_MISSING,
 					       PLUGIN
-					       (host_data)->selected_hostname);
+					       (host_data)->
+					       selected_hostname);
 	    errmsg_referto =
 		g_strdup_printf (PLUGIN_PLEASE_REFER_TO, PLUGIN_WEBSITE);
 
