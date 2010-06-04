@@ -176,6 +176,7 @@ GtkWidget *get_receiver_window (PurplePlugin * plugin);
 GtkIMHtml *get_receiver_imhtml (PurplePlugin * plugin);
 void plugin_stop (PurplePlugin * plugin);
 gboolean plugin_is_unlocked (PurplePlugin * plugin);
+gboolean receiver_window_is_iconified (PurplePlugin * plugin);
 
 #define selection_defined(plugin)\
   PLUGIN (x1) != -1
@@ -207,9 +208,6 @@ typedef struct {
     PurpleAccount *account;
     gchar *name;
     guint source;
-
-    /* conv window is minimized */
-    gboolean iconified;
 
     /* capture area */
     gint x1, y1, x2, y2;
