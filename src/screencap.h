@@ -81,11 +81,14 @@ typedef enum {
 #define BACKGROUND_PIXBUF\
   PLUGIN (root_pixbuf_x) != NULL ?  PLUGIN (root_pixbuf_x) : PLUGIN (root_pixbuf_orig)
 
-#define CLEAR_CAPTURE_AREA(plugin)\
+#define RESET_SELECTION(plugin)\
   PLUGIN (x1) = -1;\
   PLUGIN (y1) = -1;\
   PLUGIN (x2) = -1;\
-  PLUGIN (y2) = -1
+  PLUGIN (y2) = -1;\
+  PLUGIN (resize_mode) = ResizeAny;\
+  PLUGIN (resize_allow) = FALSE;\
+  PLUGIN (select_mode) = SELECT_REGULAR
 
 /* prototypes */
 void prepare_root_window (PurplePlugin * plugin);

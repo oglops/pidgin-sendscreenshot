@@ -40,8 +40,17 @@ on_screenshot_insert_as_link_aux (PidginWindow * win,
 
     plugin = purple_plugins_find_with_id (PLUGIN_ID);
 
-    g_assert (PLUGIN (running) == FALSE);
-    PLUGIN (running) = TRUE;
+
+
+
+/*     g_assert (PLUGIN (locked) == FALSE); */
+/*     PLUGIN (locked) = TRUE; */
+
+    /* should not happen */
+    if (!g_mutex_trylock (PLUGIN (mutex))) {
+	g_error (PLUGIN_ALREADY_LOCKED_ERROR, PLUGIN_NAME);	/* fatal */
+    }
+
 
     PLUGIN (send_as) = SEND_AS_HTTP_LINK;
 
@@ -112,8 +121,13 @@ on_screenshot_insert_as_ftp_link_aux (PidginWindow * win,
 
     plugin = purple_plugins_find_with_id (PLUGIN_ID);
 
-    g_assert (PLUGIN (running) == FALSE);
-    PLUGIN (running) = TRUE;
+/*     g_assert (PLUGIN (locked) == FALSE); */
+/*     PLUGIN (locked) = TRUE; */
+
+
+    if (!g_mutex_trylock (PLUGIN (mutex))) {
+	g_error (PLUGIN_ALREADY_LOCKED_ERROR, PLUGIN_NAME);	/* fatal */
+    }
 
     if (win != NULL)
 	gtkconv =
@@ -177,9 +191,13 @@ on_screenshot_insert_as_image_aux (PidginWindow * win,
 
     plugin = purple_plugins_find_with_id (PLUGIN_ID);
 
-    g_assert (PLUGIN (running) == FALSE);
-    PLUGIN (running) = TRUE;
+/*     g_assert (PLUGIN (locked) == FALSE); */
+/*     PLUGIN (locked) = TRUE; */
 
+
+    if (!g_mutex_trylock (PLUGIN (mutex))) {
+	g_error (PLUGIN_ALREADY_LOCKED_ERROR, PLUGIN_NAME);	/* fatal */
+    }
     PLUGIN (send_as) = SEND_AS_IMAGE;
 
     if (win != NULL)
@@ -258,7 +276,8 @@ on_conversation_menu_show_cb (PidginWindow * win) {
 	g_object_get_data (G_OBJECT (conversation_menu),
 			   "screenshot_menuitem");
 
-    gtk_widget_set_sensitive (screenshot_menuitem, !PLUGIN (running));
+    gtk_widget_set_sensitive (screenshot_menuitem,
+			      plugin_is_unlocked (plugin));
 }
 
 
@@ -357,7 +376,9 @@ create_plugin_submenu (PidginConversation * gtkconv, gboolean multiconv) {
 static void
 on_insert_menu_show_cb (GtkWidget * screenshot_insert_menuitem) {
     PurplePlugin *plugin = purple_plugins_find_with_id (PLUGIN_ID);
-    gtk_widget_set_sensitive (screenshot_insert_menuitem, !PLUGIN (running));
+
+    gtk_widget_set_sensitive (screenshot_insert_menuitem,
+			      plugin_is_unlocked (plugin));
 }
 
 void
@@ -530,11 +551,14 @@ remove_pidgin_menuitems (PurpleConversation * conv) {
 static void
 on_blist_context_menu_send_capture (PurpleBlistNode * node,
 				    PurplePlugin * plugin) {
-    if (PLUGIN (running)) {
-	NotifyError (PLUGIN_ALREADY_RUNNING_ERROR, PLUGIN_NAME);
+    /*  if (PLUGIN (locked)) { */
+/* 	NotifyError (PLUGIN_ALREADY_LOCKED_ERROR, PLUGIN_NAME); */
+/*     } */
+    if (!g_mutex_trylock (PLUGIN (mutex))) {
+	NotifyError (PLUGIN_ALREADY_LOCKED_ERROR, PLUGIN_NAME);
     }
     else {
-	PLUGIN (running) = TRUE;
+/* 	PLUGIN (locked) = TRUE; */
 	if (PURPLE_BLIST_NODE_IS_BUDDY (node)) {
 	    PurpleBuddy *buddy = (PurpleBuddy *) node;
 

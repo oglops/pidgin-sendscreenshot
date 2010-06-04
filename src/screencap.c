@@ -47,12 +47,12 @@ timeout_freeze_screen (PurplePlugin * plugin) {
     GdkCursor *cursor;
     gint x_orig, y_orig, width, height;
 
-    g_assert (plugin != NULL && plugin->extra != NULL);
-
 #ifdef G_OS_WIN32
     GdkScreen *screen;
     GdkRectangle rect;
     gint i;
+
+    g_assert (plugin != NULL && plugin->extra != NULL);
 
     /* Under Windows, the primary monitor origin is always (0;0),
      * so other monitor might have negative coordinates.
@@ -166,6 +166,9 @@ timeout_freeze_screen (PurplePlugin * plugin) {
 	    mygdk_pixbuf_grey (PLUGIN (root_pixbuf_x));
     }
 
+    /* reset */
+    RESET_SELECTION (plugin);
+
     /* let the user capture an area... */
     gtk_widget_show (PLUGIN (root_events));	/* focus is grabbed */
     gtk_widget_show (PLUGIN (root_window));
@@ -219,12 +222,10 @@ static void
 plugin_cancel (PurplePlugin * plugin) {
     g_assert (plugin != NULL && plugin->extra != NULL);
 
-    CLEAR_CAPTURE_AREA (plugin);
     if (PLUGIN (iconified) == TRUE) {
 	gtk_window_deiconify (GTK_WINDOW (get_receiver_window (plugin)));
 	PLUGIN (iconified) = FALSE;
     }
-    CLEAR_SEND_INFO_TO_NULL (plugin);
 
     THAW_DESKTOP ();
     plugin_stop (plugin);
@@ -311,12 +312,6 @@ static gboolean
 on_root_window_motion_notify_cb (GtkWidget * root_window,
 				 GdkEventMotion * event,
 				 PurplePlugin * plugin) {
-
-    if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)) {
-	PLUGIN (cue_x) = event->x;
-	PLUGIN (cue_y) = event->y;
-    }
-
     /* select approriate mouse cursos */
     if (PLUGIN (resize_allow) && (event->state & GDK_BUTTON1_MASK) == 0)
 	maybe_change_cursor (event->x, event->y, plugin);
@@ -378,15 +373,16 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
 			MIN (MAX (PLUGIN (y1) - ydiff, 0),
 			     gdk_screen_get_height (screen) - 1);
 	    }
-	} else  {
+	}
+	else {
 	    GdkScreen *screen;
 
 	    screen = gdk_screen_get_default ();
 
 	    gint dx, dy;
 
-	    dx = ((gint) event->x) - PLUGIN (pressed_x);
-	    dy = ((gint) event->y) - PLUGIN (pressed_y);
+	    dx = ((gint) event->x) - PLUGIN (mouse_x);
+	    dy = ((gint) event->y) - PLUGIN (mouse_y);
 
 	    if (PLUGIN (x1) + dx >= 0 &&
 		PLUGIN (x1) + dx < gdk_screen_get_width (screen) &&
@@ -403,8 +399,6 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
 		PLUGIN (y1) += dy;
 		PLUGIN (y2) += dy;
 	    }
-	    PLUGIN (pressed_x) = (gint) event->x;
-	    PLUGIN (pressed_y) = (gint) event->y;
 	}
 
 	old_r.x = MIN (_x1, _x2);
@@ -511,6 +505,12 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
 	if (border_inter != NULL)
 	    gdk_region_destroy (border_inter);
     }
+
+    if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)) {
+	PLUGIN (mouse_x) = event->x;
+	PLUGIN (mouse_y) = event->y;
+    }
+
     return TRUE;
 }
 
@@ -533,10 +533,7 @@ clear_selection (PurplePlugin * plugin) {
 			 area.x, area.y,
 			 area.width, area.height, GDK_RGB_DITHER_NONE, 0, 0);
 
-	CLEAR_CAPTURE_AREA (plugin);
-	PLUGIN (resize_mode) = ResizeAny;
-	PLUGIN (resize_allow) = FALSE;
-	PLUGIN (select_mode) = SELECT_REGULAR;
+	RESET_SELECTION (plugin);
 
 	gdk_window_set_cursor (gdkwin, cursor);
 	gdk_cursor_unref (cursor);
@@ -603,8 +600,8 @@ on_root_window_button_press_cb (GtkWidget * root_window,
 	}
 	else if (PLUGIN (resize_mode) == ResizeAny &&
 		 PLUGIN (select_mode) == SELECT_MOVE) {
-	    PLUGIN (pressed_x) = (gint) event->x;
-	    PLUGIN (pressed_y) = (gint) event->y;
+	    PLUGIN (mouse_x) = (gint) event->x;
+	    PLUGIN (mouse_y) = (gint) event->y;
 	}
 	else if (PLUGIN (x1) == -1) {	/* start defining the capture area */
 	    GdkRegion *region = NULL;
@@ -633,7 +630,6 @@ on_root_window_button_press_cb (GtkWidget * root_window,
 
 	    gdk_region_destroy (region);
 	    region = NULL;
-
 	}
     }
     else if (event->button == 2 &&	/* hide the current conversation window  */
@@ -770,6 +766,12 @@ fetch_capture (PurplePlugin * plugin) {
     GtkWidget *root_window = NULL;
 
     g_assert (plugin != NULL && plugin->extra != NULL);
+
+
+    /* do nothing if there's no selection yet */
+    if (!(selection_defined (plugin)))
+	return;
+
     root_window = PLUGIN (root_window);
 
     if (PLUGIN (iconified) && get_receiver_window (plugin)) {
@@ -787,7 +789,7 @@ fetch_capture (PurplePlugin * plugin) {
     else {
 	/* capture was successfully stored in file */
 	if (save_capture (plugin, capture)) {
-	    CLEAR_CAPTURE_AREA (plugin);
+	    /* RESET_SELECTION (plugin); */
 	    g_object_unref (capture);
 	    capture = NULL;
 
@@ -949,8 +951,8 @@ on_root_window_expose_cb (GtkWidget * root_window,
 
 	    g_assert (PLUGIN (timeout_source) == 0);
 
-	    gdk_display_get_pointer (display, NULL, &PLUGIN (cue_x),
-				     &PLUGIN (cue_y), NULL);
+	    gdk_display_get_pointer (display, NULL, &PLUGIN (mouse_x),
+				     &PLUGIN (mouse_y), NULL);
 	    /* don't use double-buffering from here, otherwise display will be
 	       messed up, gdk bug ? */
 	    draw_cues (FALSE, plugin);
@@ -1003,7 +1005,8 @@ on_screen_monitors_changed_cb (GdkScreen * screen, PurplePlugin * plugin) {
     gtk_widget_set_size_request (PLUGIN (root_window),
 				 gdk_screen_get_width (screen),
 				 gdk_screen_get_height (screen));
-    CLEAR_CAPTURE_AREA (plugin);
+    /* RESET_SELECTION (plugin); */
+    clear_selection (plugin);
 }
 
 void
@@ -1071,7 +1074,6 @@ prepare_root_window (PurplePlugin * plugin) {
 		      "key-release-event",
 		      G_CALLBACK (on_root_window_key_release_event_cb),
 		      plugin);
-
 #ifdef G_OS_WIN32
     /* waiting for signal "monitors-changed" to be implemented
        under Win32 */
@@ -1082,8 +1084,6 @@ prepare_root_window (PurplePlugin * plugin) {
 		      "monitors-changed",
 		      G_CALLBACK (on_screen_monitors_changed_cb), plugin);
 #endif
-
-    CLEAR_CAPTURE_AREA (plugin);
 }
 
 /* end of screencap.c */
