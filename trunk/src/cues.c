@@ -64,11 +64,11 @@ __private_f_cues (gboolean on, gboolean double_buff,	/* see expose-event handler
 
     /* clear previous lines */
     h.x = 0;
-    h.y = PLUGIN (__cue_y);
+    h.y = PLUGIN (__mouse_y);
     h.width = width;
     h.height = 1;
 
-    v.x = PLUGIN (__cue_x);
+    v.x = PLUGIN (__mouse_x);
     v.y = 0;
     v.width = 1;
     v.height = height;
@@ -77,13 +77,13 @@ __private_f_cues (gboolean on, gboolean double_buff,	/* see expose-event handler
     if (double_buff && on) {
 	GdkRegion *_rv, *_rh, *rv, *rh;
 
-	_v.x = PLUGIN (cue_x);
+	_v.x = PLUGIN (mouse_x);
 	_v.y = 0;
 	_v.width = 1;
 	_v.height = height;
 
 	_h.x = 0;
-	_h.y = PLUGIN (cue_y);
+	_h.y = PLUGIN (mouse_y);
 	_h.width = width;
 	_h.height = 1;
 
@@ -110,7 +110,7 @@ __private_f_cues (gboolean on, gboolean double_buff,	/* see expose-event handler
 	gdk_window_begin_paint_region (gdkwin, union_r);
 
 
-    if (PLUGIN (__cue_y) >= 0 && PLUGIN (__cue_x) >= 0) {
+    if (PLUGIN (__mouse_y) >= 0 && PLUGIN (__mouse_x) >= 0) {
 
 	gdk_draw_pixbuf (gdkwin, PLUGIN (gc), BACKGROUND_PIXBUF,	/* src */
 			 h.x, h.y,
@@ -147,8 +147,8 @@ __private_f_cues (gboolean on, gboolean double_buff,	/* see expose-event handler
 
 
 	    gdk_draw_pixbuf (gdkwin, PLUGIN (gc), PLUGIN (root_pixbuf_orig),	/* src */
-			     k, PLUGIN (cue_y),
-			     k, PLUGIN (cue_y),
+			     k, PLUGIN (mouse_y),
+			     k, PLUGIN (mouse_y),
 			     CUE_LENGTH / 2, 1, GDK_RGB_DITHER_NONE, 0, 0);
 	}
 
@@ -158,14 +158,14 @@ __private_f_cues (gboolean on, gboolean double_buff,	/* see expose-event handler
 	     k < height - (CUE_LENGTH / 2); k += CUE_LENGTH) {
 	    gdk_draw_pixbuf (gdkwin, PLUGIN (gc),
 			     PLUGIN (root_pixbuf_orig),
-			     PLUGIN (cue_x), k,
-			     PLUGIN (cue_x), k,
+			     PLUGIN (mouse_x), k,
+			     PLUGIN (mouse_x), k,
 			     1, CUE_LENGTH / 2, GDK_RGB_DITHER_NONE, 0, 0);
 
 	}
 	gdk_gc_set_function (PLUGIN (gc), GDK_COPY);
-	PLUGIN (__cue_x) = PLUGIN (cue_x);
-	PLUGIN (__cue_y) = PLUGIN (cue_y);
+	PLUGIN (__mouse_x) = PLUGIN (mouse_x);
+	PLUGIN (__mouse_y) = PLUGIN (mouse_y);
 
 	if (PLUGIN (timeout_source) == 0) {
 	    PLUGIN (timeout_source) =

@@ -85,7 +85,6 @@ plugin_stop (PurplePlugin * plugin) {
     GList *convs;
 
     g_assert (plugin != NULL && plugin->extra != NULL);
-    g_assert (PLUGIN (running) == TRUE);
 
     if (!need_save ())
 	g_unlink (PLUGIN (capture_path_filename));
@@ -95,8 +94,15 @@ plugin_stop (PurplePlugin * plugin) {
 	PLUGIN (timeout_source) = 0;
     }
 
-    CLEAR_SEND_INFO_TO_NULL (plugin);
-    PLUGIN (running) = FALSE;
+    /* clear send informations */
+    PLUGIN (conv_type) = PURPLE_CONV_TYPE_UNKNOWN;
+    PLUGIN (account) = NULL;
+    if (PLUGIN (name) != NULL) {
+	g_free (PLUGIN (name));
+	PLUGIN (name) = NULL;
+    }
+
+    g_mutex_unlock (PLUGIN (mutex));
 
     /* reactivate menuitems */
     convs = purple_get_conversations ();
@@ -131,6 +137,20 @@ plugin_stop (PurplePlugin * plugin) {
     }
 }
 
+/* Return TRUE when plugin can be instancied */
+gboolean
+plugin_is_unlocked (PurplePlugin * plugin) {
+    gboolean unlocked;
+
+    g_assert (plugin != NULL);
+
+    unlocked = g_mutex_trylock (PLUGIN (mutex));
+
+    if (unlocked == TRUE)
+	g_mutex_unlock (PLUGIN (mutex));
+    return unlocked;
+}
+
 static gboolean
 plugin_load (PurplePlugin * plugin) {
     g_assert (plugin != NULL);
@@ -149,6 +169,8 @@ plugin_load (PurplePlugin * plugin) {
 	return FALSE;
     }
     else {
+
+	PLUGIN (mutex) = g_mutex_new ();
 #ifdef ENABLE_UPLOAD
 	PLUGIN (xml_hosts_filename) =
 	    g_build_filename (PLUGIN_DATADIR, "pidgin_screenshot_data",

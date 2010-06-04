@@ -87,7 +87,7 @@ G_LOCK_EXTERN (unload);
 /* error reporting strings */
 #define PLUGIN_ERROR _("Error")
 
-#define PLUGIN_ALREADY_RUNNING_ERROR _("Another instance of %s is already running.\n"\
+#define PLUGIN_ALREADY_LOCKED_ERROR _("Another instance of %s is already running.\n"\
                                        "Please wait before sending an other screenshot.")
 
 #define PLUGIN_LOAD_DATA_ERROR _("Cannot allocate enough memory (%lu bytes) to load plugin data !")
@@ -140,14 +140,6 @@ G_LOCK_EXTERN (unload);
 #define PLUGIN(what)\
   ((PluginExtraVars*)(plugin->extra))->what
 
-#define CLEAR_SEND_INFO_TO_NULL(plugin)\
-  PLUGIN (conv_type) = PURPLE_CONV_TYPE_UNKNOWN;\
-  PLUGIN (account) = NULL;\
-  if (PLUGIN(name)) {\
-    g_free (PLUGIN(name));\
-    PLUGIN (name) = NULL;\
-  }
-
 #define REMEMBER_ACCOUNT(conv)\
   PLUGIN (conv_type) = purple_conversation_get_type (conv->active_conv);\
   PLUGIN (account) = purple_conversation_get_account (conv->active_conv);\
@@ -183,6 +175,7 @@ typedef enum {
 GtkWidget *get_receiver_window (PurplePlugin * plugin);
 GtkIMHtml *get_receiver_imhtml (PurplePlugin * plugin);
 void plugin_stop (PurplePlugin * plugin);
+gboolean plugin_is_unlocked (PurplePlugin * plugin);
 
 #define selection_defined(plugin)\
   PLUGIN (x1) != -1
@@ -191,7 +184,7 @@ void plugin_stop (PurplePlugin * plugin);
 typedef struct {
     /* prevent two instances of SndScreenshot to run
        simultenaously */
-    gboolean running;
+    GMutex *mutex;
 
     SendType send_as;
 
@@ -206,7 +199,6 @@ typedef struct {
     /* modified image (highlight mode) */
     GdkPixbuf *root_pixbuf_x;
     /* regions to paint into */
-
     GdkRegion *border_new, *border_old, *new, *old;
 
     /* where to send capture ? */
@@ -214,7 +206,6 @@ typedef struct {
     PurpleConversationType conv_type;
     PurpleAccount *account;
     gchar *name;
-    gint val;
     guint source;
 
     /* conv window is minimized */
@@ -229,10 +220,8 @@ typedef struct {
 
     /* cues */
     gint cue_offset;
-    gint cue_x, cue_y, __cue_x, __cue_y;
+    gint mouse_x, mouse_y, __mouse_x, __mouse_y;
     guint timeout_source;
-
-    gint pressed_x, pressed_y;
 
     /* screenshot's location */
     gchar *capture_path_filename;
