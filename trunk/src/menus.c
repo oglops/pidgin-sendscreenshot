@@ -40,12 +40,6 @@ on_screenshot_insert_as_link_aux (PidginWindow * win,
 
     plugin = purple_plugins_find_with_id (PLUGIN_ID);
 
-
-
-
-/*     g_assert (PLUGIN (locked) == FALSE); */
-/*     PLUGIN (locked) = TRUE; */
-
     /* should not happen */
     if (!g_mutex_trylock (PLUGIN (mutex))) {
 	g_error (PLUGIN_ALREADY_LOCKED_ERROR, PLUGIN_NAME);	/* fatal */
@@ -118,12 +112,7 @@ on_screenshot_insert_as_ftp_link_aux (PidginWindow * win,
     PurplePlugin *plugin;
     PidginConversation *gtkconv;
 
-
     plugin = purple_plugins_find_with_id (PLUGIN_ID);
-
-/*     g_assert (PLUGIN (locked) == FALSE); */
-/*     PLUGIN (locked) = TRUE; */
-
 
     if (!g_mutex_trylock (PLUGIN (mutex))) {
 	g_error (PLUGIN_ALREADY_LOCKED_ERROR, PLUGIN_NAME);	/* fatal */
@@ -190,10 +179,6 @@ on_screenshot_insert_as_image_aux (PidginWindow * win,
     PidginConversation *gtkconv;
 
     plugin = purple_plugins_find_with_id (PLUGIN_ID);
-
-/*     g_assert (PLUGIN (locked) == FALSE); */
-/*     PLUGIN (locked) = TRUE; */
-
 
     if (!g_mutex_trylock (PLUGIN (mutex))) {
 	g_error (PLUGIN_ALREADY_LOCKED_ERROR, PLUGIN_NAME);	/* fatal */
@@ -279,7 +264,6 @@ on_conversation_menu_show_cb (PidginWindow * win) {
     gtk_widget_set_sensitive (screenshot_menuitem,
 			      plugin_is_unlocked (plugin));
 }
-
 
 /**
    Create a submenu with send as Image, Link (Http) and Link (Ftp) menuitems.
@@ -551,14 +535,10 @@ remove_pidgin_menuitems (PurpleConversation * conv) {
 static void
 on_blist_context_menu_send_capture (PurpleBlistNode * node,
 				    PurplePlugin * plugin) {
-    /*  if (PLUGIN (locked)) { */
-/* 	NotifyError (PLUGIN_ALREADY_LOCKED_ERROR, PLUGIN_NAME); */
-/*     } */
     if (!g_mutex_trylock (PLUGIN (mutex))) {
 	NotifyError (PLUGIN_ALREADY_LOCKED_ERROR, PLUGIN_NAME);
     }
     else {
-/* 	PLUGIN (locked) = TRUE; */
 	if (PURPLE_BLIST_NODE_IS_BUDDY (node)) {
 	    PurpleBuddy *buddy = (PurpleBuddy *) node;
 
