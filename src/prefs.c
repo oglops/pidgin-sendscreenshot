@@ -398,7 +398,6 @@ get_plugin_pref_frame (PurplePlugin * plugin) {
     /* =========================================================================
      *      IMAGE PARAMETERS
      * ========================================================================= */
-
     vbox = pidgin_make_frame (frame1, PREF_UI_FRAME1);
     gtk_container_set_border_width (GTK_CONTAINER (vbox), 4);
 
