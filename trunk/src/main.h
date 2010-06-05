@@ -114,9 +114,6 @@ G_LOCK_EXTERN (unload);
 
 #define PIXBUF_HOSTS_SIZE 32
 
-#define JPG 0
-#define PNG 1
-
 #define SIGN_MAXWIDTH 128
 #define SIGN_MAXHEIGHT 32
 

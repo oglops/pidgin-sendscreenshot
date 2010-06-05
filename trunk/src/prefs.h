@@ -77,6 +77,7 @@
 #define PREF_UI_IMAGE_TYPE _("Image format: ")
 #define PREF_TYPE_JPG "JPEG"
 #define PREF_TYPE_PNG "PNG"
+#define PREF_TYPE_BMP "BMP"
 
 
 #define PREF_JPEG_QUALITY_DEFAULT 93

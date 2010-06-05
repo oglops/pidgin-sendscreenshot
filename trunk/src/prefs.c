@@ -408,7 +408,7 @@ get_plugin_pref_frame (PurplePlugin * plugin) {
     dropdown_imgtype =
 	pidgin_prefs_dropdown (vbox, PREF_UI_IMAGE_TYPE, PURPLE_PREF_STRING,
 			       PREF_IMAGE_TYPE, PREF_TYPE_JPG, "jpeg",
-			       PREF_TYPE_PNG, "png", NULL);
+			       PREF_TYPE_PNG, "png", PREF_TYPE_BMP, "bmp", NULL);
 
     gtk_box_pack_start (GTK_BOX (vbox), hbox_imgtype, TRUE, FALSE, 0);
     pidgin_prefs_labeled_spin_button (hbox_imgtype,
