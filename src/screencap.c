@@ -540,7 +540,6 @@ clear_selection (PurplePlugin * plugin) {
 	    g_assert (PLUGIN (timeout_source) == 0);
 	    draw_cues (TRUE, plugin);
 	}
-
     }
 }
 

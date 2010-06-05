@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pidgin-screenshot 0.6-5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-10 17:05+0200\n"
-"PO-Revision-Date: 2010-05-10 17:33+0200\n"
+"POT-Creation-Date: 2010-06-05 02:32+0200\n"
+"PO-Revision-Date: 2010-06-05 02:35+0200\n"
 "Last-Translator:  <contact@raoulito.info>\n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: src/error.h:56
+#: src/error.h:58
 msgid "FTP upload failed:"
 msgstr "Impossible d'envoyer la capture vers le serveur FTP :"
 
-#: src/error.h:59
+#: src/error.h:61
 #, c-format
 msgid ""
 "Failed to upload the screenshot to '%s'!\n"
@@ -30,7 +30,7 @@ msgstr ""
 "Impossible d'envoyer votre capture vers '%s' !<\n"
 "%s"
 
-#: src/error.h:62
+#: src/error.h:64
 msgid "Failed to open screenshot file:"
 msgstr "Impossible d'ouvrir le fichier image :"
 
@@ -47,7 +47,7 @@ msgstr "comme lien (envoi _FTP)"
 msgid "as a URL (_FTP upload)"
 msgstr "comme URL (envoi _FTP)"
 
-#: src/http_upload.c:364
+#: src/http_upload.c:335
 #, c-format
 msgid ""
 "Regexp doesn't match HTTP upload response !\n"
@@ -177,25 +177,25 @@ msgstr "comme URL (envoi _HTML)"
 msgid "More info"
 msgstr "Plus d'informations"
 
-#: src/main.h:73
+#: src/main.h:75
 msgid "Send Screenshot"
 msgstr "Capture d'Écran"
 
-#: src/main.h:74
+#: src/main.h:76
 msgid "Capture and send a screenshot."
 msgstr "Prendre une capture d'écran et l'envoyer."
 
-#: src/main.h:75
+#: src/main.h:77
 msgid "This plugin will capture a screenshot given a rectangular area."
 msgstr ""
 "Ce plugin permet de capturer une zone de l'écran, puis de l'envoyer à vos "
 "contacts."
 
-#: src/main.h:84
+#: src/main.h:86
 msgid "Error"
 msgstr "Erreur"
 
-#: src/main.h:86
+#: src/main.h:88
 #, c-format
 msgid ""
 "Another instance of %s is already running.\n"
@@ -204,12 +204,12 @@ msgstr ""
 "Une autre instance de %s est en cours d'exécution.\n"
 "Veuillez patientez avant d'envoyer une autre capture."
 
-#: src/main.h:89
+#: src/main.h:91
 #, c-format
 msgid "Cannot allocate enough memory (%lu bytes) to load plugin data !"
 msgstr "Ne peut allouer assez de mémoire (%lu octets) pour charger le plugin !"
 
-#: src/main.h:90
+#: src/main.h:92
 msgid ""
 "Failed to allocate enough memory to create the screenshot. You will need to "
 "quit some applications and retry."
@@ -217,21 +217,21 @@ msgstr ""
 "Pas assez de mémoire pour créer votre capture.\n"
 "Quittez d'autres applications et réessayez."
 
-#: src/main.h:92
+#: src/main.h:94
 #, c-format
 msgid "Failed to save your screenshot to '%s'."
 msgstr "Impossible d'enregistrer votre capture vers '%s'."
 
-#: src/main.h:94
+#: src/main.h:96
 #, c-format
 msgid "Failed to get '%s' data."
 msgstr "Impossible de récupérer les données de '%s'."
 
-#: src/main.h:95
+#: src/main.h:97
 msgid "Failed to insert your screenshot in the text area."
 msgstr "Impossible d'insérer votre capture dans la zone de texte."
 
-#: src/main.h:97
+#: src/main.h:99
 #, c-format
 msgid ""
 "The image used to sign the screenshot is too big.\n"
@@ -240,51 +240,53 @@ msgstr ""
 "L'image utilisée pour signer la capture est trop grande.\n"
 "%dx%d est le maximum autorisé."
 
-#: src/main.h:100
+#: src/main.h:102
 msgid "An unexpected error occured, see debug window..."
-msgstr "Une erreur inatendue s'est produite, veuillez ouvrir la fenêtre de debug pour plus de détails..."
+msgstr ""
+"Une erreur inatendue s'est produite, veuillez ouvrir la fenêtre de debug "
+"pour plus de détails..."
 
-#: src/main.h:108
+#: src/main.h:110
 msgid "No selection"
 msgstr "Aucune sélection"
 
-#: src/main.h:109
+#: src/main.h:111
 msgid "Terms Of Service"
 msgstr "Conditions"
 
-#: src/main.h:119
+#: src/main.h:118
 msgid "_Screenshot"
 msgstr "_Capture d'Écran"
 
-#: src/main.h:120
+#: src/main.h:119
 msgid "Insert _Screenshot..."
 msgstr "Insérer une _Capture d'écran..."
 
-#: src/main.h:121
+#: src/main.h:120
 msgid "Send a _Screenshot..."
 msgstr "Envoyer une _Capture d'Écran..."
 
-#: src/main.h:123
+#: src/main.h:122
 msgid "capture"
 msgstr "capture"
 
-#: src/main.h:126
+#: src/main.h:125
 msgid "as an _Image"
 msgstr "comme _Image"
 
-#: src/main.h:128
+#: src/main.h:127
 msgid "Set capture name"
 msgstr "Nom de la capture"
 
-#: src/main.h:129
+#: src/main.h:128
 msgid "Capture name:"
 msgstr "Nom de votre capture :"
 
-#: src/main.h:130
+#: src/main.h:129
 msgid "File already exists!"
 msgstr "Le fichier existe déjà !"
 
-#: src/prefs.c:443
+#: src/prefs.c:424
 msgid "Image"
 msgstr "Image"
 
@@ -293,78 +295,98 @@ msgid "Image parameters"
 msgstr "Paramètres de l'image"
 
 #: src/prefs.h:69
-msgid "Plugin behaviour"
-msgstr "Comportement du plugin"
+msgid "Display behaviour"
+msgstr "Affichage"
 
 #: src/prefs.h:70
+msgid "Saving"
+msgstr "Enregistrement"
+
+#: src/prefs.h:71
+msgid "Misc"
+msgstr "Divers"
+
+#: src/prefs.h:73
 msgid "HTTP upload"
 msgstr "Envoi HTTP"
 
-#: src/prefs.h:71
+#: src/prefs.h:74
 msgid "FTP upload"
 msgstr "Envoi FTP"
 
-#: src/prefs.h:72
+#: src/prefs.h:75
 msgid "Upload options"
 msgstr "Options d'envoi"
 
-#: src/prefs.h:74
+#: src/prefs.h:77
 msgid "Image format: "
 msgstr "Format de l'image :"
 
-#: src/prefs.h:80
+#: src/prefs.h:84
 msgid "JPEG quality level:"
 msgstr "Qualité JPEG :"
 
-#: src/prefs.h:82
+#: src/prefs.h:86
 msgid "PNG compression level:"
 msgstr "Niveau de compression PNG :"
 
-#: src/prefs.h:84
+#: src/prefs.h:88
 msgid "Always add this signature:"
 msgstr "Toujours ajouter cette signature :"
 
-#: src/prefs.h:86
+#: src/prefs.h:90
 msgid "Highlight mode:"
 msgstr "Méthode graphique de sélection :"
 
-#: src/prefs.h:87
+#: src/prefs.h:91
 msgid "lighten up desktop"
 msgstr "éclaircir le bureau"
 
-#: src/prefs.h:88
+#: src/prefs.h:92
 msgid "darken desktop"
 msgstr "assombrir le bureau"
 
-#: src/prefs.h:89
+#: src/prefs.h:93
 msgid "invert selection only"
 msgstr "inverser la sélection"
 
-#: src/prefs.h:90
+#: src/prefs.h:94
 msgid "borders only"
 msgstr "bordures seulement"
 
-#: src/prefs.h:91
+#: src/prefs.h:95
 msgid "grayscale desktop"
 msgstr "bureau en noir&blanc"
 
-#: src/prefs.h:93
+#: src/prefs.h:97
 msgid "Folder to store captures in:"
 msgstr "Enregistrer les captures dans :"
 
-#: src/prefs.h:95
+#: src/prefs.h:99
 msgid "Always ask for filename when sending as a file."
 msgstr "Toujours demander le nom du fichier avant d'envoyer."
 
-#: src/prefs.h:98
+#: src/prefs.h:100
+msgid "Only save when sending as a File."
+msgstr "Uniquement sauvegarder lors d'un envoi en tant que fichier."
+
+#: src/prefs.h:102
 msgid "Show visual cues."
 msgstr "Afficher les repères visuels."
 
-#: src/prefs.h:99
+#: src/prefs.h:104
 msgid "Seconds to wait before desktop freezes:"
 msgstr "Secondes à attendre avant le début de la capture :"
 
-#: src/prefs.h:102
+#: src/prefs.h:107
+msgid "General"
+msgstr "Général"
+
+#: src/prefs.h:108
+msgid "Upload"
+msgstr "Envoi distant"
+
+#: src/prefs.h:109
 #, c-format
 msgid ""
 "Pick an image hosting provider (<span foreground='blue'><u>list v.%s</u></"
@@ -373,27 +395,27 @@ msgstr ""
 "Choisissez un hébergeur d'images (<span foreground='blue'><u>liste v.%s</u></"
 "span>)"
 
-#: src/prefs.h:104
+#: src/prefs.h:111
 msgid "Connect timeout (sec): "
 msgstr "Tenter de se connecter pendant (sec) :"
 
-#: src/prefs.h:105
+#: src/prefs.h:112
 msgid "Upload timeout (sec): "
 msgstr "Tenter d'envoyer les données pendant (sec) :"
 
-#: src/prefs.h:106
+#: src/prefs.h:113
 msgid "Remote FTP URL:"
 msgstr "URL distante :"
 
-#: src/prefs.h:107
+#: src/prefs.h:114
 msgid "Corresponding Web address:"
 msgstr "Adresse web correspondante :"
 
-#: src/prefs.h:108
+#: src/prefs.h:115
 msgid "User:"
 msgstr "Utilisateur :"
 
-#: src/prefs.h:109
+#: src/prefs.h:116
 msgid "Password:"
 msgstr "Mot de passe :"
 
@@ -407,7 +429,7 @@ msgid "Uploading to \"%s\"..."
 msgstr "Envoi de la capture vers \"%s\"..."
 
 #: src/upload_utils.h:45
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Failed to insert a link, possible reasons are:\n"
 " - account not connected,\n"
