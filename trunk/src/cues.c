@@ -125,8 +125,6 @@ __private_f_cues (gboolean on, gboolean double_buff,	/* see expose-event handler
     if (on) {
 	gint k;
 	/* draw cues */
-
-
 	if (double_buff) {
 	    gdk_draw_pixbuf (gdkwin, PLUGIN (gc), BACKGROUND_PIXBUF,	/* src */
 			     _h.x, _h.y,
@@ -143,9 +141,6 @@ __private_f_cues (gboolean on, gboolean double_buff,	/* see expose-event handler
 	/* horizontal */
 	for (k = PLUGIN (cue_offset);
 	     k < width - (CUE_LENGTH / 2); k += CUE_LENGTH) {
-
-
-
 	    gdk_draw_pixbuf (gdkwin, PLUGIN (gc), PLUGIN (root_pixbuf_orig),	/* src */
 			     k, PLUGIN (mouse_y),
 			     k, PLUGIN (mouse_y),
@@ -169,7 +164,7 @@ __private_f_cues (gboolean on, gboolean double_buff,	/* see expose-event handler
 
 	if (PLUGIN (timeout_source) == 0) {
 	    PLUGIN (timeout_source) =
-		g_timeout_add (32, update_cue_offset, plugin);
+		g_timeout_add (30, update_cue_offset, plugin);
 	}
 
     }
