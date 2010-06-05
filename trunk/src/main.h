@@ -50,8 +50,6 @@
 #include <gtkblist.h>
 #include <glib/gstdio.h>
 
-
-
 #ifdef HAVE_LIBCURL
 #include <curl/curl.h>
 #include <curl/types.h>
