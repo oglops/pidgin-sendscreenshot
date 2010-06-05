@@ -116,7 +116,7 @@ plugin_stop (PurplePlugin * plugin) {
 	g_free (PLUGIN (name));
 	PLUGIN (name) = NULL;
     }
-
+    
     g_mutex_unlock (PLUGIN (mutex));
 
     /* reactivate menuitems */
@@ -227,9 +227,12 @@ plugin_unload (PurplePlugin * plugin) {
      *
      * see upload ()
      */
-    if (!G_TRYLOCK (unload))
+    if (!G_TRYLOCK (unload) || !plugin_is_unlocked (plugin))
 	return FALSE;		/* better let the upload to finish */
-
+    
+    g_assert (PLUGIN (mutex) != NULL);
+    g_mutex_free (PLUGIN (mutex));
+    
     host_data = PLUGIN (host_data);
     timeout_handle = PLUGIN (timeout_cb_handle);
     if (timeout_handle)

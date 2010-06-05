@@ -711,7 +711,7 @@ save_capture (PurplePlugin * plugin, GdkPixbuf * capture) {
 	    g_strdup_printf ("%d",
 			     purple_prefs_get_int (PREF_PNG_COMPRESSION));
     }
-    else {
+    else if (!strcmp (extension, "jpg")){
 	param_name = g_strdup ("quality");
 	param_value =
 	    g_strdup_printf ("%d", purple_prefs_get_int (PREF_JPEG_QUALITY));
