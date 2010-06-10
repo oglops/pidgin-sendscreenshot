@@ -37,52 +37,52 @@ plugin_curl_set_common_opts (CURL * curl, PurplePlugin * plugin) {
 
     /* install timeouts */
     curl_easy_setopt (curl, CURLOPT_CONNECTTIMEOUT,
-		      purple_prefs_get_int (PREF_UPLOAD_CONNECTTIMEOUT));
+                      purple_prefs_get_int (PREF_UPLOAD_CONNECTTIMEOUT));
     curl_easy_setopt (curl, CURLOPT_TIMEOUT,
-		      purple_prefs_get_int (PREF_UPLOAD_TIMEOUT));
+                      purple_prefs_get_int (PREF_UPLOAD_TIMEOUT));
 
     /* use proxy settings */
     if ((gpi = purple_proxy_get_setup (PLUGIN (account))) != NULL) {
-	PurpleProxyType proxy_type = purple_proxy_info_get_type (gpi);
-	if (proxy_type != PURPLE_PROXY_NONE) {
-	    long curl_proxy_type;
-	    const gchar *proxy_username = NULL;
-	    const gchar *proxy_password = NULL;
+        PurpleProxyType proxy_type = purple_proxy_info_get_type (gpi);
+        if (proxy_type != PURPLE_PROXY_NONE) {
+            long curl_proxy_type;
+            const gchar *proxy_username = NULL;
+            const gchar *proxy_password = NULL;
 
-	    proxy_username = purple_proxy_info_get_username (gpi);
-	    proxy_password = purple_proxy_info_get_password (gpi);
+            proxy_username = purple_proxy_info_get_username (gpi);
+            proxy_password = purple_proxy_info_get_password (gpi);
 
-	    /* set proxy type */
-	    if (proxy_type == PURPLE_PROXY_HTTP)
-		curl_proxy_type = CURLPROXY_HTTP;
-	    else if (proxy_type == PURPLE_PROXY_SOCKS4) {
-		if (purple_prefs_get_bool ("/purple/proxy/socks4_remotedns"))
-		    curl_proxy_type = CURLPROXY_SOCKS4A;
-		else
-		    curl_proxy_type = CURLPROXY_SOCKS4;
-	    }
-	    else if (proxy_type == PURPLE_PROXY_SOCKS5)
-		curl_proxy_type = CURLPROXY_SOCKS5;
-	    else {
-		/* should not happen */
-		NotifyError ("proxy type :'%d' is invalid", proxy_type);
-		return;
-	    }
-	    curl_easy_setopt (curl, CURLOPT_PROXYTYPE, curl_proxy_type);
-	    curl_easy_setopt (curl, CURLOPT_PROXYPORT,
-			      purple_proxy_info_get_port (gpi));
-	    curl_easy_setopt (curl, CURLOPT_PROXY,
-			      purple_proxy_info_get_host (gpi));
+            /* set proxy type */
+            if (proxy_type == PURPLE_PROXY_HTTP)
+                curl_proxy_type = CURLPROXY_HTTP;
+            else if (proxy_type == PURPLE_PROXY_SOCKS4) {
+                if (purple_prefs_get_bool ("/purple/proxy/socks4_remotedns"))
+                    curl_proxy_type = CURLPROXY_SOCKS4A;
+                else
+                    curl_proxy_type = CURLPROXY_SOCKS4;
+            }
+            else if (proxy_type == PURPLE_PROXY_SOCKS5)
+                curl_proxy_type = CURLPROXY_SOCKS5;
+            else {
+                /* should not happen */
+                NotifyError ("proxy type :'%d' is invalid", proxy_type);
+                return;
+            }
+            curl_easy_setopt (curl, CURLOPT_PROXYTYPE, curl_proxy_type);
+            curl_easy_setopt (curl, CURLOPT_PROXYPORT,
+                              purple_proxy_info_get_port (gpi));
+            curl_easy_setopt (curl, CURLOPT_PROXY,
+                              purple_proxy_info_get_host (gpi));
 
-	    if (proxy_username && !strcmp (proxy_username, "")) {
-		curl_easy_setopt (curl, CURLOPT_PROXYUSERNAME,
-				  proxy_username);
+            if (proxy_username && !strcmp (proxy_username, "")) {
+                curl_easy_setopt (curl, CURLOPT_PROXYUSERNAME,
+                                  proxy_username);
 
-		if (proxy_password && !strcmp (proxy_password, ""))
-		    curl_easy_setopt (curl, CURLOPT_PROXYPASSWORD,
-				      proxy_password);
-	    }
-	}
+                if (proxy_password && !strcmp (proxy_password, ""))
+                    curl_easy_setopt (curl, CURLOPT_PROXYPASSWORD,
+                                      proxy_password);
+            }
+        }
     }
 }
 
@@ -96,38 +96,38 @@ real_insert_link (PurplePlugin * plugin, const gchar * url) {
     g_assert (plugin != NULL && plugin->extra != NULL);
 
     if ((imhtml = get_receiver_imhtml (plugin)) == NULL) {
-	NotifyError (PLUGIN_UPLOAD_CLOSED_CONV_ERROR, url);
+        NotifyError (PLUGIN_UPLOAD_CLOSED_CONV_ERROR, url);
     }
     else {
-	GtkTextBuffer *textbf = NULL;
-	GtkTextMark *mark = NULL;
-	GtkTextIter iter, bw_iter;
-	gchar *last_char = NULL;
+        GtkTextBuffer *textbf = NULL;
+        GtkTextMark *mark = NULL;
+        GtkTextIter iter, bw_iter;
+        gchar *last_char = NULL;
 
-	textbf = gtk_text_view_get_buffer (GTK_TEXT_VIEW (imhtml));
-	mark = gtk_text_buffer_get_insert (textbf);
+        textbf = gtk_text_view_get_buffer (GTK_TEXT_VIEW (imhtml));
+        mark = gtk_text_buffer_get_insert (textbf);
 
-	gtk_text_buffer_get_iter_at_mark (textbf, &iter, mark);
-	bw_iter = iter;
+        gtk_text_buffer_get_iter_at_mark (textbf, &iter, mark);
+        bw_iter = iter;
 
-	/* add a space to prevent messing up with previous text */
-	if (gtk_text_iter_backward_char (&bw_iter)) {
-	    last_char = gtk_text_iter_get_slice (&bw_iter, &iter);
-	    /* not a space nor a tabulation */
-	    if (last_char && last_char[0] != 0x20 && last_char[0] != 0x9) {
-		gtk_text_buffer_insert (textbf, &iter, " ", 1);
-		mark = gtk_text_buffer_get_insert (textbf);
-		gtk_text_buffer_get_iter_at_mark (textbf, &iter, mark);
-	    }
-	}
+        /* add a space to prevent messing up with previous text */
+        if (gtk_text_iter_backward_char (&bw_iter)) {
+            last_char = gtk_text_iter_get_slice (&bw_iter, &iter);
+            /* not a space nor a tabulation */
+            if (last_char && last_char[0] != 0x20 && last_char[0] != 0x9) {
+                gtk_text_buffer_insert (textbf, &iter, " ", 1);
+                mark = gtk_text_buffer_get_insert (textbf);
+                gtk_text_buffer_get_iter_at_mark (textbf, &iter, mark);
+            }
+        }
 
-	/* support for HTML-formatted messages */
-	if (PLUGIN (conv_features) & PURPLE_CONNECTION_HTML)
-	    gtk_imhtml_insert_link (imhtml, mark, url,
-				    g_path_get_basename (PLUGIN
-							 (capture_path_filename)));
-	else
-	    gtk_text_buffer_insert (textbf, &iter, url, (gint) strlen (url));
+        /* support for HTML-formatted messages */
+        if (PLUGIN (conv_features) & PURPLE_CONNECTION_HTML)
+            gtk_imhtml_insert_link (imhtml, mark, url,
+                                    g_path_get_basename (PLUGIN
+                                                         (capture_path_filename)));
+        else
+            gtk_text_buffer_insert (textbf, &iter, url, (gint) strlen (url));
     }
 }
 
@@ -139,29 +139,32 @@ show_uploading_dialog (PurplePlugin * plugin, const gchar * str) {
     GtkWidget *dialog;
     GtkWidget *content_area;
     GtkWidget *img;
-    GtkWidget *hbox;
+    GtkWidget *hbox, *vbox;
     GtkWidget *progress_bar;
     GtkWidget *gtkconv_window;
     GtkWidget *blist_window;
+    GtkWidget *label = NULL;
     gchar *send_msg = NULL;
 
     g_assert (plugin != NULL && plugin->extra != NULL);
 
     progress_bar = gtk_progress_bar_new ();
     img =
-	gtk_image_new_from_stock (PIDGIN_STOCK_UPLOAD,
-				  gtk_icon_size_from_name
-				  (PIDGIN_ICON_SIZE_TANGO_MEDIUM));
+        gtk_image_new_from_stock (PIDGIN_STOCK_UPLOAD,
+                                  gtk_icon_size_from_name
+                                  (PIDGIN_ICON_SIZE_TANGO_SMALL));
+
     hbox = gtk_hbox_new (FALSE, PIDGIN_HIG_BOX_SPACE);
+    vbox = gtk_vbox_new (FALSE, PIDGIN_HIG_BOX_SPACE);
 
     gtkconv_window = get_receiver_window (plugin);
     blist_window = pidgin_blist_get_default_gtk_blist ()->window;
 
     dialog = gtk_dialog_new_with_buttons (PLUGIN_NAME,
-					  GTK_WINDOW ((gtkconv_window) ?
-						      gtkconv_window :
-						      blist_window),
-					  GTK_DIALOG_NO_SEPARATOR, NULL);
+                                          GTK_WINDOW ((gtkconv_window) ?
+                                                      gtkconv_window :
+                                                      blist_window),
+                                          GTK_DIALOG_NO_SEPARATOR, NULL);
 
     gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
     gtk_progress_bar_set_pulse_step (GTK_PROGRESS_BAR (progress_bar), 0.05);
@@ -170,7 +173,9 @@ show_uploading_dialog (PurplePlugin * plugin, const gchar * str) {
 
     send_msg = g_strdup_printf (PLUGIN_SENDING_INFO, str);
 
-    gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progress_bar), send_msg);
+    label = gtk_label_new (send_msg);
+
+    /* gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progress_bar), send_msg); */
 
     g_free (send_msg);
     send_msg = NULL;
@@ -181,10 +186,13 @@ show_uploading_dialog (PurplePlugin * plugin, const gchar * str) {
     content_area = (GTK_DIALOG (dialog))->vbox;
 #endif
 
-    gtk_window_set_decorated (GTK_WINDOW (dialog), FALSE);
-    gtk_box_pack_start (GTK_BOX (content_area), hbox, FALSE, FALSE, 0);
+    gtk_window_set_deletable (GTK_WINDOW (dialog), FALSE);
+    gtk_box_pack_start (GTK_BOX (content_area), vbox, FALSE, FALSE, 0);
+    gtk_box_pack_start_defaults (GTK_BOX (vbox), hbox);
+
     gtk_box_pack_start (GTK_BOX (hbox), img, FALSE, FALSE, 0);
-    gtk_box_pack_start (GTK_BOX (hbox), progress_bar, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (vbox), progress_bar, FALSE, FALSE, 0);
 
     gtk_widget_show_all (dialog);
     return dialog;

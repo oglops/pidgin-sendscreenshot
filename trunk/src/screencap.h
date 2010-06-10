@@ -23,11 +23,7 @@
 #ifndef __SCREENCAP_H__
 #define __SCREENCAP_H__ 1
 
-
 #include "main.h"
-
-
-#include "debug.h"
 
 /* selection border width :
    should we add an option to modify ? */
@@ -40,16 +36,6 @@ typedef enum {
     BordersOnly = 4,
     Grayscale = 5
 } HighlightMode;
-
-
-/*
- * If we immediately freeze the screen, then the menuitem we just
- * click on may remain. That's we wait for a small timeout.
- */
-#define FREEZE_DESKTOP()\
-  purple_timeout_add\
-  (MAX(MSEC_TIMEOUT_VAL, purple_prefs_get_int(PREF_WAIT_BEFORE_SCREENSHOT) * 1000), \
-   (GSourceFunc) timeout_freeze_screen, plugin)
 
 /* Give back focus to Pidgin. */
 #define THAW_DESKTOP()					\

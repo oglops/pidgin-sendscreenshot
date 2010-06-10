@@ -26,6 +26,9 @@
 #include "main.h"
 
 void screenshot_maybe_rename (PurplePlugin * plugin, gchar ** basename);
+void show_countdown_dialog (PurplePlugin * plugin);
+
+#define COUNTDOWN_MSG _("Please be ready ! Desktop will freeze in...")
 
 #endif
 

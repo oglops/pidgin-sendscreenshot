@@ -16,7 +16,7 @@ void mygdk_pixbuf_compose (GdkPixbuf * pixbuf1, GdkPixbuf * pixbuf);
 
 gboolean
 mygdk_pixbuf_check_maxsize (GdkPixbuf * pixbuf,
-			    gint max_width, gint max_height);
+                            gint max_width, gint max_height);
 
 void
   mask_monitors (GdkPixbuf * pixbuf, GdkWindow * root_window, gint x, gint y);
