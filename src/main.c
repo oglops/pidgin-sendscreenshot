@@ -30,8 +30,24 @@
 #include "error.h"
 
 #ifdef ENABLE_UPLOAD
-#include "http_upload.h"	/* CLEAR_HOST_PARAM_DATA_FULL() */
+#include "http_upload.h"        /* CLEAR_HOST_PARAM_DATA_FULL() */
 #endif
+
+PidginConversation *
+get_receiver_gtkconv (PurplePlugin * plugin) {
+    PurpleConversation *target_conv;
+
+    g_assert (plugin != NULL && plugin->extra != NULL);
+    target_conv =
+        purple_find_conversation_with_account (PLUGIN (conv_type),
+                                               PLUGIN (name),
+                                               PLUGIN (account));
+
+    if (target_conv != NULL && PIDGIN_IS_PIDGIN_CONVERSATION (target_conv))
+        return PIDGIN_CONVERSATION (target_conv);
+    else
+        return NULL;
+}
 
 GtkWidget *
 get_receiver_window (PurplePlugin * plugin) {
@@ -39,16 +55,16 @@ get_receiver_window (PurplePlugin * plugin) {
 
     g_assert (plugin != NULL && plugin->extra != NULL);
     target_conv =
-	purple_find_conversation_with_account (PLUGIN (conv_type),
-					       PLUGIN (name),
-					       PLUGIN (account));
+        purple_find_conversation_with_account (PLUGIN (conv_type),
+                                               PLUGIN (name),
+                                               PLUGIN (account));
 
     if (target_conv != NULL && PIDGIN_IS_PIDGIN_CONVERSATION (target_conv))
-	return
-	    pidgin_conv_get_window (PIDGIN_CONVERSATION
-				    (target_conv))->window;
+        return
+            pidgin_conv_get_window (PIDGIN_CONVERSATION
+                                    (target_conv))->window;
     else
-	return NULL;
+        return NULL;
 }
 
 gboolean
@@ -59,9 +75,9 @@ receiver_window_is_iconified (PurplePlugin * plugin) {
     g_assert (plugin != NULL && plugin->extra != NULL);
 
     if ((win = get_receiver_window (plugin)) != NULL) {
-	ret =
-	    (gdk_window_get_state (win->window) & GDK_WINDOW_STATE_ICONIFIED)
-	    == GDK_WINDOW_STATE_ICONIFIED;
+        ret =
+            (gdk_window_get_state (win->window) & GDK_WINDOW_STATE_ICONIFIED)
+            == GDK_WINDOW_STATE_ICONIFIED;
     }
     return ret;
 }
@@ -72,25 +88,25 @@ get_receiver_imhtml (PurplePlugin * plugin) {
 
     g_assert (plugin != NULL && plugin->extra != NULL);
     target_conv =
-	purple_find_conversation_with_account (PLUGIN (conv_type),
-					       PLUGIN (name),
-					       PLUGIN (account));
+        purple_find_conversation_with_account (PLUGIN (conv_type),
+                                               PLUGIN (name),
+                                               PLUGIN (account));
 
     if (target_conv != NULL && PIDGIN_IS_PIDGIN_CONVERSATION (target_conv)) {
-	return
-	    GTK_IMHTML (((GtkIMHtmlToolbar
-			  *) (PIDGIN_CONVERSATION (target_conv)->toolbar))->
-			imhtml);
+        return
+            GTK_IMHTML (((GtkIMHtmlToolbar
+                          *) (PIDGIN_CONVERSATION (target_conv)->toolbar))->
+                        imhtml);
     }
     else {
-	/* reopen conversation */
-	target_conv =
-	    purple_conversation_new (PLUGIN (conv_type),
-				     PLUGIN (account), PLUGIN (name));
-	if (target_conv) {
-	    purple_conversation_present (target_conv);
-	    return get_receiver_imhtml (plugin);
-	}
+        /* reopen conversation */
+        target_conv =
+            purple_conversation_new (PLUGIN (conv_type),
+                                     PLUGIN (account), PLUGIN (name));
+        if (target_conv) {
+            purple_conversation_present (target_conv);
+            return get_receiver_imhtml (plugin);
+        }
     }
     return NULL;
 }
@@ -102,68 +118,53 @@ plugin_stop (PurplePlugin * plugin) {
     g_assert (plugin != NULL && plugin->extra != NULL);
 
     if (!need_save ())
-	g_unlink (PLUGIN (capture_path_filename));
+        g_unlink (PLUGIN (capture_path_filename));
 
     if (PLUGIN (timeout_source) != 0) {
-	g_source_remove (PLUGIN (timeout_source));
-	PLUGIN (timeout_source) = 0;
+        g_source_remove (PLUGIN (timeout_source));
+        PLUGIN (timeout_source) = 0;
     }
 
     /* clear send informations */
     PLUGIN (conv_type) = PURPLE_CONV_TYPE_UNKNOWN;
     PLUGIN (account) = NULL;
     if (PLUGIN (name) != NULL) {
-	g_free (PLUGIN (name));
-	PLUGIN (name) = NULL;
+        g_free (PLUGIN (name));
+        PLUGIN (name) = NULL;
     }
-    
-    g_mutex_unlock (PLUGIN (mutex));
+    PLUGIN (locked) = FALSE;
 
     /* reactivate menuitems */
     convs = purple_get_conversations ();
     while (convs != NULL) {
-	PurpleConversation *conv = (PurpleConversation *) convs->data;
-	if (PIDGIN_IS_PIDGIN_CONVERSATION (conv)) {
-	    PidginConversation *gtkconv;
-	    PidginWindow *win;
-	    GtkWidget *screenshot_insert_menuitem;
-	    GtkWidget *screenshot_menuitem, *conversation_menu;
+        PurpleConversation *conv = (PurpleConversation *) convs->data;
+        if (PIDGIN_IS_PIDGIN_CONVERSATION (conv)) {
+            PidginConversation *gtkconv;
+            PidginWindow *win;
+            GtkWidget *screenshot_insert_menuitem;
+            GtkWidget *screenshot_menuitem, *conversation_menu;
 
-	    gtkconv = PIDGIN_CONVERSATION (conv);
+            gtkconv = PIDGIN_CONVERSATION (conv);
 
-	    win = pidgin_conv_get_window (gtkconv);
+            win = pidgin_conv_get_window (gtkconv);
 
-	    conversation_menu =
-		gtk_item_factory_get_widget (win->menu.item_factory,
-					     N_("/Conversation"));
+            conversation_menu =
+                gtk_item_factory_get_widget (win->menu.item_factory,
+                                             N_("/Conversation"));
 
-	    if ((screenshot_insert_menuitem =
-		 g_object_get_data (G_OBJECT (gtkconv->toolbar),
-				    "screenshot_insert_menuitem")) != NULL)
-		gtk_widget_set_sensitive (screenshot_insert_menuitem, TRUE);
+            if ((screenshot_insert_menuitem =
+                 g_object_get_data (G_OBJECT (gtkconv->toolbar),
+                                    "screenshot_insert_menuitem")) != NULL)
+                gtk_widget_set_sensitive (screenshot_insert_menuitem, TRUE);
 
-	    if ((screenshot_menuitem =
-		 g_object_get_data (G_OBJECT (conversation_menu),
-				    "screenshot_menuitem")) != NULL)
-		gtk_widget_set_sensitive (screenshot_menuitem, TRUE);
+            if ((screenshot_menuitem =
+                 g_object_get_data (G_OBJECT (conversation_menu),
+                                    "screenshot_menuitem")) != NULL)
+                gtk_widget_set_sensitive (screenshot_menuitem, TRUE);
 
-	}
-	convs = g_list_next (convs);
+        }
+        convs = g_list_next (convs);
     }
-}
-
-/* Return TRUE when plugin can be instancied */
-gboolean
-plugin_is_unlocked (PurplePlugin * plugin) {
-    gboolean unlocked;
-
-    g_assert (plugin != NULL);
-
-    unlocked = g_mutex_trylock (PLUGIN (mutex));
-
-    if (unlocked == TRUE)
-	g_mutex_unlock (PLUGIN (mutex));
-    return unlocked;
 }
 
 static gboolean
@@ -172,44 +173,43 @@ plugin_load (PurplePlugin * plugin) {
 
     if ((plugin->extra = g_try_malloc0 (sizeof (PluginExtraVars))) == NULL
 #ifdef ENABLE_UPLOAD
-	|| (((PluginExtraVars *) plugin->extra)->host_data =
-	    g_try_malloc0 (sizeof (struct host_param_data))) == NULL
+        || (((PluginExtraVars *) plugin->extra)->host_data =
+            g_try_malloc0 (sizeof (struct host_param_data))) == NULL
 #endif
-	) {
-	NotifyError (PLUGIN_LOAD_DATA_ERROR,
-		     (gulong) sizeof (PluginExtraVars));
+        ) {
+        NotifyError (PLUGIN_LOAD_DATA_ERROR,
+                     (gulong) sizeof (PluginExtraVars));
 
-	if (plugin->extra != NULL)
-	    g_free (plugin->extra);
-	return FALSE;
+        if (plugin->extra != NULL)
+            g_free (plugin->extra);
+        return FALSE;
     }
     else {
 
-	PLUGIN (mutex) = g_mutex_new ();
 #ifdef ENABLE_UPLOAD
-	PLUGIN (xml_hosts_filename) =
-	    g_build_filename (PLUGIN_DATADIR, "pidgin_screenshot_data",
-			      "img_hosting_providers.xml", NULL);
-	curl_global_init (CURL_GLOBAL_ALL);
+        PLUGIN (xml_hosts_filename) =
+            g_build_filename (PLUGIN_DATADIR, "pidgin_screenshot_data",
+                              "img_hosting_providers.xml", NULL);
+        curl_global_init (CURL_GLOBAL_ALL);
 #endif
 
-	prepare_root_window (plugin);
+        prepare_root_window (plugin);
 
-	/* add menuitems each time a conversation is opened */
-	purple_signal_connect (pidgin_conversations_get_handle (),
-			       "conversation-switched",
-			       plugin,
-			       PURPLE_CALLBACK (create_plugin_menuitems),
-			       NULL);
-	/* to add us to the buddy list context menu (and "plus" menu) */
-	purple_signal_connect (purple_blist_get_handle (),
-			       "blist-node-extended-menu", plugin,
-			       PURPLE_CALLBACK (buddy_context_menu_add_item),
-			       plugin);
+        /* add menuitems each time a conversation is opened */
+        purple_signal_connect (pidgin_conversations_get_handle (),
+                               "conversation-switched",
+                               plugin,
+                               PURPLE_CALLBACK (create_plugin_menuitems),
+                               NULL);
+        /* to add us to the buddy list context menu (and "plus" menu) */
+        purple_signal_connect (purple_blist_get_handle (),
+                               "blist-node-extended-menu", plugin,
+                               PURPLE_CALLBACK (buddy_context_menu_add_item),
+                               plugin);
 
-	/* add menuitems to existing conversations */
-	purple_conversation_foreach (create_plugin_menuitems);
-	return TRUE;
+        /* add menuitems to existing conversations */
+        purple_conversation_foreach (create_plugin_menuitems);
+        return TRUE;
     }
 }
 
@@ -227,19 +227,17 @@ plugin_unload (PurplePlugin * plugin) {
      *
      * see upload ()
      */
-    if (!G_TRYLOCK (unload) || !plugin_is_unlocked (plugin))
-	return FALSE;		/* better let the upload to finish */
-    
-    g_assert (PLUGIN (mutex) != NULL);
-    g_mutex_free (PLUGIN (mutex));
-    
+    if (!G_TRYLOCK (unload)
+        || PLUGIN (locked) /* !plugin_is_unlocked (plugin) */ )
+        return FALSE;           /* better let the upload to finish */
+
     host_data = PLUGIN (host_data);
     timeout_handle = PLUGIN (timeout_cb_handle);
     if (timeout_handle)
-	purple_timeout_remove (timeout_handle);
+        purple_timeout_remove (timeout_handle);
     if (PLUGIN (uploading_dialog) != NULL) {
-	gtk_widget_destroy (PLUGIN (uploading_dialog));
-	PLUGIN (uploading_dialog) = NULL;
+        gtk_widget_destroy (PLUGIN (uploading_dialog));
+        PLUGIN (uploading_dialog) = NULL;
     }
 #endif
 
@@ -247,20 +245,20 @@ plugin_unload (PurplePlugin * plugin) {
     purple_conversation_foreach (remove_pidgin_menuitems);
 
     if (PLUGIN (root_window) != NULL) {
-	gtk_widget_destroy (PLUGIN (root_window));
-	PLUGIN (root_window) = NULL;
+        gtk_widget_destroy (PLUGIN (root_window));
+        PLUGIN (root_window) = NULL;
     }
     if (PLUGIN (root_events) != NULL) {
-	gtk_widget_destroy (PLUGIN (root_events));
-	PLUGIN (root_events) = NULL;
+        gtk_widget_destroy (PLUGIN (root_events));
+        PLUGIN (root_events) = NULL;
     }
     if (PLUGIN (gc) != NULL) {
-	g_object_unref (PLUGIN (gc));
-	PLUGIN (gc) = NULL;
+        g_object_unref (PLUGIN (gc));
+        PLUGIN (gc) = NULL;
     }
     if (PLUGIN (capture_path_filename) != NULL) {
-	g_free (PLUGIN (capture_path_filename));
-	PLUGIN (capture_path_filename = NULL);
+        g_free (PLUGIN (capture_path_filename));
+        PLUGIN (capture_path_filename = NULL);
     }
 
 #ifdef ENABLE_UPLOAD
@@ -281,7 +279,7 @@ plugin_unload (PurplePlugin * plugin) {
 
 static PidginPluginUiInfo ui_info = {
     get_plugin_pref_frame,
-    0,				/* reserved */
+    0,                          /* reserved */
     NULL,
     NULL,
     NULL,
@@ -301,10 +299,10 @@ static PurplePluginInfo info = {
     /* some elements need translation,
        initialize them in init_plugin() */
     PLUGIN_ID,
-    NULL,			/* PLUGIN_NAME */
+    NULL,                       /* PLUGIN_NAME */
     PACKAGE_VERSION,
-    NULL,			/* PLUGIN_SUMMARY */
-    NULL,			/* PLUGIN_DESCRIPTION */
+    NULL,                       /* PLUGIN_SUMMARY */
+    NULL,                       /* PLUGIN_DESCRIPTION */
     PLUGIN_AUTHOR,
     PLUGIN_WEBSITE,
 

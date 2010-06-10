@@ -5,6 +5,8 @@ Version 0.8-2 06/??/10:
 	* Add a space before inserting a link, if necessary.
 	* Added BMP file format.
 	* Hold shift key to move or resize the selection.
+	* Show countdown when a delay was set in pref window.
+	* Animated cues (quite useless).
 	
 Version 0.8-1 04/18/10:
 	* Present conversation to show upload link if it is closed 

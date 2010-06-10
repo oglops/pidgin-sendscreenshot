@@ -69,15 +69,15 @@ flipRedAndBlueBytes (int width, int height) {
 
     j = 0;
     while (j < height) {
-	i = width;
-	bufp = capBytes + j * ROUND4 (width) * 3;
-	while (i--) {
-	    temp = bufp[2];
-	    bufp[2] = bufp[0];
-	    bufp[0] = temp;
-	    bufp += 3;
-	}
-	j++;
+        i = width;
+        bufp = capBytes + j * ROUND4 (width) * 3;
+        while (i--) {
+            temp = bufp[2];
+            bufp[2] = bufp[0];
+            bufp[0] = temp;
+            bufp += 3;
+        }
+        j++;
     }
 }
 
@@ -99,14 +99,14 @@ sendBMPToGimp (HBITMAP hBMP, HDC hDC, RECT rect) {
     flipRedAndBlueBytes (width, height);
     /* Check that we got the memory */
     if (!capBytes) {
-	g_message ("No data captured");
-	return NULL;
+        g_message ("No data captured");
+        return NULL;
     }
 
     pixbuf = gdk_pixbuf_new_from_data
-	((guchar *) capBytes,
-	 GDK_COLORSPACE_RGB, FALSE, 8, ROUND4 (width), height,
-	 ROUND4 (width) * 3, NULL, NULL);
+        ((guchar *) capBytes,
+         GDK_COLORSPACE_RGB, FALSE, 8, ROUND4 (width), height,
+         ROUND4 (width) * 3, NULL, NULL);
 
     return pixbuf;
 }
@@ -141,30 +141,30 @@ primDoWindowCapture (HDC hdcWindow, HDC hdcCompat, RECT rect) {
 
     /* Create the bitmap storage space */
     hbmCopy = CreateDIBSection (hdcCompat,
-				(BITMAPINFO *) & bmi,
-				DIB_RGB_COLORS, &capBytes, NULL, 0);
+                                (BITMAPINFO *) & bmi,
+                                DIB_RGB_COLORS, &capBytes, NULL, 0);
     if (!hbmCopy) {
 
-	g_error ("Error creating DIB section");
-	return NULL;
+        g_error ("Error creating DIB section");
+        return NULL;
     }
 
     /* Select the bitmap into the compatible DC. */
     oldObject = SelectObject (hdcCompat, hbmCopy);
     if (!oldObject) {
 
-	g_error ("Error selecting object");
-	return NULL;
+        g_error ("Error selecting object");
+        return NULL;
     }
 
     /* Copy the data from the application to the bitmap.  Even if we did
      * round up the width, BitBlt only the actual data.
      */
     if (!BitBlt (hdcCompat, 0, 0,
-		 width, height, hdcWindow, rect.left, rect.top, SRCCOPY)) {
+                 width, height, hdcWindow, rect.left, rect.top, SRCCOPY)) {
 
-	g_error ("Error copying bitmap");
-	return NULL;
+        g_error ("Error copying bitmap");
+        return NULL;
     }
 
     /* Restore the original object */
@@ -192,26 +192,26 @@ doCapture (GdkRectangle gdk_rect) {
     gdi_rect.right = gdk_rect.x + gdk_rect.width;
 
     if (!hdcSrc) {
-	g_error ("Error getting device context");
-	return NULL;
+        g_error ("Error getting device context");
+        return NULL;
     }
     hdcCompat = CreateCompatibleDC (hdcSrc);
     if (!hdcCompat) {
-	g_error ("ErRor getting compat device context");
-	return NULL;
+        g_error ("ErRor getting compat device context");
+        return NULL;
     }
 
     /* Do the window capture */
     hbm = primDoWindowCapture (hdcSrc, hdcCompat, gdi_rect);
     if (!hbm)
-	return NULL;
+        return NULL;
 
     /* Release the device context */
     ReleaseDC (NULL, hdcSrc);
 
     /* Send the bitmap */
     if (hbm != NULL) {
-	pixbuf = sendBMPToGimp (hbm, hdcCompat, gdi_rect);
+        pixbuf = sendBMPToGimp (hbm, hdcCompat, gdi_rect);
     }
     return pixbuf;
 }

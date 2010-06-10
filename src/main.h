@@ -44,8 +44,8 @@
 #include <gtkplugin.h>
 #include <gtkconv.h>
 #include <gtkimhtmltoolbar.h>
-#include <string.h>		/* strrchr() */
-#include <gdk/gdkkeysyms.h>	/* GDK_Escape, GDK_Down */
+#include <string.h>             /* strrchr() */
+#include <gdk/gdkkeysyms.h>     /* GDK_Escape, GDK_Down */
 #include <gtkutils.h>
 #include <gtkblist.h>
 #include <glib/gstdio.h>
@@ -170,9 +170,12 @@ typedef enum {
 GtkWidget *get_receiver_window (PurplePlugin * plugin);
 GtkIMHtml *get_receiver_imhtml (PurplePlugin * plugin);
 void plugin_stop (PurplePlugin * plugin);
-gboolean plugin_is_unlocked (PurplePlugin * plugin);
+/* gboolean plugin_is_unlocked (PurplePlugin * plugin); */
 gboolean receiver_window_is_iconified (PurplePlugin * plugin);
 
+PidginConversation *get_receiver_gtkconv (PurplePlugin * plugin);
+void
+  freeze_desktop (PurplePlugin * plugin);
 #define selection_defined(plugin)\
   PLUGIN (x1) != -1
 
@@ -180,7 +183,7 @@ gboolean receiver_window_is_iconified (PurplePlugin * plugin);
 typedef struct {
     /* prevent two instances of SndScreenshot to run
        simultenaously */
-    GMutex *mutex;
+    gboolean locked;
 
     SendType send_as;
 
@@ -202,7 +205,6 @@ typedef struct {
     PurpleConversationType conv_type;
     PurpleAccount *account;
     gchar *name;
-    guint source;
 
     /* capture area */
     gint x1, y1, x2, y2;
@@ -214,12 +216,16 @@ typedef struct {
     /* cues */
     gint cue_offset;
     gint mouse_x, mouse_y, __mouse_x, __mouse_y;
+
+    /* freeze cb handle */
     guint timeout_source;
 
     /* screenshot's location */
     gchar *capture_path_filename;
 
     GError *error;
+
+    GtkWidget *countdown_dialog;
 
 #ifdef ENABLE_UPLOAD
     GtkWidget *uploading_dialog;
@@ -233,22 +239,22 @@ typedef struct {
 
     /* host data from xml */
     struct host_param_data {
-	gchar *xml_hosts_version;
-	gchar *selected_hostname;
-	gchar *form_action;
-	gchar *file_input_name;
-	gchar *regexp;
+        gchar *xml_hosts_version;
+        gchar *selected_hostname;
+        gchar *form_action;
+        gchar *file_input_name;
+        gchar *regexp;
 
-	gchar *html_response;
+        gchar *html_response;
 
-	GArray *host_names;
-	GArray *extra_names;
-	GArray *extra_values;
+        GArray *host_names;
+        GArray *extra_names;
+        GArray *extra_values;
 
-	gboolean is_inside;
-	gboolean quit_handlers;
+        gboolean is_inside;
+        gboolean quit_handlers;
 
-	/* needed by conf dialog */
+        /* needed by conf dialog */
     } *host_data;
 #endif
 } PluginExtraVars;

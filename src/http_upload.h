@@ -124,7 +124,7 @@
 
 
 
-#define MAX_URL_SIZE 2500	/* this should be enough, right ? */
+#define MAX_URL_SIZE 2500       /* this should be enough, right ? */
 
 
 #define SEND_AS_HTML_LINK_TXT _("as a link (_HTML upload)")

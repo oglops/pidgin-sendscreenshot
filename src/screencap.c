@@ -38,6 +38,25 @@
 #include "mswin-freeze.h"
 #endif
 
+/*
+ * If we immediately freeze the screen, then the menuitem we just
+ * click on may remain. That's we wait for a small timeout.
+ */
+void
+freeze_desktop (PurplePlugin * plugin) {
+
+    if (purple_prefs_get_int (PREF_WAIT_BEFORE_SCREENSHOT) > 0)
+        show_countdown_dialog (plugin);
+
+    PLUGIN (timeout_source) =
+        purple_timeout_add
+        (MAX
+         (MSEC_TIMEOUT_VAL,
+          purple_prefs_get_int (PREF_WAIT_BEFORE_SCREENSHOT) * 1000),
+         (GSourceFunc) timeout_freeze_screen, plugin);
+}
+
+
 /**
  * Get, copy and show current desktop image.
  */
@@ -72,11 +91,11 @@ timeout_freeze_screen (PurplePlugin * plugin) {
     rect.y += y_offset;
 
     for (i = 1; i < gdk_screen_get_n_monitors (screen); i++) {
-	GdkRectangle monitor_rect;
-	gdk_screen_get_monitor_geometry (screen, i, &monitor_rect);
-	monitor_rect.x += x_offset;
-	monitor_rect.y += y_offset;
-	gdk_rectangle_union (&rect, &monitor_rect, &rect);
+        GdkRectangle monitor_rect;
+        gdk_screen_get_monitor_geometry (screen, i, &monitor_rect);
+        monitor_rect.x += x_offset;
+        monitor_rect.y += y_offset;
+        gdk_rectangle_union (&rect, &monitor_rect, &rect);
     }
     x_orig = rect.x;
     y_orig = rect.y;
@@ -85,92 +104,94 @@ timeout_freeze_screen (PurplePlugin * plugin) {
 
     /* primary monitor not at the top-left corner, use Win32 API. */
     if (rect.x != 0 || rect.y != 0) {
-	if (mswin_freeze_screen (plugin, rect) == FALSE) {
-	    purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
-				 PLUGIN_MEMORY_ERROR);
-	    plugin_stop (plugin);
-	    return 0;
-	}
+        if (mswin_freeze_screen (plugin, rect) == FALSE) {
+            purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
+                                 PLUGIN_MEMORY_ERROR);
+            plugin_stop (plugin);
+            return 0;
+        }
     }
     else {
 #endif
-	/* vvvvvv
-	   Part stolen from gnome-screenshot code, part
-	   of GnomeUtils ( See http://live.gnome.org/GnomeUtils)
-	 */
-	gint x_real_orig, y_real_orig;
-	gint real_width, real_height;
+        /* vvvvvv
+           Part stolen from gnome-screenshot code, part
+           of GnomeUtils ( See http://live.gnome.org/GnomeUtils)
+         */
+        gint x_real_orig, y_real_orig;
+        gint real_width, real_height;
 
-	gdkroot = gdk_get_default_root_window ();
+        gdkroot = gdk_get_default_root_window ();
 
-	gdk_drawable_get_size (gdkroot, &real_width, &real_height);
-	gdk_window_get_origin (gdkroot, &x_real_orig, &y_real_orig);
+        gdk_drawable_get_size (gdkroot, &real_width, &real_height);
+        gdk_window_get_origin (gdkroot, &x_real_orig, &y_real_orig);
 
-	x_orig = x_real_orig;
-	y_orig = y_real_orig;
-	width = real_width;
-	height = real_height;
+        x_orig = x_real_orig;
+        y_orig = y_real_orig;
+        width = real_width;
+        height = real_height;
 
-	if (x_orig < 0) {
-	    width = width + x_orig;
-	    x_orig = 0;
-	}
+        if (x_orig < 0) {
+            width = width + x_orig;
+            x_orig = 0;
+        }
 
-	if (y_orig < 0) {
-	    height = height + y_orig;
-	    y_orig = 0;
-	}
+        if (y_orig < 0) {
+            height = height + y_orig;
+            y_orig = 0;
+        }
 
-	if (x_orig + width > gdk_screen_width ())
-	    width = gdk_screen_width () - x_orig;
+        if (x_orig + width > gdk_screen_width ())
+            width = gdk_screen_width () - x_orig;
 
-	if (y_orig + height > gdk_screen_height ())
-	    height = gdk_screen_height () - y_orig;
-	/* ^^^^ */
+        if (y_orig + height > gdk_screen_height ())
+            height = gdk_screen_height () - y_orig;
+        /* ^^^^ */
 
-	g_assert (PLUGIN (root_pixbuf_orig) == NULL);
-	if ((PLUGIN (root_pixbuf_orig) =
-	     gdk_pixbuf_get_from_drawable (NULL, gdkroot, NULL,
-					   x_orig, y_orig, 0, 0, width,
-					   height)) == NULL) {
-	    purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
-				 PLUGIN_MEMORY_ERROR);
-	    plugin_stop (plugin);
-	    return 0;
-	}
+        g_assert (PLUGIN (root_pixbuf_orig) == NULL);
+        if ((PLUGIN (root_pixbuf_orig) =
+             gdk_pixbuf_get_from_drawable (NULL, gdkroot, NULL,
+                                           x_orig, y_orig, 0, 0, width,
+                                           height)) == NULL) {
+            purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
+                                 PLUGIN_MEMORY_ERROR);
+            plugin_stop (plugin);
+            return 0;
+        }
 #ifdef G_OS_WIN32
     }
 #endif
 
     if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) < 3 ||
-	purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == Grayscale) {
-	g_assert (PLUGIN (root_pixbuf_x) == NULL);
-	g_assert (PLUGIN (root_pixbuf_orig) != NULL);
-	if ((PLUGIN (root_pixbuf_x) =
-	     gdk_pixbuf_copy (PLUGIN (root_pixbuf_orig))) == NULL) {
-	    purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
-				 PLUGIN_MEMORY_ERROR);
-	    g_object_unref (PLUGIN (root_pixbuf_orig));
-	    PLUGIN (root_pixbuf_orig) = NULL;
-	    plugin_stop (plugin);
-	    return 0;
-	}
+        purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == Grayscale) {
+        g_assert (PLUGIN (root_pixbuf_x) == NULL);
+        g_assert (PLUGIN (root_pixbuf_orig) != NULL);
+        if ((PLUGIN (root_pixbuf_x) =
+             gdk_pixbuf_copy (PLUGIN (root_pixbuf_orig))) == NULL) {
+            purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
+                                 PLUGIN_MEMORY_ERROR);
+            g_object_unref (PLUGIN (root_pixbuf_orig));
+            PLUGIN (root_pixbuf_orig) = NULL;
+            plugin_stop (plugin);
+            return 0;
+        }
     }
     /* apply effects */
     if (PLUGIN (root_pixbuf_x) != NULL) {
-	if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == LighenUp)
-	    mygdk_pixbuf_lighten (PLUGIN (root_pixbuf_x), PIXEL_VAL);
-	else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == Darken)
-	    mygdk_pixbuf_darken (PLUGIN (root_pixbuf_x), PIXEL_VAL);
-	else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == Grayscale)
-	    mygdk_pixbuf_grey (PLUGIN (root_pixbuf_x));
+        if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == LighenUp)
+            mygdk_pixbuf_lighten (PLUGIN (root_pixbuf_x), PIXEL_VAL);
+        else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == Darken)
+            mygdk_pixbuf_darken (PLUGIN (root_pixbuf_x), PIXEL_VAL);
+        else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == Grayscale)
+            mygdk_pixbuf_grey (PLUGIN (root_pixbuf_x));
     }
 
     /* reset */
     RESET_SELECTION (plugin);
 
+    PLUGIN (timeout_source) = 0;
+
     /* let the user capture an area... */
-    gtk_widget_show (PLUGIN (root_events));	/* focus is grabbed */
+    gtk_widget_show (PLUGIN (root_events));     /* focus is grabbed */
     gtk_widget_show (PLUGIN (root_window));
 
     cursor = gdk_cursor_new (GDK_CROSSHAIR);
@@ -182,18 +203,18 @@ timeout_freeze_screen (PurplePlugin * plugin) {
 
 static void
 paint_region (GdkRegion * region,
-	      GdkWindow * gdkwin, GdkPixbuf * pixbuf, PurplePlugin * plugin) {
+              GdkWindow * gdkwin, GdkPixbuf * pixbuf, PurplePlugin * plugin) {
     GdkRectangle *rectangles = NULL;
     gint n_rectangles, idx;
 
     gdk_region_get_rectangles (region, &rectangles, &n_rectangles);
 
     for (idx = 0; idx < n_rectangles; idx++) {
-	gdk_draw_pixbuf (gdkwin, PLUGIN (gc), pixbuf,	/* src */
-			 (rectangles[idx]).x, (rectangles[idx]).y,
-			 (rectangles[idx]).x, (rectangles[idx]).y,
-			 (rectangles[idx]).width, (rectangles[idx]).height,
-			 GDK_RGB_DITHER_NONE, 0, 0);
+        gdk_draw_pixbuf (gdkwin, PLUGIN (gc), pixbuf,   /* src */
+                         (rectangles[idx]).x, (rectangles[idx]).y,
+                         (rectangles[idx]).x, (rectangles[idx]).y,
+                         (rectangles[idx]).width, (rectangles[idx]).height,
+                         GDK_RGB_DITHER_NONE, 0, 0);
     }
     g_free (rectangles);
 }
@@ -211,8 +232,8 @@ on_root_window_realize_cb (PurplePlugin * plugin) {
 #endif
     /* be sensitive to user interaction  */
     gdk_window_set_events (gdkwin, GDK_EXPOSURE_MASK |
-			   GDK_BUTTON_PRESS_MASK |
-			   GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK);
+                           GDK_BUTTON_PRESS_MASK |
+                           GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK);
     gdk_window_set_back_pixmap (gdkwin, NULL, FALSE);
 }
 
@@ -223,7 +244,7 @@ plugin_cancel (PurplePlugin * plugin) {
     g_assert (plugin != NULL && plugin->extra != NULL);
 
     if (receiver_window_is_iconified (plugin))
-	gtk_window_deiconify (GTK_WINDOW (get_receiver_window (plugin)));
+        gtk_window_deiconify (GTK_WINDOW (get_receiver_window (plugin)));
 
     THAW_DESKTOP ();
     plugin_stop (plugin);
@@ -251,56 +272,56 @@ maybe_change_cursor (gint x, gint y, PurplePlugin * plugin) {
 
     /* top left */
     if (ABS (y - y1) < DETECT_THRESHOLD && ABS (x - x1) < DETECT_THRESHOLD) {
-	cursor = gdk_cursor_new (GDK_TOP_LEFT_CORNER);
-	PLUGIN (resize_mode) = ResizeTopLeft;
+        cursor = gdk_cursor_new (GDK_TOP_LEFT_CORNER);
+        PLUGIN (resize_mode) = ResizeTopLeft;
     }
     /* bottom right */
     else if (ABS (y - y2) < DETECT_THRESHOLD
-	     && ABS (x - x2) < DETECT_THRESHOLD) {
-	cursor = gdk_cursor_new (GDK_BOTTOM_RIGHT_CORNER);
-	PLUGIN (resize_mode) = ResizeBottomRight;
+             && ABS (x - x2) < DETECT_THRESHOLD) {
+        cursor = gdk_cursor_new (GDK_BOTTOM_RIGHT_CORNER);
+        PLUGIN (resize_mode) = ResizeBottomRight;
     }
     /* bottom left */
     else if (ABS (y - y2) < DETECT_THRESHOLD
-	     && ABS (x - x1) < DETECT_THRESHOLD) {
-	cursor = gdk_cursor_new (GDK_BOTTOM_LEFT_CORNER);
-	PLUGIN (resize_mode) = ResizeBottomLeft;
+             && ABS (x - x1) < DETECT_THRESHOLD) {
+        cursor = gdk_cursor_new (GDK_BOTTOM_LEFT_CORNER);
+        PLUGIN (resize_mode) = ResizeBottomLeft;
     }
     /* top right */
     else if (ABS (y - y1) < DETECT_THRESHOLD
-	     && ABS (x - x2) < DETECT_THRESHOLD) {
-	cursor = gdk_cursor_new (GDK_TOP_RIGHT_CORNER);
-	PLUGIN (resize_mode) = ResizeTopRight;
+             && ABS (x - x2) < DETECT_THRESHOLD) {
+        cursor = gdk_cursor_new (GDK_TOP_RIGHT_CORNER);
+        PLUGIN (resize_mode) = ResizeTopRight;
     }
     /* left */
     else if (ABS (x - x1) < DETECT_THRESHOLD && y >= y1 && y <= y2) {
-	cursor = gdk_cursor_new (GDK_LEFT_SIDE);
-	PLUGIN (resize_mode) = ResizeLeft;
+        cursor = gdk_cursor_new (GDK_LEFT_SIDE);
+        PLUGIN (resize_mode) = ResizeLeft;
     }
     /* right */
     else if (ABS (x - x2) < DETECT_THRESHOLD && y >= y1 && y <= y2) {
-	cursor = gdk_cursor_new (GDK_RIGHT_SIDE);
-	PLUGIN (resize_mode) = ResizeRight;
+        cursor = gdk_cursor_new (GDK_RIGHT_SIDE);
+        PLUGIN (resize_mode) = ResizeRight;
     }
     /* top */
     else if (ABS (y - y1) < DETECT_THRESHOLD && x >= x1 && x <= x2) {
-	cursor = gdk_cursor_new (GDK_TOP_SIDE);
-	PLUGIN (resize_mode) = ResizeTop;
+        cursor = gdk_cursor_new (GDK_TOP_SIDE);
+        PLUGIN (resize_mode) = ResizeTop;
     }
     /* bottom */
     else if (ABS (y - y2) < DETECT_THRESHOLD && x >= x1 && x <= x2) {
-	cursor = gdk_cursor_new (GDK_BOTTOM_SIDE);
-	PLUGIN (resize_mode) = ResizeBottom;
+        cursor = gdk_cursor_new (GDK_BOTTOM_SIDE);
+        PLUGIN (resize_mode) = ResizeBottom;
     }
     /* inside */
     else if (x > x1 && x < x2 && y > y1 && y < y2) {
-	cursor = gdk_cursor_new (GDK_FLEUR);
-	PLUGIN (resize_mode) = ResizeAny;
-	PLUGIN (select_mode) = SELECT_MOVE;
+        cursor = gdk_cursor_new (GDK_FLEUR);
+        PLUGIN (resize_mode) = ResizeAny;
+        PLUGIN (select_mode) = SELECT_MOVE;
     }
     else {
-	cursor = gdk_cursor_new (GDK_LEFT_PTR);
-	PLUGIN (resize_mode) = ResizeNone;
+        cursor = gdk_cursor_new (GDK_LEFT_PTR);
+        PLUGIN (resize_mode) = ResizeNone;
     }
     gdk_window_set_cursor (gdkwin, cursor);
     gdk_cursor_unref (cursor);
@@ -308,205 +329,205 @@ maybe_change_cursor (gint x, gint y, PurplePlugin * plugin) {
 
 static gboolean
 on_root_window_motion_notify_cb (GtkWidget * root_window,
-				 GdkEventMotion * event,
-				 PurplePlugin * plugin) {
+                                 GdkEventMotion * event,
+                                 PurplePlugin * plugin) {
     /* select approriate mouse cursos */
     if (PLUGIN (resize_allow) && (event->state & GDK_BUTTON1_MASK) == 0)
-	maybe_change_cursor (event->x, event->y, plugin);
+        maybe_change_cursor (event->x, event->y, plugin);
 
     /* mouse button pressed */
     if ((event->state & GDK_BUTTON1_MASK) == GDK_BUTTON1_MASK &&
-	selection_defined (plugin) && PLUGIN (resize_mode) != ResizeNone) {
-	gint _x1, _y1, _x2, _y2;
+        selection_defined (plugin) && PLUGIN (resize_mode) != ResizeNone) {
+        gint _x1, _y1, _x2, _y2;
 
-	GdkRectangle old_r, new_r;
-	GdkRegion *border_inter = NULL;
-	GdkWindow *gdkwin;
+        GdkRectangle old_r, new_r;
+        GdkRegion *border_inter = NULL;
+        GdkWindow *gdkwin;
 
-	g_assert (PLUGIN (old) == NULL);
-	g_assert (PLUGIN (new) == NULL);
-	g_assert (PLUGIN (border_old) == NULL);
-	g_assert (PLUGIN (border_new) == NULL);
+        g_assert (PLUGIN (old) == NULL);
+        g_assert (PLUGIN (new) == NULL);
+        g_assert (PLUGIN (border_old) == NULL);
+        g_assert (PLUGIN (border_new) == NULL);
 
 #if GTK_CHECK_VERSION(2,14,0)
-	gdkwin = gtk_widget_get_window (root_window);
+        gdkwin = gtk_widget_get_window (root_window);
 #else
-	gdkwin = root_window->window;
+        gdkwin = root_window->window;
 #endif
 
-	/* remember previous coordinates */
-	_x1 = PLUGIN (x1);
-	_y1 = PLUGIN (y1);
-	_x2 = PLUGIN (x2);
-	_y2 = PLUGIN (y2);
+        /* remember previous coordinates */
+        _x1 = PLUGIN (x1);
+        _y1 = PLUGIN (y1);
+        _x2 = PLUGIN (x2);
+        _y2 = PLUGIN (y2);
 
-	if (PLUGIN (select_mode) != SELECT_MOVE) {
-	    /* allow horizontal resizing */
-	    if (PLUGIN (resize_mode) != ResizeTop &&
-		PLUGIN (resize_mode) != ResizeBottom)
-		PLUGIN (x2) = (gint) event->x;
-	    /* allow vertical resizing */
-	    if (PLUGIN (resize_mode) != ResizeLeft &&
-		PLUGIN (resize_mode) != ResizeRight)
-		PLUGIN (y2) = (gint) event->y;
+        if (PLUGIN (select_mode) != SELECT_MOVE) {
+            /* allow horizontal resizing */
+            if (PLUGIN (resize_mode) != ResizeTop &&
+                PLUGIN (resize_mode) != ResizeBottom)
+                PLUGIN (x2) = (gint) event->x;
+            /* allow vertical resizing */
+            if (PLUGIN (resize_mode) != ResizeLeft &&
+                PLUGIN (resize_mode) != ResizeRight)
+                PLUGIN (y2) = (gint) event->y;
 
-	    if (PLUGIN (select_mode) == SELECT_CENTER_HOLD) {
-		GdkScreen *screen;
-		gint xdiff, ydiff;
+            if (PLUGIN (select_mode) == SELECT_CENTER_HOLD) {
+                GdkScreen *screen;
+                gint xdiff, ydiff;
 
-		screen = gdk_screen_get_default ();
+                screen = gdk_screen_get_default ();
 
-		xdiff = (gint) event->x - _x2;
-		ydiff = (gint) event->y - _y2;
+                xdiff = (gint) event->x - _x2;
+                ydiff = (gint) event->y - _y2;
 
-		if (PLUGIN (resize_mode) != ResizeTop &&
-		    PLUGIN (resize_mode) != ResizeBottom)
-		    PLUGIN (x1) =
-			MIN (MAX (PLUGIN (x1) - xdiff, 0),
-			     gdk_screen_get_width (screen) - 1);
+                if (PLUGIN (resize_mode) != ResizeTop &&
+                    PLUGIN (resize_mode) != ResizeBottom)
+                    PLUGIN (x1) =
+                        MIN (MAX (PLUGIN (x1) - xdiff, 0),
+                             gdk_screen_get_width (screen) - 1);
 
-		if (PLUGIN (resize_mode) != ResizeLeft &&
-		    PLUGIN (resize_mode) != ResizeRight)
-		    PLUGIN (y1) =
-			MIN (MAX (PLUGIN (y1) - ydiff, 0),
-			     gdk_screen_get_height (screen) - 1);
-	    }
-	}
-	else {
-	    GdkScreen *screen;
+                if (PLUGIN (resize_mode) != ResizeLeft &&
+                    PLUGIN (resize_mode) != ResizeRight)
+                    PLUGIN (y1) =
+                        MIN (MAX (PLUGIN (y1) - ydiff, 0),
+                             gdk_screen_get_height (screen) - 1);
+            }
+        }
+        else {
+            GdkScreen *screen;
 
-	    screen = gdk_screen_get_default ();
+            screen = gdk_screen_get_default ();
 
-	    gint dx, dy;
+            gint dx, dy;
 
-	    dx = ((gint) event->x) - PLUGIN (mouse_x);
-	    dy = ((gint) event->y) - PLUGIN (mouse_y);
+            dx = ((gint) event->x) - PLUGIN (mouse_x);
+            dy = ((gint) event->y) - PLUGIN (mouse_y);
 
-	    if (PLUGIN (x1) + dx >= 0 &&
-		PLUGIN (x1) + dx < gdk_screen_get_width (screen) &&
-		PLUGIN (x2) + dx >= 0 &&
-		PLUGIN (x2) + dx < gdk_screen_get_width (screen)) {
-		PLUGIN (x1) += dx;
-		PLUGIN (x2) += dx;
-	    }
+            if (PLUGIN (x1) + dx >= 0 &&
+                PLUGIN (x1) + dx < gdk_screen_get_width (screen) &&
+                PLUGIN (x2) + dx >= 0 &&
+                PLUGIN (x2) + dx < gdk_screen_get_width (screen)) {
+                PLUGIN (x1) += dx;
+                PLUGIN (x2) += dx;
+            }
 
-	    if (PLUGIN (y1) + dy >= 0 &&
-		PLUGIN (y1) + dy < gdk_screen_get_height (screen) &&
-		PLUGIN (y2) + dy >= 0 &&
-		PLUGIN (y2) + dy < gdk_screen_get_height (screen)) {
-		PLUGIN (y1) += dy;
-		PLUGIN (y2) += dy;
-	    }
-	}
+            if (PLUGIN (y1) + dy >= 0 &&
+                PLUGIN (y1) + dy < gdk_screen_get_height (screen) &&
+                PLUGIN (y2) + dy >= 0 &&
+                PLUGIN (y2) + dy < gdk_screen_get_height (screen)) {
+                PLUGIN (y1) += dy;
+                PLUGIN (y2) += dy;
+            }
+        }
 
-	old_r.x = MIN (_x1, _x2);
-	old_r.y = MIN (_y1, _y2);
-	old_r.width = ABS (_x1 - _x2) + 1;
-	old_r.height = ABS (_y1 - _y2) + 1;
+        old_r.x = MIN (_x1, _x2);
+        old_r.y = MIN (_y1, _y2);
+        old_r.width = ABS (_x1 - _x2) + 1;
+        old_r.height = ABS (_y1 - _y2) + 1;
 
-	new_r.width = CAPTURE_WIDTH (plugin);
-	new_r.height = CAPTURE_HEIGHT (plugin);
-	new_r.x = CAPTURE_X0 (plugin);
-	new_r.y = CAPTURE_Y0 (plugin);
+        new_r.width = CAPTURE_WIDTH (plugin);
+        new_r.height = CAPTURE_HEIGHT (plugin);
+        new_r.x = CAPTURE_X0 (plugin);
+        new_r.y = CAPTURE_Y0 (plugin);
 
-	if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != InvertOnly) {
-	    PLUGIN (old) = gdk_region_rectangle (&old_r);
-	    PLUGIN (new) = gdk_region_rectangle (&new_r);
+        if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != InvertOnly) {
+            PLUGIN (old) = gdk_region_rectangle (&old_r);
+            PLUGIN (new) = gdk_region_rectangle (&new_r);
 
-	    PLUGIN (border_old) = gdk_region_rectangle (&old_r);
-	    PLUGIN (border_new) = gdk_region_rectangle (&new_r);
+            PLUGIN (border_old) = gdk_region_rectangle (&old_r);
+            PLUGIN (border_new) = gdk_region_rectangle (&new_r);
 
-	    gdk_region_shrink (PLUGIN (old), BORDER_WIDTH, BORDER_WIDTH);
-	    gdk_region_shrink (PLUGIN (new), BORDER_WIDTH, BORDER_WIDTH);
+            gdk_region_shrink (PLUGIN (old), BORDER_WIDTH, BORDER_WIDTH);
+            gdk_region_shrink (PLUGIN (new), BORDER_WIDTH, BORDER_WIDTH);
 
-	    gdk_region_subtract (PLUGIN (border_old), PLUGIN (old));
-	    gdk_region_subtract (PLUGIN (border_new), PLUGIN (new));
+            gdk_region_subtract (PLUGIN (border_old), PLUGIN (old));
+            gdk_region_subtract (PLUGIN (border_new), PLUGIN (new));
 
-	    gdk_region_destroy (PLUGIN (old));
-	    gdk_region_destroy (PLUGIN (new));
+            gdk_region_destroy (PLUGIN (old));
+            gdk_region_destroy (PLUGIN (new));
 
-	    PLUGIN (old) = NULL;
-	    PLUGIN (new) = NULL;
+            PLUGIN (old) = NULL;
+            PLUGIN (new) = NULL;
 
-	    border_inter = gdk_region_copy (PLUGIN (border_old));
-	    gdk_region_intersect (border_inter, PLUGIN (border_new));
-	    gdk_region_subtract (PLUGIN (border_old), border_inter);
-	    gdk_region_subtract (PLUGIN (border_new), border_inter);
-	}
+            border_inter = gdk_region_copy (PLUGIN (border_old));
+            gdk_region_intersect (border_inter, PLUGIN (border_new));
+            gdk_region_subtract (PLUGIN (border_old), border_inter);
+            gdk_region_subtract (PLUGIN (border_new), border_inter);
+        }
 
-	if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != BordersOnly) {
-	    GdkRegion *inter;
+        if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != BordersOnly) {
+            GdkRegion *inter;
 
-	    PLUGIN (old) = gdk_region_rectangle (&old_r);
-	    PLUGIN (new) = gdk_region_rectangle (&new_r);
+            PLUGIN (old) = gdk_region_rectangle (&old_r);
+            PLUGIN (new) = gdk_region_rectangle (&new_r);
 
-	    inter = gdk_region_copy (PLUGIN (old));
-	    gdk_region_intersect (inter, PLUGIN (new));
+            inter = gdk_region_copy (PLUGIN (old));
+            gdk_region_intersect (inter, PLUGIN (new));
 
-	    gdk_region_subtract (PLUGIN (old), inter);
-	    gdk_region_subtract (PLUGIN (new), inter);
-	    gdk_region_destroy (inter);
-	}
+            gdk_region_subtract (PLUGIN (old), inter);
+            gdk_region_subtract (PLUGIN (new), inter);
+            gdk_region_destroy (inter);
+        }
 
-	/* remove old borders */
-	if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != InvertOnly)
-	    paint_region (PLUGIN (border_old), gdkwin,
-			  PLUGIN (root_pixbuf_orig), plugin);
+        /* remove old borders */
+        if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != InvertOnly)
+            paint_region (PLUGIN (border_old), gdkwin,
+                          PLUGIN (root_pixbuf_orig), plugin);
 
-	/* clear old selection */
-	if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == InvertOnly)
-	    paint_region (PLUGIN (old), gdkwin, PLUGIN (root_pixbuf_orig),
-			  plugin);
-	else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != BordersOnly)
-	    paint_region (PLUGIN (old), gdkwin, PLUGIN (root_pixbuf_x),
-			  plugin);
-
-
-	/* draw selection */
-	if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == InvertOnly) {
-	    gdk_gc_set_function (PLUGIN (gc), GDK_COPY_INVERT);
-	    paint_region (PLUGIN (new), gdkwin, PLUGIN (root_pixbuf_orig),
-			  plugin);
-	    gdk_gc_set_function (PLUGIN (gc), GDK_COPY);
-
-	}
-	else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != BordersOnly)
-	    paint_region (PLUGIN (new), gdkwin, PLUGIN (root_pixbuf_orig),
-			  plugin);
+        /* clear old selection */
+        if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == InvertOnly)
+            paint_region (PLUGIN (old), gdkwin, PLUGIN (root_pixbuf_orig),
+                          plugin);
+        else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != BordersOnly)
+            paint_region (PLUGIN (old), gdkwin, PLUGIN (root_pixbuf_x),
+                          plugin);
 
 
-	/* add selection borders */
-	if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != InvertOnly) {
-	    gdk_gc_set_function (PLUGIN (gc), GDK_COPY_INVERT);
-	    paint_region (PLUGIN (border_new), gdkwin,
-			  PLUGIN (root_pixbuf_orig), plugin);
-	    gdk_gc_set_function (PLUGIN (gc), GDK_COPY);
-	}
+        /* draw selection */
+        if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == InvertOnly) {
+            gdk_gc_set_function (PLUGIN (gc), GDK_COPY_INVERT);
+            paint_region (PLUGIN (new), gdkwin, PLUGIN (root_pixbuf_orig),
+                          plugin);
+            gdk_gc_set_function (PLUGIN (gc), GDK_COPY);
 
-	if (PLUGIN (old) != NULL) {
-	    gdk_region_destroy (PLUGIN (old));
-	    PLUGIN (old) = NULL;
-	}
-	if (PLUGIN (border_old) != NULL) {
-	    gdk_region_destroy (PLUGIN (border_old));
-	    PLUGIN (border_old) = NULL;
-	}
-	if (PLUGIN (new) != NULL) {
-	    gdk_region_destroy (PLUGIN (new));
-	    PLUGIN (new) = NULL;
-	}
-	if (PLUGIN (border_new) != NULL) {
-	    gdk_region_destroy (PLUGIN (border_new));
-	    PLUGIN (border_new) = NULL;
-	}
+        }
+        else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != BordersOnly)
+            paint_region (PLUGIN (new), gdkwin, PLUGIN (root_pixbuf_orig),
+                          plugin);
 
-	if (border_inter != NULL)
-	    gdk_region_destroy (border_inter);
+
+        /* add selection borders */
+        if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != InvertOnly) {
+            gdk_gc_set_function (PLUGIN (gc), GDK_COPY_INVERT);
+            paint_region (PLUGIN (border_new), gdkwin,
+                          PLUGIN (root_pixbuf_orig), plugin);
+            gdk_gc_set_function (PLUGIN (gc), GDK_COPY);
+        }
+
+        if (PLUGIN (old) != NULL) {
+            gdk_region_destroy (PLUGIN (old));
+            PLUGIN (old) = NULL;
+        }
+        if (PLUGIN (border_old) != NULL) {
+            gdk_region_destroy (PLUGIN (border_old));
+            PLUGIN (border_old) = NULL;
+        }
+        if (PLUGIN (new) != NULL) {
+            gdk_region_destroy (PLUGIN (new));
+            PLUGIN (new) = NULL;
+        }
+        if (PLUGIN (border_new) != NULL) {
+            gdk_region_destroy (PLUGIN (border_new));
+            PLUGIN (border_new) = NULL;
+        }
+
+        if (border_inter != NULL)
+            gdk_region_destroy (border_inter);
     }
 
     if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)) {
-	PLUGIN (mouse_x) = event->x;
-	PLUGIN (mouse_y) = event->y;
+        PLUGIN (mouse_x) = event->x;
+        PLUGIN (mouse_y) = event->y;
     }
 
     return TRUE;
@@ -515,31 +536,31 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
 static void
 clear_selection (PurplePlugin * plugin) {
     if (selection_defined (plugin)) {
-	GdkRectangle area;
-	GdkWindow *gdkwin = PLUGIN (root_window)->window;
-	GdkCursor *cursor = gdk_cursor_new (GDK_CROSSHAIR);
+        GdkRectangle area;
+        GdkWindow *gdkwin = PLUGIN (root_window)->window;
+        GdkCursor *cursor = gdk_cursor_new (GDK_CROSSHAIR);
 
-	/* cancel current selection to try a new one */
-	area.x = CAPTURE_X0 (plugin);
-	area.y = CAPTURE_Y0 (plugin);
-	area.width = CAPTURE_WIDTH (plugin);
-	area.height = CAPTURE_HEIGHT (plugin);
+        /* cancel current selection to try a new one */
+        area.x = CAPTURE_X0 (plugin);
+        area.y = CAPTURE_Y0 (plugin);
+        area.width = CAPTURE_WIDTH (plugin);
+        area.height = CAPTURE_HEIGHT (plugin);
 
-	/* draw background */
-	gdk_draw_pixbuf (gdkwin, PLUGIN (gc), BACKGROUND_PIXBUF,	/* src */
-			 area.x, area.y,
-			 area.x, area.y,
-			 area.width, area.height, GDK_RGB_DITHER_NONE, 0, 0);
+        /* draw background */
+        gdk_draw_pixbuf (gdkwin, PLUGIN (gc), BACKGROUND_PIXBUF,        /* src */
+                         area.x, area.y,
+                         area.x, area.y,
+                         area.width, area.height, GDK_RGB_DITHER_NONE, 0, 0);
 
-	RESET_SELECTION (plugin);
+        RESET_SELECTION (plugin);
 
-	gdk_window_set_cursor (gdkwin, cursor);
-	gdk_cursor_unref (cursor);
+        gdk_window_set_cursor (gdkwin, cursor);
+        gdk_cursor_unref (cursor);
 
-	if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)) {
-	    g_assert (PLUGIN (timeout_source) == 0);
-	    draw_cues (TRUE, plugin);
-	}
+        if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)) {
+            g_assert (PLUGIN (timeout_source) == 0);
+            draw_cues (TRUE, plugin);
+        }
     }
 }
 
@@ -555,92 +576,92 @@ clear_selection (PurplePlugin * plugin) {
 
 static gboolean
 on_root_window_button_press_cb (GtkWidget * root_window,
-				GdkEventButton * event,
-				PurplePlugin * plugin) {
+                                GdkEventButton * event,
+                                PurplePlugin * plugin) {
     if (event->button == 1) {
-	if ((PLUGIN (resize_mode) == ResizeLeft && PLUGIN (x1) < PLUGIN (x2))
-	    || (PLUGIN (resize_mode) == ResizeRight
-		&& PLUGIN (x2) < PLUGIN (x1))
-	    || (PLUGIN (resize_mode) == ResizeTop
-		&& PLUGIN (y1) < PLUGIN (y2))
-	    || (PLUGIN (resize_mode) == ResizeBottom
-		&& PLUGIN (y2) < PLUGIN (y1))) {
-	    SWAP_X ();
-	    SWAP_Y ();
-	}
-	else if (PLUGIN (resize_mode) == ResizeTopLeft) {
-	    if (PLUGIN (x1) < PLUGIN (x2))
-		SWAP_X ();
+        if ((PLUGIN (resize_mode) == ResizeLeft && PLUGIN (x1) < PLUGIN (x2))
+            || (PLUGIN (resize_mode) == ResizeRight
+                && PLUGIN (x2) < PLUGIN (x1))
+            || (PLUGIN (resize_mode) == ResizeTop
+                && PLUGIN (y1) < PLUGIN (y2))
+            || (PLUGIN (resize_mode) == ResizeBottom
+                && PLUGIN (y2) < PLUGIN (y1))) {
+            SWAP_X ();
+            SWAP_Y ();
+        }
+        else if (PLUGIN (resize_mode) == ResizeTopLeft) {
+            if (PLUGIN (x1) < PLUGIN (x2))
+                SWAP_X ();
 
-	    if (PLUGIN (y1) < PLUGIN (y2))
-		SWAP_Y ();
-	}
-	else if (PLUGIN (resize_mode) == ResizeBottomLeft) {
-	    if (PLUGIN (x1) < PLUGIN (x2))
-		SWAP_X ();
+            if (PLUGIN (y1) < PLUGIN (y2))
+                SWAP_Y ();
+        }
+        else if (PLUGIN (resize_mode) == ResizeBottomLeft) {
+            if (PLUGIN (x1) < PLUGIN (x2))
+                SWAP_X ();
 
-	    if (PLUGIN (y1) > PLUGIN (y2))
-		SWAP_Y ();
-	}
-	else if (PLUGIN (resize_mode) == ResizeTopRight) {
-	    if (PLUGIN (x1) > PLUGIN (x2))
-		SWAP_X ();
+            if (PLUGIN (y1) > PLUGIN (y2))
+                SWAP_Y ();
+        }
+        else if (PLUGIN (resize_mode) == ResizeTopRight) {
+            if (PLUGIN (x1) > PLUGIN (x2))
+                SWAP_X ();
 
-	    if (PLUGIN (y1) < PLUGIN (y2))
-		SWAP_Y ();
-	}
-	else if (PLUGIN (resize_mode) == ResizeBottomRight) {
-	    if (PLUGIN (x1) > PLUGIN (x2))
-		SWAP_X ();
-	    if (PLUGIN (y1) > PLUGIN (y2))
-		SWAP_Y ();
-	}
-	else if (PLUGIN (resize_mode) == ResizeAny &&
-		 PLUGIN (select_mode) == SELECT_MOVE) {
-	    PLUGIN (mouse_x) = (gint) event->x;
-	    PLUGIN (mouse_y) = (gint) event->y;
-	}
-	else if (PLUGIN (x1) == -1) {	/* start defining the capture area */
-	    GdkRegion *region = NULL;
-	    GdkRectangle rect;
+            if (PLUGIN (y1) < PLUGIN (y2))
+                SWAP_Y ();
+        }
+        else if (PLUGIN (resize_mode) == ResizeBottomRight) {
+            if (PLUGIN (x1) > PLUGIN (x2))
+                SWAP_X ();
+            if (PLUGIN (y1) > PLUGIN (y2))
+                SWAP_Y ();
+        }
+        else if (PLUGIN (resize_mode) == ResizeAny &&
+                 PLUGIN (select_mode) == SELECT_MOVE) {
+            PLUGIN (mouse_x) = (gint) event->x;
+            PLUGIN (mouse_y) = (gint) event->y;
+        }
+        else if (PLUGIN (x1) == -1) {   /* start defining the capture area */
+            GdkRegion *region = NULL;
+            GdkRectangle rect;
 
-	    PLUGIN (x1) = (gint) event->x;
-	    PLUGIN (y1) = (gint) event->y;
-	    PLUGIN (x2) = (gint) event->x;
-	    PLUGIN (y2) = (gint) event->y;
+            PLUGIN (x1) = (gint) event->x;
+            PLUGIN (y1) = (gint) event->y;
+            PLUGIN (x2) = (gint) event->x;
+            PLUGIN (y2) = (gint) event->y;
 
-	    if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES))
-		erase_cues (plugin);
+            if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES))
+                erase_cues (plugin);
 
-	    /* draw upper-left pixel */
-	    rect.x = PLUGIN (x1);
-	    rect.y = PLUGIN (y1);
-	    rect.width = 1;
-	    rect.height = 1;
+            /* draw upper-left pixel */
+            rect.x = PLUGIN (x1);
+            rect.y = PLUGIN (y1);
+            rect.width = 1;
+            rect.height = 1;
 
-	    region = gdk_region_rectangle (&rect);
+            region = gdk_region_rectangle (&rect);
 
-	    gdk_gc_set_function (PLUGIN (gc), GDK_COPY_INVERT);
-	    paint_region (region, root_window->window,
-			  PLUGIN (root_pixbuf_orig), plugin);
-	    gdk_gc_set_function (PLUGIN (gc), GDK_COPY);
+            gdk_gc_set_function (PLUGIN (gc), GDK_COPY_INVERT);
+            paint_region (region, root_window->window,
+                          PLUGIN (root_pixbuf_orig), plugin);
+            gdk_gc_set_function (PLUGIN (gc), GDK_COPY);
 
-	    gdk_region_destroy (region);
-	    region = NULL;
-	}
+            gdk_region_destroy (region);
+            region = NULL;
+        }
     }
-    else if (event->button == 2 &&	/* hide the current conversation window  */
-	     !receiver_window_is_iconified (plugin)) {
-	THAW_DESKTOP ();
-	gtk_window_iconify (GTK_WINDOW (get_receiver_window (plugin)));
-	FREEZE_DESKTOP ();
+    else if (event->button == 2 &&      /* hide the current conversation window  */
+             !receiver_window_is_iconified (plugin)) {
+        THAW_DESKTOP ();
+        gtk_window_iconify (GTK_WINDOW (get_receiver_window (plugin)));
+        freeze_desktop (plugin);
     }
     else if (event->button == 3) {
-	if (event->type == GDK_2BUTTON_PRESS)
-	    plugin_cancel (plugin);
-	else if (selection_defined (plugin)) {
-	    clear_selection (plugin);
-	}
+        if (event->type == GDK_2BUTTON_PRESS)
+            plugin_cancel (plugin);
+        else if (selection_defined (plugin)) {
+            clear_selection (plugin);
+        }
     }
     return TRUE;
 }
@@ -654,38 +675,38 @@ extract_capture (PurplePlugin * plugin) {
     /* 1/ create our new pixbuf */
     g_assert (PLUGIN (root_pixbuf_orig) != NULL);
     capture =
-	gdk_pixbuf_new_subpixbuf (PLUGIN (root_pixbuf_orig),
-				  CAPTURE_X0 (plugin),
-				  CAPTURE_Y0 (plugin),
-				  CAPTURE_WIDTH (plugin),
-				  CAPTURE_HEIGHT (plugin));
+        gdk_pixbuf_new_subpixbuf (PLUGIN (root_pixbuf_orig),
+                                  CAPTURE_X0 (plugin),
+                                  CAPTURE_Y0 (plugin),
+                                  CAPTURE_WIDTH (plugin),
+                                  CAPTURE_HEIGHT (plugin));
 
     if (capture != NULL) {
-	/* 2/ make invisible areas black */
-	mask_monitors (capture,
-		       gdk_get_default_root_window (),
-		       CAPTURE_X0 (plugin), CAPTURE_Y0 (plugin));
+        /* 2/ make invisible areas black */
+        mask_monitors (capture,
+                       gdk_get_default_root_window (),
+                       CAPTURE_X0 (plugin), CAPTURE_Y0 (plugin));
 
-	/* 3/ add a signature to the bottom-right corner */
-	if (purple_prefs_get_bool (PREF_ADD_SIGNATURE)) {
-	    GdkPixbuf *sign_pixbuf =
-		gdk_pixbuf_new_from_file (purple_prefs_get_string
-					  (PREF_SIGNATURE_FILENAME),
-					  NULL);
-	    if (sign_pixbuf != NULL) {
-		if (!mygdk_pixbuf_check_maxsize
-		    (sign_pixbuf, SIGN_MAXWIDTH, SIGN_MAXHEIGHT)) {
-		    NotifyError (PLUGIN_SIGNATURE_TOOBIG_ERROR, SIGN_MAXWIDTH,
-				 SIGN_MAXHEIGHT);
-		    purple_prefs_set_string (PREF_SIGNATURE_FILENAME, "");
-		}
-		else
-		    mygdk_pixbuf_compose (capture, sign_pixbuf);
+        /* 3/ add a signature to the bottom-right corner */
+        if (purple_prefs_get_bool (PREF_ADD_SIGNATURE)) {
+            GdkPixbuf *sign_pixbuf =
+                gdk_pixbuf_new_from_file (purple_prefs_get_string
+                                          (PREF_SIGNATURE_FILENAME),
+                                          NULL);
+            if (sign_pixbuf != NULL) {
+                if (!mygdk_pixbuf_check_maxsize
+                    (sign_pixbuf, SIGN_MAXWIDTH, SIGN_MAXHEIGHT)) {
+                    NotifyError (PLUGIN_SIGNATURE_TOOBIG_ERROR, SIGN_MAXWIDTH,
+                                 SIGN_MAXHEIGHT);
+                    purple_prefs_set_string (PREF_SIGNATURE_FILENAME, "");
+                }
+                else
+                    mygdk_pixbuf_compose (capture, sign_pixbuf);
 
-		g_object_unref (sign_pixbuf);
-		sign_pixbuf = NULL;
-	    }
-	}
+                g_object_unref (sign_pixbuf);
+                sign_pixbuf = NULL;
+            }
+        }
     }
     return capture;
 }
@@ -702,18 +723,18 @@ save_capture (PurplePlugin * plugin, GdkPixbuf * capture) {
     g_assert (plugin != NULL && plugin->extra != NULL);
 
     if (PLUGIN (capture_path_filename) != NULL)
-	g_free (PLUGIN (capture_path_filename));
+        g_free (PLUGIN (capture_path_filename));
 
     if (!strcmp (extension, "png")) {
-	param_name = g_strdup ("compression");
-	param_value =
-	    g_strdup_printf ("%d",
-			     purple_prefs_get_int (PREF_PNG_COMPRESSION));
+        param_name = g_strdup ("compression");
+        param_value =
+            g_strdup_printf ("%d",
+                             purple_prefs_get_int (PREF_PNG_COMPRESSION));
     }
-    else if (!strcmp (extension, "jpg")){
-	param_name = g_strdup ("quality");
-	param_value =
-	    g_strdup_printf ("%d", purple_prefs_get_int (PREF_JPEG_QUALITY));
+    else if (!strcmp (extension, "jpg")) {
+        param_name = g_strdup ("quality");
+        param_value =
+            g_strdup_printf ("%d", purple_prefs_get_int (PREF_JPEG_QUALITY));
     }
 
     /* create default name */
@@ -724,32 +745,32 @@ save_capture (PurplePlugin * plugin, GdkPixbuf * capture) {
     screenshot_maybe_rename (plugin, &basename);
 
     PLUGIN (capture_path_filename) =
-	g_build_filename (need_save ()?
-			  purple_prefs_get_string (PREF_STORE_FOLDER) :
-			  g_get_tmp_dir (), basename, NULL);
+        g_build_filename (need_save ()?
+                          purple_prefs_get_string (PREF_STORE_FOLDER) :
+                          g_get_tmp_dir (), basename, NULL);
     g_free (basename);
     basename = NULL;
 
     /* store capture in a file */
     gdk_pixbuf_save (capture, PLUGIN (capture_path_filename), extension,
-		     &error, param_name, param_value, NULL);
+                     &error, param_name, param_value, NULL);
 
     if (param_name != NULL)
-	g_free (param_name);
+        g_free (param_name);
     if (param_value != NULL)
-	g_free (param_value);
+        g_free (param_value);
 
     if (error != NULL) {
-	gchar *errmsg_saveto = g_strdup_printf (PLUGIN_SAVE_TO_FILE_ERROR,
-						PLUGIN
-						(capture_path_filename));
+        gchar *errmsg_saveto = g_strdup_printf (PLUGIN_SAVE_TO_FILE_ERROR,
+                                                PLUGIN
+                                                (capture_path_filename));
 
-	NotifyError ("%s\n\n\%s", errmsg_saveto, error->message);
+        NotifyError ("%s\n\n\%s", errmsg_saveto, error->message);
 
-	g_free (errmsg_saveto);
-	plugin_stop (plugin);
-	g_error_free (error);
-	return FALSE;
+        g_free (errmsg_saveto);
+        plugin_stop (plugin);
+        g_error_free (error);
+        return FALSE;
     }
     return TRUE;
 }
@@ -764,138 +785,137 @@ fetch_capture (PurplePlugin * plugin) {
 
     /* do nothing if there's no selection yet */
     if (!(selection_defined (plugin)))
-	return;
+        return;
 
     root_window = PLUGIN (root_window);
 
     if (receiver_window_is_iconified (plugin))
-	gtk_window_deiconify (GTK_WINDOW (get_receiver_window (plugin)));
+        gtk_window_deiconify (GTK_WINDOW (get_receiver_window (plugin)));
 
     /* process screenshot */
     if ((capture = extract_capture (plugin)) == NULL) {
-	purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
-			     PLUGIN_MEMORY_ERROR);
-	THAW_DESKTOP ();
-	plugin_stop (plugin);
+        purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
+                             PLUGIN_MEMORY_ERROR);
+        THAW_DESKTOP ();
+        plugin_stop (plugin);
     }
     else {
-	/* capture was successfully stored in file */
-	if (save_capture (plugin, capture)) {
-	    /* RESET_SELECTION (plugin); */
-	    g_object_unref (capture);
-	    capture = NULL;
+        /* capture was successfully stored in file */
+        if (save_capture (plugin, capture)) {
+            g_object_unref (capture);
+            capture = NULL;
 
-	    switch (PLUGIN (send_as)) {
-	    case SEND_AS_FILE:
-		{
-		    serv_send_file
-			(purple_account_get_connection
-			 (PLUGIN (account)), PLUGIN (name),
-			 PLUGIN (capture_path_filename));
-		    plugin_stop (plugin);
-		    break;
-		}
-	    case SEND_AS_IMAGE:
-		{
-		    gchar *filedata = NULL;
-		    size_t size;
-		    GError *error = NULL;
+            switch (PLUGIN (send_as)) {
+            case SEND_AS_FILE:
+                {
+                    serv_send_file
+                        (purple_account_get_connection
+                         (PLUGIN (account)), PLUGIN (name),
+                         PLUGIN (capture_path_filename));
+                    plugin_stop (plugin);
+                    break;
+                }
+            case SEND_AS_IMAGE:
+                {
+                    gchar *filedata = NULL;
+                    size_t size;
+                    GError *error = NULL;
 
-		    if (g_file_get_contents
-			(PLUGIN (capture_path_filename), &filedata, &size,
-			 &error) == FALSE) {
-			gchar *errmsg_getdata;
-			if (filedata != NULL)
-			    g_free (filedata);
+                    if (g_file_get_contents
+                        (PLUGIN (capture_path_filename), &filedata, &size,
+                         &error) == FALSE) {
+                        gchar *errmsg_getdata;
+                        if (filedata != NULL)
+                            g_free (filedata);
 
-			errmsg_getdata =
-			    g_strdup_printf (PLUGIN_GET_DATA_ERROR,
-					     PLUGIN (capture_path_filename));
-			NotifyError ("%s\n\n\%s", errmsg_getdata,
-				     error->message);
-			g_free (errmsg_getdata);
-			g_error_free (error);
-		    }
-		    else {
-			gchar *basename = NULL;
-			GtkTextIter iter;
-			GtkTextMark *ins = NULL;
-			gint purple_tmp_id;
-			GtkIMHtml *imhtml = get_receiver_imhtml (plugin);
+                        errmsg_getdata =
+                            g_strdup_printf (PLUGIN_GET_DATA_ERROR,
+                                             PLUGIN (capture_path_filename));
+                        NotifyError ("%s\n\n\%s", errmsg_getdata,
+                                     error->message);
+                        g_free (errmsg_getdata);
+                        g_error_free (error);
+                    }
+                    else {
+                        gchar *basename = NULL;
+                        GtkTextIter iter;
+                        GtkTextMark *ins = NULL;
+                        gint purple_tmp_id;
+                        GtkIMHtml *imhtml = get_receiver_imhtml (plugin);
 
-			basename =
-			    g_path_get_basename (PLUGIN
-						 (capture_path_filename));
+                        basename =
+                            g_path_get_basename (PLUGIN
+                                                 (capture_path_filename));
 
-			ins =
-			    gtk_text_buffer_get_insert
-			    (gtk_text_view_get_buffer
-			     (GTK_TEXT_VIEW (imhtml)));
+                        ins =
+                            gtk_text_buffer_get_insert
+                            (gtk_text_view_get_buffer
+                             (GTK_TEXT_VIEW (imhtml)));
 
-			gtk_text_buffer_get_iter_at_mark
-			    (gtk_text_view_get_buffer
-			     (GTK_TEXT_VIEW (imhtml)), &iter, ins);
+                        gtk_text_buffer_get_iter_at_mark
+                            (gtk_text_view_get_buffer
+                             (GTK_TEXT_VIEW (imhtml)), &iter, ins);
 
-			purple_tmp_id =
-			    purple_imgstore_add_with_id (filedata, size,
-							 basename);
-			g_free (basename);
+                        purple_tmp_id =
+                            purple_imgstore_add_with_id (filedata, size,
+                                                         basename);
+                        g_free (basename);
 
-			if (purple_tmp_id == 0) {
-			    NotifyError ("%s\n\n\%s",
-					 PLUGIN_STORE_FAILED_ERROR,
-					 PLUGIN (capture_path_filename));
-			    g_free (filedata);
-			}
-			else {
-			    gtk_imhtml_insert_image_at_iter
-				(GTK_IMHTML (imhtml), purple_tmp_id, &iter);
-			    /* filedata is freed here */
-			    purple_imgstore_unref_by_id (purple_tmp_id);
-			    gtk_widget_grab_focus (GTK_WIDGET (imhtml));
-			}
-		    }
-		    plugin_stop (plugin);
-		    break;
-		}
+                        if (purple_tmp_id == 0) {
+                            NotifyError ("%s\n\n\%s",
+                                         PLUGIN_STORE_FAILED_ERROR,
+                                         PLUGIN (capture_path_filename));
+                            g_free (filedata);
+                        }
+                        else {
+                            gtk_imhtml_insert_image_at_iter
+                                (GTK_IMHTML (imhtml), purple_tmp_id, &iter);
+                            /* filedata is freed here */
+                            purple_imgstore_unref_by_id (purple_tmp_id);
+                            gtk_widget_grab_focus (GTK_WIDGET (imhtml));
+                        }
+                    }
+                    plugin_stop (plugin);
+                    break;
+                }
 #ifdef ENABLE_UPLOAD
-	    case SEND_AS_HTTP_LINK:
-		{
-		    http_upload_prepare (plugin);
-		    break;
-		}
-	    case SEND_AS_FTP_LINK:
-		{
-		    ftp_upload_prepare (plugin);
-		    break;
-		}
+            case SEND_AS_HTTP_LINK:
+                {
+                    http_upload_prepare (plugin);
+                    break;
+                }
+            case SEND_AS_FTP_LINK:
+                {
+                    ftp_upload_prepare (plugin);
+                    break;
+                }
 #endif
-	    }
-	}
+            }
+        }
     }
     THAW_DESKTOP ();
 }
 
 static gboolean
 on_root_window_button_release_cb (PurplePlugin * plugin,
-				  GdkEventButton * event) {
+                                  GdkEventButton * event) {
     /* capture not yet defined */
     if (event->button != 1 || PLUGIN (x2) == -1)
-	return TRUE;
+        return TRUE;
 
     /* press shift to hold the selection */
     if ((event->state & GDK_SHIFT_MASK) == GDK_SHIFT_MASK
-	|| PLUGIN (resize_allow))
-	PLUGIN (resize_allow) = TRUE;
+        || PLUGIN (resize_allow))
+        PLUGIN (resize_allow) = TRUE;
     else
-	fetch_capture (plugin);
+        fetch_capture (plugin);
 
     return TRUE;
 }
 
 static void
 on_root_window_map_event_cb (GtkWidget * root_window, GdkEvent * event,
-			     PurplePlugin * plugin) {
+                             PurplePlugin * plugin) {
     GdkWindow *gdkwin;
 
     g_assert (plugin != NULL && plugin->extra != NULL);
@@ -913,65 +933,65 @@ on_root_window_map_event_cb (GtkWidget * root_window, GdkEvent * event,
 
 static gboolean
 on_root_window_expose_cb (GtkWidget * root_window,
-			  GdkEventExpose * event, PurplePlugin * plugin) {
+                          GdkEventExpose * event, PurplePlugin * plugin) {
     g_assert (plugin != NULL && plugin->extra != NULL);
 
     /* no area is selected */
     if (!selection_defined (plugin)) {
-	GdkWindow *gdkwin;
+        GdkWindow *gdkwin;
 
 #if GTK_CHECK_VERSION(2,14,0)
-	gdkwin = gtk_widget_get_window (root_window);
+        gdkwin = gtk_widget_get_window (root_window);
 #else
-	gdkwin = root_window->window;
+        gdkwin = root_window->window;
 #endif
-	if (PLUGIN (gc) == NULL)
-	    PLUGIN (gc) = gdk_gc_new (gdkwin);
+        if (PLUGIN (gc) == NULL)
+            PLUGIN (gc) = gdk_gc_new (gdkwin);
 
 
-	gdk_draw_pixbuf (gdkwin, PLUGIN (gc), BACKGROUND_PIXBUF,	/* src */
-			 event->area.x, event->area.y,
-			 event->area.x, event->area.y,
-			 event->area.width, event->area.height,
-			 GDK_RGB_DITHER_NONE, 0, 0);
+        gdk_draw_pixbuf (gdkwin, PLUGIN (gc), BACKGROUND_PIXBUF,        /* src */
+                         event->area.x, event->area.y,
+                         event->area.x, event->area.y,
+                         event->area.width, event->area.height,
+                         GDK_RGB_DITHER_NONE, 0, 0);
 
-	gtk_window_move (GTK_WINDOW (root_window), 0, 0);
+        gtk_window_move (GTK_WINDOW (root_window), 0, 0);
 
-	/* draw cues now */
-	if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)) {
-	    GdkDisplay *display = gdk_display_get_default ();
+        /* draw cues now */
+        if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)) {
+            GdkDisplay *display = gdk_display_get_default ();
 
-	    g_assert (PLUGIN (timeout_source) == 0);
+            g_assert (PLUGIN (timeout_source) == 0);
 
-	    gdk_display_get_pointer (display, NULL, &PLUGIN (mouse_x),
-				     &PLUGIN (mouse_y), NULL);
-	    /* don't use double-buffering from here, otherwise display will be
-	       messed up, gdk bug ? */
-	    draw_cues (FALSE, plugin);
-	}
+            gdk_display_get_pointer (display, NULL, &PLUGIN (mouse_x),
+                                     &PLUGIN (mouse_y), NULL);
+            /* don't use double-buffering from here, otherwise display will be
+               messed up, gdk bug ? */
+            draw_cues (FALSE, plugin);
+        }
     }
     return TRUE;
 }
 
 static gboolean
 on_root_window_key_press_event_cb (GtkWidget * root_events,
-				   GdkEventKey * event,
-				   PurplePlugin * plugin) {
+                                   GdkEventKey * event,
+                                   PurplePlugin * plugin) {
     g_assert (plugin != NULL && plugin->extra != NULL);
     switch (event->keyval) {
     case GDK_Escape:
-	plugin_cancel (plugin);
-	break;
+        plugin_cancel (plugin);
+        break;
     case GDK_Control_L:
-	if (PLUGIN (select_mode) != SELECT_MOVE)
-	    PLUGIN (select_mode) = SELECT_CENTER_HOLD;
-	break;
+        if (PLUGIN (select_mode) != SELECT_MOVE)
+            PLUGIN (select_mode) = SELECT_CENTER_HOLD;
+        break;
     case GDK_Return:
-	fetch_capture (plugin);
-	break;
+        fetch_capture (plugin);
+        break;
     case GDK_BackSpace:
-	clear_selection (plugin);
-	break;
+        clear_selection (plugin);
+        break;
     }
     (void) root_events;
     return FALSE;
@@ -979,13 +999,13 @@ on_root_window_key_press_event_cb (GtkWidget * root_events,
 
 static gboolean
 on_root_window_key_release_event_cb (GtkWidget * root_events,
-				     GdkEventKey * event,
-				     PurplePlugin * plugin) {
+                                     GdkEventKey * event,
+                                     PurplePlugin * plugin) {
     g_assert (plugin != NULL && plugin->extra != NULL);
     switch (event->keyval) {
     case GDK_Control_L:
-	PLUGIN (select_mode) = SELECT_REGULAR;
-	break;
+        PLUGIN (select_mode) = SELECT_REGULAR;
+        break;
     }
     (void) root_events;
     return FALSE;
@@ -995,8 +1015,8 @@ static void
 on_screen_monitors_changed_cb (GdkScreen * screen, PurplePlugin * plugin) {
     g_assert (plugin != NULL && plugin->extra != NULL);
     gtk_widget_set_size_request (PLUGIN (root_window),
-				 gdk_screen_get_width (screen),
-				 gdk_screen_get_height (screen));
+                                 gdk_screen_get_width (screen),
+                                 gdk_screen_get_height (screen));
     /* RESET_SELECTION (plugin); */
     clear_selection (plugin);
 }
@@ -1031,50 +1051,49 @@ prepare_root_window (PurplePlugin * plugin) {
        WMs do this on the current monitor only, while we want our
        invisible window to cover the entire GdkScreen. */
     gtk_widget_set_size_request (PLUGIN (root_window),
-				 gdk_screen_get_width (screen),
-				 gdk_screen_get_height (screen));
+                                 gdk_screen_get_width (screen),
+                                 gdk_screen_get_height (screen));
 
-    /* not sure this is actually needed */
 #if GTK_CHECK_VERSION(2,4,0)
     gtk_window_set_keep_above (GTK_WINDOW (PLUGIN (root_window)), TRUE);
 #endif
 
     /* install callbacks */
     g_signal_connect_swapped (GTK_OBJECT (PLUGIN (root_window)), "realize",
-			      G_CALLBACK (on_root_window_realize_cb), plugin);
+                              G_CALLBACK (on_root_window_realize_cb), plugin);
     g_signal_connect (GTK_OBJECT (PLUGIN (root_window)),
-		      "button-press-event",
-		      G_CALLBACK (on_root_window_button_press_cb), plugin);
+                      "button-press-event",
+                      G_CALLBACK (on_root_window_button_press_cb), plugin);
     g_signal_connect_swapped (GTK_OBJECT (PLUGIN (root_window)),
-			      "button-release-event",
-			      G_CALLBACK (on_root_window_button_release_cb),
-			      plugin);
+                              "button-release-event",
+                              G_CALLBACK (on_root_window_button_release_cb),
+                              plugin);
 
     g_signal_connect (GTK_OBJECT (PLUGIN (root_window)),
-		      "expose-event",
-		      G_CALLBACK (on_root_window_expose_cb), plugin);
+                      "expose-event",
+                      G_CALLBACK (on_root_window_expose_cb), plugin);
     g_signal_connect (GTK_OBJECT (PLUGIN (root_window)),
-		      "motion-notify-event",
-		      G_CALLBACK (on_root_window_motion_notify_cb), plugin);
+                      "motion-notify-event",
+                      G_CALLBACK (on_root_window_motion_notify_cb), plugin);
     g_signal_connect (GTK_OBJECT (PLUGIN (root_window)),
-		      "map-event",
-		      G_CALLBACK (on_root_window_map_event_cb), plugin);
+                      "map-event",
+                      G_CALLBACK (on_root_window_map_event_cb), plugin);
     g_signal_connect (GTK_OBJECT (PLUGIN (root_events)),
-		      "key-press-event",
-		      G_CALLBACK (on_root_window_key_press_event_cb), plugin);
+                      "key-press-event",
+                      G_CALLBACK (on_root_window_key_press_event_cb), plugin);
     g_signal_connect (GTK_OBJECT (PLUGIN (root_events)),
-		      "key-release-event",
-		      G_CALLBACK (on_root_window_key_release_event_cb),
-		      plugin);
+                      "key-release-event",
+                      G_CALLBACK (on_root_window_key_release_event_cb),
+                      plugin);
 #ifdef G_OS_WIN32
     /* waiting for signal "monitors-changed" to be implemented
        under Win32 */
     g_signal_connect (G_OBJECT (screen), "size-changed",
-		      G_CALLBACK (on_screen_monitors_changed_cb), plugin);
+                      G_CALLBACK (on_screen_monitors_changed_cb), plugin);
 #else
     g_signal_connect (G_OBJECT (screen),
-		      "monitors-changed",
-		      G_CALLBACK (on_screen_monitors_changed_cb), plugin);
+                      "monitors-changed",
+                      G_CALLBACK (on_screen_monitors_changed_cb), plugin);
 #endif
 }
 

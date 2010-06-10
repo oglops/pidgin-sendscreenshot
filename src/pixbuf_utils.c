@@ -38,7 +38,7 @@ op_darken (guchar val, gpointer data) {
 
 static void
 mygdk_pixbuf_apply_op (GdkPixbuf * pixbuf,
-		       PixbufOpFunc op_func, gpointer data) {
+                       PixbufOpFunc op_func, gpointer data) {
     BEGIN_PIXBUF_FORALL (pixbuf);
     p[0] = op_func (p[0], data);
     p[1] = op_func (p[1], data);
@@ -80,42 +80,42 @@ mygdk_pixbuf_compose (GdkPixbuf * pixbuf1, GdkPixbuf * pixbuf) {
 
 
     if (gdk_pixbuf_get_has_alpha (pixbuf)) {
-	BEGIN_PIXBUF_FORALL (pixbuf);
-	gdouble alpha;
-	guchar *p1;
+        BEGIN_PIXBUF_FORALL (pixbuf);
+        gdouble alpha;
+        guchar *p1;
 
-	/* do nothing if pixbuf cannot fit in pixbuf1 */
-	if (width1 < width || height1 < height)
-	    return;
+        /* do nothing if pixbuf cannot fit in pixbuf1 */
+        if (width1 < width || height1 < height)
+            return;
 
-	p1 = pixels1 + (y + (height1 - height)) * rowstride1 +
-	    (x + (width1 - width)) * n_channels1;
+        p1 = pixels1 + (y + (height1 - height)) * rowstride1 +
+            (x + (width1 - width)) * n_channels1;
 
-	alpha = p[3] / (gdouble) 255.;
+        alpha = p[3] / (gdouble) 255.;
 
-	p1[0] += alpha * (p[0] - p1[0]);
-	p1[1] += alpha * (p[1] - p1[1]);
-	p1[2] += alpha * (p[2] - p1[2]);
-	END_PIXBUF_FORALL ();
+        p1[0] += alpha * (p[0] - p1[0]);
+        p1[1] += alpha * (p[1] - p1[1]);
+        p1[2] += alpha * (p[2] - p1[2]);
+        END_PIXBUF_FORALL ();
     }
     else {
-	BEGIN_PIXBUF_FORALL (pixbuf);
-	guchar *p1 = pixels1 + (y + (height1 - height)) * rowstride1 +
-	    (x + (width1 - width)) * n_channels1;
+        BEGIN_PIXBUF_FORALL (pixbuf);
+        guchar *p1 = pixels1 + (y + (height1 - height)) * rowstride1 +
+            (x + (width1 - width)) * n_channels1;
 
-	p1[0] = p[0];
-	p1[1] = p[1];
-	p1[2] = p[2];
-	END_PIXBUF_FORALL ();
+        p1[0] = p[0];
+        p1[1] = p[1];
+        p1[2] = p[2];
+        END_PIXBUF_FORALL ();
     }
 }
 
 gboolean
 mygdk_pixbuf_check_maxsize (GdkPixbuf * pixbuf,
-			    gint max_width, gint max_height) {
+                            gint max_width, gint max_height) {
     return
-	gdk_pixbuf_get_width (pixbuf) <= max_width &&
-	gdk_pixbuf_get_height (pixbuf) <= max_height;
+        gdk_pixbuf_get_width (pixbuf) <= max_width &&
+        gdk_pixbuf_get_height (pixbuf) <= max_height;
 }
 
 
@@ -142,10 +142,10 @@ make_region_with_monitors (GdkScreen * screen) {
     region = gdk_region_new ();
 
     for (i = 0; i < num_monitors; i++) {
-	GdkRectangle rect;
+        GdkRectangle rect;
 
-	gdk_screen_get_monitor_geometry (screen, i, &rect);
-	gdk_region_union_with_rect (region, &rect);
+        gdk_screen_get_monitor_geometry (screen, i, &rect);
+        gdk_region_union_with_rect (region, &rect);
     }
 
     return region;
@@ -172,19 +172,19 @@ blank_rectangle_in_pixbuf (GdkPixbuf * pixbuf, GdkRectangle * rect) {
     n_channels = gdk_pixbuf_get_n_channels (pixbuf);
 
     for (y = rect->y; y < y2; y++) {
-	guchar *p;
+        guchar *p;
 
-	row = pixels + y * rowstride;
-	p = row + rect->x * n_channels;
+        row = pixels + y * rowstride;
+        p = row + rect->x * n_channels;
 
-	for (x = rect->x; x < x2; x++) {
-	    *p++ = 0;
-	    *p++ = 0;
-	    *p++ = 0;
+        for (x = rect->x; x < x2; x++) {
+            *p++ = 0;
+            *p++ = 0;
+            *p++ = 0;
 
-	    if (has_alpha)
-		*p++ = 255;	/* opaque black */
-	}
+            if (has_alpha)
+                *p++ = 255;     /* opaque black */
+        }
     }
 }
 
@@ -192,7 +192,7 @@ blank_rectangle_in_pixbuf (GdkPixbuf * pixbuf, GdkRectangle * rect) {
 /* Modified for pidgin-sendscreenshot to handle custom selected area. */
 static void
 blank_region_in_pixbuf (GdkPixbuf * pixbuf, GdkRegion * region,
-			gint x, gint y) {
+                        gint x, gint y) {
     GdkRectangle *rects;
     int n_rects;
     int i;
@@ -206,13 +206,13 @@ blank_region_in_pixbuf (GdkPixbuf * pixbuf, GdkRegion * region,
     pixbuf_rect.height = gdk_pixbuf_get_height (pixbuf);
 
     for (i = 0; i < n_rects; i++) {
-	GdkRectangle dest;
+        GdkRectangle dest;
 
-	if (gdk_rectangle_intersect (rects + i, &pixbuf_rect, &dest)) {
-	    dest.x -= x;
-	    dest.y -= y;
-	    blank_rectangle_in_pixbuf (pixbuf, &dest);
-	}
+        if (gdk_rectangle_intersect (rects + i, &pixbuf_rect, &dest)) {
+            dest.x -= x;
+            dest.y -= y;
+            blank_rectangle_in_pixbuf (pixbuf, &dest);
+        }
     }
 
     g_free (rects);
