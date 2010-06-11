@@ -56,7 +56,6 @@ freeze_desktop (PurplePlugin * plugin) {
          (GSourceFunc) timeout_freeze_screen, plugin);
 }
 
-
 /**
  * Get, copy and show current desktop image.
  */
@@ -957,11 +956,10 @@ on_root_window_expose_cb (GtkWidget * root_window,
 
         gtk_window_move (GTK_WINDOW (root_window), 0, 0);
 
-        /* draw cues now */
-        if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)) {
+        /* draw cues if not already present */
+        if (PLUGIN (timeout_source) == 0 &&
+	    purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)) {
             GdkDisplay *display = gdk_display_get_default ();
-
-            g_assert (PLUGIN (timeout_source) == 0);
 
             gdk_display_get_pointer (display, NULL, &PLUGIN (mouse_x),
                                      &PLUGIN (mouse_y), NULL);
