@@ -23,16 +23,13 @@
 #ifndef __PREFS_H__
 #define __PREFS_H__ 1
 
-
 #ifdef HAVE_CONFIG_H
 # include "../config.h"
 #endif
 
-
 #include <gtkpluginpref.h>
 #include <gtkprefs.h>
 #include "main.h"
-
 
 /* xml prefs keys */
 #define	PREF_PREFIX	"/plugins/gtk/" PLUGIN_ID
@@ -47,6 +44,13 @@
 #define PREF_WAIT_BEFORE_SCREENSHOT PREF_PREFIX "/wait_time"
 #define PREF_ADD_SIGNATURE PREF_PREFIX "/add-signature"
 #define PREF_SIGNATURE_FILENAME PREF_PREFIX "/signature-filename"
+
+#define PREF_HOTKEYS_MODIFIERS PREF_PREFIX "/hotkeys-modifiers"
+#define PREF_HOTKEYS_SEND_AS_FILE PREF_PREFIX "/hotkeys-sendas-file"
+#define PREF_HOTKEYS_SEND_AS_FTP PREF_PREFIX "/hotkeys-sendas-ftp"
+#define PREF_HOTKEYS_SEND_AS_HTTP PREF_PREFIX "/hotkeys-sendas-http"
+#define PREF_HOTKEYS_SEND_AS_IMAGE PREF_PREFIX "/hotkeys-sendas-image"
+
 
 #ifdef ENABLE_UPLOAD
 
@@ -70,6 +74,9 @@
 #define PREF_UI_FRAME6 _("Saving")
 #define PREF_UI_FRAME7 _("Misc")
 
+#define PREF_UI_FRAME8 _("Combo modifiers")
+#define PREF_UI_FRAME9 _("Keys")
+
 #define PREF_UI_FRAME3 _("HTTP upload")
 #define PREF_UI_FRAME4 _("FTP upload")
 #define PREF_UI_FRAME5 _("Upload options")
@@ -87,6 +94,15 @@
 
 #define PREF_UI_SIGNATURE _("Always add this signature:")
 
+#define KEYVAL_VALIDATE_COMBO GDK_Return
+
+#define PREF_UI_HOTKEYS_MODIFIERS _("Hold the modifier keys and press %s...")
+
+#define PREF_UI_HOTKEYS_SEND_AS_FILE _("Send as File: ")
+#define PREF_UI_HOTKEYS_SEND_AS_FTP _("Send as FTP link: ")
+#define PREF_UI_HOTKEYS_SEND_AS_HTTP _("Send as HTTP link: ")
+#define PREF_UI_HOTKEYS_SEND_AS_IMAGE _("Send as Image: ")
+
 #define PREF_UI_HIGHLIGHT_MODE _("Highlight mode:")
 #define PREF_HIGHLIGHT_MODE_01 _("lighten up desktop")
 #define PREF_HIGHLIGHT_MODE_02 _("darken desktop")
@@ -103,9 +119,13 @@
 
 #define PREF_UI_WAIT_BEFORE_SCREENSHOT _("Seconds to wait before desktop freezes:")
 
+
+#define PREFS_TAB1 _("General")
+#define PREFS_TAB2 _("Hotkeys")
+
 #ifdef ENABLE_UPLOAD
-#define TAB_1 _("General")
-#define TAB_2 _("Upload")
+#define PREFS_TAB3 _("Upload")
+
 #define PREF_UI_UPLOAD_TO _("Pick an image hosting provider "\
 			    "(<span foreground='blue'><u>list v.%s</u></span>)")
 #define PREF_UI_UPLOAD_CONNECTTIMEOUT _("Connect timeout (sec): ")

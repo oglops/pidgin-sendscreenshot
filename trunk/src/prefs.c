@@ -41,6 +41,14 @@ update_spin_value (GtkWidget * w, GtkWidget * spin) {
     (void) w;
 }
 
+static void
+entry_set (GtkEntry * entry, gpointer data) {
+    const char *key = (const char *) data;
+
+    purple_prefs_set_string (key, gtk_entry_get_text (entry));
+}
+
+
 /* same as pidgin_prefs_labeled_spin_button() but with a custom step */
 static GtkWidget *
 pidgin_prefs_labeled_spin_button_custom (GtkWidget * box, const gchar * title,
@@ -68,25 +76,21 @@ pidgin_prefs_labeled_spin_button_custom (GtkWidget * box, const gchar * title,
                                       NULL);
 }
 
-static void
-entry_set (GtkEntry * entry, gpointer data) {
-    const char *key = (const char *) data;
-
-    purple_prefs_set_string (key, gtk_entry_get_text (entry));
-}
-
-
 /* same as pidgin_prefs_labeled_entry() but using invisible chars */
-GtkWidget *
-pidgin_prefs_labeled_invisible_entry (GtkWidget * page, const gchar * title,
-                                      const char *key, GtkSizeGroup * sg) {
+static GtkWidget *
+pidgin_prefs_labeled_entry_custom (GtkWidget * page, const gchar * title,
+                                   const char *key,
+                                   gint max_length,
+                                   gboolean visible, GtkSizeGroup * sg) {
     GtkWidget *entry;
     const gchar *value;
 
     value = purple_prefs_get_string (key);
 
     entry = gtk_entry_new ();
-    gtk_entry_set_visibility (GTK_ENTRY (entry), FALSE);
+    gtk_entry_set_visibility (GTK_ENTRY (entry), visible);
+    if (max_length > 0)
+        gtk_entry_set_max_length (GTK_ENTRY (entry), max_length);
     gtk_entry_set_text (GTK_ENTRY (entry), value);
     g_signal_connect (G_OBJECT (entry), "changed",
                       G_CALLBACK (entry_set), (char *) key);
@@ -307,8 +311,6 @@ static GMarkupParser prefs_parser = {
     NULL,
     NULL
 };
-
-
 #endif
 
 #if GTK_CHECK_VERSION(2,6,0)
@@ -349,12 +351,115 @@ change_signature_cb (GtkFileChooser * file_chooser, GtkImage * sign_image) {
 }
 #endif /* GTK_CHECK_VERSION(2,6,0) */
 
+static void
+gchar_add (gchar ** str, const gchar * add) {
+    if (*str != NULL) {
+        gchar *tmp = g_strjoin ("+", *str, add, NULL);
+        g_free (*str);
+        *str = tmp;
+    }
+    else
+        *str = g_strdup (add);
+}
+
+#define maybe_add_modifier(m, m_strval)		\
+  if (event->state & m) {			\
+    gchar_add (&combo, m_strval);		\
+    all_modifiers |= m;				\
+  }
+
+#define SHIFT_MODIFIER_STR "Shift"
+#define CONTROL_MODIFIER_STR "Ctrl"
+#define ALT_MODIFIER_STR "Alt"
+
+static gchar *
+get_combo (PurplePlugin * plugin) {
+
+    gchar *res = NULL;
+
+    guint combo = purple_prefs_get_int (PREF_HOTKEYS_MODIFIERS);
+
+    if (combo & GDK_SHIFT_MASK)
+        gchar_add (&res, SHIFT_MODIFIER_STR);
+    if (combo & GDK_CONTROL_MASK)
+        gchar_add (&res, CONTROL_MODIFIER_STR);
+    if (combo & GDK_MOD1_MASK)
+        gchar_add (&res, ALT_MODIFIER_STR);
+    if (res)
+        gchar_add (&res, "...");
+    else {
+        gchar_add (&res, "invalid...");
+        purple_prefs_set_int (PREF_HOTKEYS_MODIFIERS, 0);       /* disable hotkeys */
+    }
+    (void) plugin;
+    return res;
+}
+
+static gboolean
+set_keyval_name (GtkWidget * entry, GdkEventKey * event, const gchar * key) {
+    if (event->is_modifier == FALSE && event->keyval
+        && event->keyval != GDK_BackSpace && event->keyval != GDK_Tab) {
+
+        gtk_entry_set_text (GTK_ENTRY (entry),
+                            gdk_keyval_name (gdk_keyval_to_lower
+                                             (event->keyval)));
+
+        purple_prefs_set_int (key, gdk_keyval_to_lower (event->keyval));
+
+    }
+    else {
+        gtk_entry_set_text (GTK_ENTRY (entry), "");
+        purple_prefs_set_int (key, 0);
+    }
+    return TRUE;
+}
+
+static gboolean
+on_modifiers_entry_key_press_cb (GtkWidget * entry, GdkEventKey * event) {
+    if (event->is_modifier == FALSE) {
+        gchar *combo = NULL;
+        guint all_modifiers = 0;
+
+        maybe_add_modifier (GDK_SHIFT_MASK, SHIFT_MODIFIER_STR);
+        maybe_add_modifier (GDK_CONTROL_MASK, CONTROL_MODIFIER_STR);
+        maybe_add_modifier (GDK_MOD1_MASK, ALT_MODIFIER_STR);
+
+        /* validate modifiers combo */
+        if (combo && event->keyval == KEYVAL_VALIDATE_COMBO) {
+            gchar_add (&combo, "...");
+            gtk_entry_set_text (GTK_ENTRY (entry), combo);
+
+            purple_prefs_set_int (PREF_HOTKEYS_MODIFIERS, all_modifiers);
+
+            g_free (combo);
+            return TRUE;
+        }
+
+        gtk_entry_set_text (GTK_ENTRY (entry), "invalid...");
+        purple_prefs_set_int (PREF_HOTKEYS_MODIFIERS, 0);       /* disable hotkeys */
+    }
+    return TRUE;
+}
+
+#define add_hotkey_entry(vbox, title, key)				\
+  {									\
+    GtkWidget * _entry;							\
+    _entry = gtk_entry_new ();						\
+    gtk_entry_set_text (GTK_ENTRY (_entry),gdk_keyval_name(purple_prefs_get_int(key)));	\
+    pidgin_add_widget_to_vbox (GTK_BOX (vbox), title, NULL, _entry, TRUE,  NULL); \
+    g_signal_connect (G_OBJECT(_entry), "key-release-event",		\
+		      G_CALLBACK(set_keyval_name), key);		\
+  }
+
+
 GtkWidget *
 get_plugin_pref_frame (PurplePlugin * plugin) {
-    GtkWidget *frame1, *frame2;
+    GtkWidget *tab1, *tab2, *tab3;
     GtkWidget *vbox;
     GtkWidget *dropdown_imgtype;
     GtkWidget *hbox_imgtype, *hbox_sign;
+    GtkWidget *prefs_book;
+
 #if GTK_CHECK_VERSION(2,6,0)
     GdkPixbuf *sign_pixbuf;
     GtkWidget *folder_chooser, *file_chooser, *sign_image;
@@ -365,7 +470,6 @@ get_plugin_pref_frame (PurplePlugin * plugin) {
 
 #ifdef ENABLE_UPLOAD
     GtkWidget *hbox_ftp, *hbox_html;
-    GtkWidget *prefs_book;
     enum { COLUMN_PIXBUF, COLUMN_STRING, N_COLUMNS };
     GtkListStore *list_store;
     GtkTreeIter iter;
@@ -381,24 +485,35 @@ get_plugin_pref_frame (PurplePlugin * plugin) {
     (void) plugin;
 #endif /* ENABLE_UPLOAD */
 
-    frame1 = gtk_vbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
-    gtk_container_set_border_width (GTK_CONTAINER (frame1),
-                                    PIDGIN_HIG_BORDER);
+    prefs_book = gtk_notebook_new ();
+
+    tab1 = gtk_vbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
+    gtk_container_set_border_width (GTK_CONTAINER (tab1), PIDGIN_HIG_BORDER);
+
+    tab2 = gtk_vbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
+    gtk_container_set_border_width (GTK_CONTAINER (tab2), PIDGIN_HIG_BORDER);
+
+
+    gtk_notebook_append_page (GTK_NOTEBOOK (prefs_book), tab1,
+                              gtk_label_new (PREFS_TAB1));
+
+
+    gtk_notebook_append_page (GTK_NOTEBOOK (prefs_book), tab2,
+                              gtk_label_new (PREFS_TAB2));
 
 #ifdef ENABLE_UPLOAD
-    frame2 = gtk_vbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
-    gtk_container_set_border_width (GTK_CONTAINER (frame2),
-                                    PIDGIN_HIG_BORDER);
-    prefs_book = gtk_notebook_new ();
-    gtk_notebook_append_page (GTK_NOTEBOOK (prefs_book), frame1,
-                              gtk_label_new (TAB_1));
+    tab3 = gtk_vbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
+    gtk_container_set_border_width (GTK_CONTAINER (tab3), PIDGIN_HIG_BORDER);
+
+    gtk_notebook_append_page (GTK_NOTEBOOK (prefs_book), tab3,
+                              gtk_label_new (PREFS_TAB3));
 #endif /* ENABLE_UPLOAD */
 
 
     /* =========================================================================
      *      IMAGE PARAMETERS
      * ========================================================================= */
-    vbox = pidgin_make_frame (frame1, PREF_UI_FRAME1);
+    vbox = pidgin_make_frame (tab1, PREF_UI_FRAME1);
     gtk_container_set_border_width (GTK_CONTAINER (vbox), 4);
 
     hbox_imgtype = gtk_hbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
@@ -463,7 +578,7 @@ get_plugin_pref_frame (PurplePlugin * plugin) {
      *      GENERAL
      * ========================================================================= */
 
-    vbox = pidgin_make_frame (frame1, PREF_UI_FRAME2);
+    vbox = pidgin_make_frame (tab1, PREF_UI_FRAME2);
 
     pidgin_prefs_dropdown (vbox, PREF_UI_HIGHLIGHT_MODE, PURPLE_PREF_INT,
                            PREF_HIGHLIGHT_MODE,
@@ -475,7 +590,7 @@ get_plugin_pref_frame (PurplePlugin * plugin) {
     pidgin_prefs_checkbox (PREF_UI_SHOW_VISUAL_CUES, PREF_SHOW_VISUAL_CUES,
                            vbox);
 
-    vbox = pidgin_make_frame (frame1, PREF_UI_FRAME6);
+    vbox = pidgin_make_frame (tab1, PREF_UI_FRAME6);
 #if GTK_CHECK_VERSION(2,6,0)
     folder_chooser = gtk_file_chooser_button_new (PREF_UI_STORE_FOLDER,
                                                   GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
@@ -495,23 +610,74 @@ get_plugin_pref_frame (PurplePlugin * plugin) {
                                 NULL);
 #endif
 
+
     pidgin_prefs_checkbox (PREF_UI_ASK_FILENAME, PREF_ASK_FILENAME, vbox);
     pidgin_prefs_checkbox (PREF_UI_ONLY_SAVE_WHEN, PREF_ONLY_SAVE_WHEN, vbox);
 
-    vbox = pidgin_make_frame (frame1, PREF_UI_FRAME7);
+    /* == misc == */
+    vbox = pidgin_make_frame (tab1, PREF_UI_FRAME7);
     pidgin_prefs_labeled_spin_button_custom (vbox,
                                              PREF_UI_WAIT_BEFORE_SCREENSHOT,
                                              PREF_WAIT_BEFORE_SCREENSHOT, 0,
                                              30, 5, NULL);
+
+    /* =========================================================================
+     *      HOTKEYS
+     * ========================================================================= */
+
+    vbox = pidgin_make_frame (tab2, PREF_UI_FRAME8);
+
+    GtkWidget *modifiers_entry;
+    GtkWidget *modif_label;
+    GtkWidget *modif_hbox;
+
+    gchar *lbl_txt = NULL;
+    gchar *current_combo = NULL;
+
+    lbl_txt = g_strdup_printf (PREF_UI_HOTKEYS_MODIFIERS,
+                               gdk_keyval_name (KEYVAL_VALIDATE_COMBO));
+
+    modif_hbox = gtk_hbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
+    modifiers_entry = gtk_entry_new ();
+
+    current_combo = get_combo (plugin);
+
+    gtk_entry_set_text (GTK_ENTRY (modifiers_entry), current_combo);
+    g_free (current_combo);
+
+    modif_label = gtk_label_new (lbl_txt);
+    g_free (lbl_txt);
+
+    gtk_box_pack_start_defaults (GTK_BOX (vbox), modif_hbox);
+
+    gtk_box_pack_start_defaults (GTK_BOX (modif_hbox), modif_label);
+    gtk_box_pack_start_defaults (GTK_BOX (modif_hbox), modifiers_entry);
+
+    /* Intercept hotkeys defined in pref window */
+    g_signal_connect (G_OBJECT (modifiers_entry),
+                      "key-press-event",
+                      G_CALLBACK (on_modifiers_entry_key_press_cb), NULL);
+
+    vbox = pidgin_make_frame (tab2, PREF_UI_FRAME9);
+
+    add_hotkey_entry (vbox, PREF_UI_HOTKEYS_SEND_AS_FILE,
+                      PREF_HOTKEYS_SEND_AS_FILE);
+    add_hotkey_entry (vbox, PREF_UI_HOTKEYS_SEND_AS_FTP,
+                      PREF_HOTKEYS_SEND_AS_FTP);
+    add_hotkey_entry (vbox, PREF_UI_HOTKEYS_SEND_AS_HTTP,
+                      PREF_HOTKEYS_SEND_AS_HTTP);
+    add_hotkey_entry (vbox, PREF_UI_HOTKEYS_SEND_AS_IMAGE,
+                      PREF_HOTKEYS_SEND_AS_IMAGE);
+
+
+
 #ifdef ENABLE_UPLOAD
 
-    gtk_notebook_append_page (GTK_NOTEBOOK (prefs_book), frame2,
-                              gtk_label_new (TAB_2));
 
     /* =========================================================================
      *      FTP UPLOAD
      * ========================================================================= */
-    vbox = pidgin_make_frame (frame2, PREF_UI_FRAME4);
+    vbox = pidgin_make_frame (tab3, PREF_UI_FRAME4);
 
     pidgin_prefs_labeled_entry (vbox, PREF_UI_FTP_REMOTE_URL,
                                 PREF_FTP_REMOTE_URL, NULL);
@@ -524,17 +690,18 @@ get_plugin_pref_frame (PurplePlugin * plugin) {
 
     pidgin_prefs_labeled_entry (hbox_ftp, PREF_UI_FTP_USERNAME,
                                 PREF_FTP_USERNAME, NULL);
-    pidgin_prefs_labeled_invisible_entry (hbox_ftp, PREF_UI_FTP_PASSWORD,
-                                          PREF_FTP_PASSWORD, NULL);
+    pidgin_prefs_labeled_entry_custom (hbox_ftp, PREF_UI_FTP_PASSWORD,
+                                       PREF_FTP_PASSWORD, -1, FALSE, NULL);
 
     /* =========================================================================
      *      HTTP UPLOAD
      * ========================================================================= */
 
-    vbox = pidgin_make_frame (frame2, PREF_UI_FRAME3);
+    vbox = pidgin_make_frame (tab3, PREF_UI_FRAME3);
 
     if (g_file_get_contents (PLUGIN (xml_hosts_filename),
                              &contents, &length, &error) == FALSE) {
+        g_assert (error != NULL);
         insert_error_frame (error->message, vbox, plugin);
         g_error_free (error);
         error = NULL;
@@ -707,17 +874,16 @@ get_plugin_pref_frame (PurplePlugin * plugin) {
     /* =========================================================================
      *   GENERAL UPLOAD OPTIONS
      * ========================================================================= */
-    vbox = pidgin_make_frame (frame2, PREF_UI_FRAME5);
+    vbox = pidgin_make_frame (tab3, PREF_UI_FRAME5);
     pidgin_prefs_labeled_spin_button (vbox,
                                       PREF_UI_UPLOAD_CONNECTTIMEOUT,
                                       PREF_UPLOAD_CONNECTTIMEOUT, 1, 240,
                                       NULL);
     pidgin_prefs_labeled_spin_button (vbox, PREF_UI_UPLOAD_TIMEOUT,
                                       PREF_UPLOAD_TIMEOUT, 1, 240, NULL);
-    return prefs_book;
-#else
-    return frame1;
 #endif /* ENABLE_UPLOAD */
+
+    return prefs_book;
 }
 
 /* end of prefs.c */
