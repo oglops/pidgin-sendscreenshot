@@ -36,37 +36,35 @@ static void
 on_screenshot_insert_as_link_aux (PidginWindow * win,
                                   PidginConversation * _gtkconv) {
     PurplePlugin *plugin;
-    PidginConversation *gtkconv;
 
     plugin = purple_plugins_find_with_id (PLUGIN_ID);
 
-    PLUGIN (locked) = TRUE;
+    if (PLUGIN (locked))
+        return;                 /* Just return, don't fail. */
+    else {
+        PidginConversation *gtkconv;
 
-    /*    /\* should not happen *\/ */
-/*     if (PLUGIN(locked)/\* !g_mutex_trylock (PLUGIN (mutex)) *\/) { */
-/*         g_error (PLUGIN_ALREADY_LOCKED_ERROR, PLUGIN_NAME);     /\* fatal *\/ */
-/*     } */
+        PLUGIN (locked) = TRUE;
+        PLUGIN (send_as) = SEND_AS_HTTP_LINK;
 
+        if (win != NULL)
+            gtkconv =
+                PIDGIN_CONVERSATION
+                (pidgin_conv_window_get_active_conversation (win));
+        else
+            gtkconv = _gtkconv;
 
-    PLUGIN (send_as) = SEND_AS_HTTP_LINK;
+        if (!strcmp (purple_prefs_get_string (PREF_UPLOAD_TO), HOST_DISABLED)) {
+            purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
+                                 PLUGIN_HOST_DISABLED_ERROR);
+            plugin_stop (plugin);
+            return;
+        }
+        REMEMBER_ACCOUNT (gtkconv);
 
-    if (win != NULL)
-        gtkconv =
-            PIDGIN_CONVERSATION (pidgin_conv_window_get_active_conversation
-                                 (win));
-    else
-        gtkconv = _gtkconv;
-
-    if (!strcmp (purple_prefs_get_string (PREF_UPLOAD_TO), HOST_DISABLED)) {
-        purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
-                             PLUGIN_HOST_DISABLED_ERROR);
-        plugin_stop (plugin);
-        return;
+        PLUGIN (conv_features) = gtkconv->active_conv->features;
+        freeze_desktop (plugin);
     }
-    REMEMBER_ACCOUNT (gtkconv);
-
-    PLUGIN (conv_features) = gtkconv->active_conv->features;
-    freeze_desktop (plugin);
 }
 
 static void
@@ -74,12 +72,10 @@ on_screenshot_insert_as_link_fromwin_activate_cb (PidginWindow * win) {
     on_screenshot_insert_as_link_aux (win, NULL);
 }
 
-
 static void
 on_screenshot_insert_as_link_activate_cb (PidginConversation * gtkconv) {
     on_screenshot_insert_as_link_aux (NULL, gtkconv);
 }
-
 
 static void
 on_screenshot_insert_as_link_show_cb (GtkWidget * as_link,
@@ -112,27 +108,29 @@ static void
 on_screenshot_insert_as_ftp_link_aux (PidginWindow * win,
                                       PidginConversation * _gtkconv) {
     PurplePlugin *plugin;
-    PidginConversation *gtkconv;
+
 
     plugin = purple_plugins_find_with_id (PLUGIN_ID);
-    PLUGIN (locked) = TRUE;
-/*     if (PLUGIN(locked)/\*  !g_mutex_trylock (PLUGIN (mutex)) *\/) { */
-/*         g_error (PLUGIN_ALREADY_LOCKED_ERROR, PLUGIN_NAME);     /\* fatal *\/ */
-/*     } */
+    if (PLUGIN (locked))
+        return;                 /* Just return, don't fail. */
+    else {
+        PidginConversation *gtkconv;
+        PLUGIN (locked) = TRUE;
 
-    if (win != NULL)
-        gtkconv =
-            PIDGIN_CONVERSATION (pidgin_conv_window_get_active_conversation
-                                 (win));
-    else
-        gtkconv = _gtkconv;
+        if (win != NULL)
+            gtkconv =
+                PIDGIN_CONVERSATION
+                (pidgin_conv_window_get_active_conversation (win));
+        else
+            gtkconv = _gtkconv;
 
-    REMEMBER_ACCOUNT (gtkconv);
+        REMEMBER_ACCOUNT (gtkconv);
 
-    PLUGIN (send_as) = SEND_AS_FTP_LINK;
+        PLUGIN (send_as) = SEND_AS_FTP_LINK;
 
-    PLUGIN (conv_features) = gtkconv->active_conv->features;
-    freeze_desktop (plugin);
+        PLUGIN (conv_features) = gtkconv->active_conv->features;
+        freeze_desktop (plugin);
+    }
 }
 
 static void
@@ -177,30 +175,29 @@ on_screenshot_insert_as_ftp_link_show_cb (GtkWidget *
 static void
 on_screenshot_insert_as_image_aux (PidginWindow * win,
                                    PidginConversation * _gtkconv) {
-    PurplePlugin *plugin;
-    PidginConversation *gtkconv;
+    PurplePlugin *plugin = purple_plugins_find_with_id (PLUGIN_ID);
 
-    plugin = purple_plugins_find_with_id (PLUGIN_ID);
-    PLUGIN (locked) = TRUE;
+    if (PLUGIN (locked))
+        return;                 /* Just return, don't fail. */
+    else {
+        PidginConversation *gtkconv;
 
+        PLUGIN (locked) = TRUE;
+        PLUGIN (send_as) = SEND_AS_IMAGE;
 
-    /*    if (PLUGIN(locked) /\* !g_mutex_trylock (PLUGIN (mutex)) *\/) { */
-/*         g_error (PLUGIN_ALREADY_LOCKED_ERROR, PLUGIN_NAME);     /\* fatal *\/ */
-/*     } */
-    PLUGIN (send_as) = SEND_AS_IMAGE;
-
-    if (win != NULL)
-        gtkconv =
-            PIDGIN_CONVERSATION (pidgin_conv_window_get_active_conversation
-                                 (win));
-    else
-        gtkconv = _gtkconv;
+        if (win != NULL)
+            gtkconv =
+                PIDGIN_CONVERSATION
+                (pidgin_conv_window_get_active_conversation (win));
+        else
+            gtkconv = _gtkconv;
 
 
-    REMEMBER_ACCOUNT (gtkconv);
+        REMEMBER_ACCOUNT (gtkconv);
 
-    PLUGIN (conv_features) = gtkconv->active_conv->features;
-    freeze_desktop (plugin);
+        PLUGIN (conv_features) = gtkconv->active_conv->features;
+        freeze_desktop (plugin);
+    }
 }
 
 static void
@@ -265,9 +262,7 @@ on_conversation_menu_show_cb (PidginWindow * win) {
         g_object_get_data (G_OBJECT (conversation_menu),
                            "screenshot_menuitem");
 
-    gtk_widget_set_sensitive (screenshot_menuitem,
-                              !PLUGIN (locked)
-                              /* plugin_is_unlocked (plugin) */ );
+    gtk_widget_set_sensitive (screenshot_menuitem, !PLUGIN (locked));
 }
 
 /**
@@ -365,13 +360,79 @@ create_plugin_submenu (PidginConversation * gtkconv, gboolean multiconv) {
 static void
 on_insert_menu_show_cb (GtkWidget * screenshot_insert_menuitem) {
     PurplePlugin *plugin = purple_plugins_find_with_id (PLUGIN_ID);
-
-    gtk_widget_set_sensitive (screenshot_insert_menuitem,
-                              !PLUGIN (locked)
-                              /* plugin_is_unlocked (plugin) */ );
+    gtk_widget_set_sensitive (screenshot_insert_menuitem, !PLUGIN (locked));
 }
 
-/* #include "infobar.h" */
+static gboolean
+catch_hotkeys_cb (PidginWindow * win, GdkEventKey * event) {
+    if (event->is_modifier == FALSE) {
+        gint all_modifiers = 0;
+
+        if (event->state & GDK_SHIFT_MASK)
+            all_modifiers |= GDK_SHIFT_MASK;
+        if (event->state & GDK_CONTROL_MASK)
+            all_modifiers |= GDK_CONTROL_MASK;
+        if (event->state & GDK_MOD1_MASK)
+            all_modifiers |= GDK_MOD1_MASK;
+
+        /* modifiers match  */
+        if (all_modifiers == purple_prefs_get_int (PREF_HOTKEYS_MODIFIERS)) {
+            PurpleConversation *conv =
+                pidgin_conv_window_get_active_conversation (win);
+
+            if (gdk_keyval_to_lower (event->keyval) ==
+                (guint) purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_FILE)) {
+
+                PurpleConnection *gc = NULL;
+                PurplePluginProtocolInfo *prpl_info = NULL;
+
+                gc = purple_conversation_get_gc (conv);
+
+                if ((gc != NULL) &&
+                    ((purple_conversation_get_type (conv) !=
+                      PURPLE_CONV_TYPE_CHAT)
+                     || !purple_conv_chat_has_left (PURPLE_CONV_CHAT (conv)))) {
+
+                    prpl_info = PURPLE_PLUGIN_PROTOCOL_INFO (gc->prpl);
+                    if (purple_conversation_get_type (conv) ==
+                        PURPLE_CONV_TYPE_IM
+                        && prpl_info->send_file != NULL
+                        && (!prpl_info->can_receive_file
+                            || prpl_info->can_receive_file (gc,
+                                                            purple_conversation_get_name
+                                                            (conv)))) {
+                        PurplePlugin *plugin =
+                            purple_plugins_find_with_id (PLUGIN_ID);
+
+                        if (PLUGIN (locked))
+                            return FALSE;       /* Just return, don't fail. */
+                        else {
+                            PLUGIN (locked) = TRUE;
+                            PLUGIN (send_as) = SEND_AS_FILE;
+                            REMEMBER_ACCOUNT (PIDGIN_CONVERSATION (conv));
+                            freeze_desktop (plugin);
+                        }
+                    }
+                }
+            }
+            else if (gdk_keyval_to_lower (event->keyval) ==
+                     (guint) purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_FTP))
+                on_screenshot_insert_as_ftp_link_fromwin_activate_cb (win);
+            else if (gdk_keyval_to_lower (event->keyval) ==
+                     (guint) purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_HTTP))
+                on_screenshot_insert_as_link_fromwin_activate_cb (win);
+            else if (gdk_keyval_to_lower (event->keyval) == (guint)
+                     purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_IMAGE)) {
+                if (!(purple_conversation_get_features (conv) &
+                      PURPLE_CONNECTION_NO_IMAGES))
+                    on_screenshot_insert_as_image_fromwin_activate_cb (win);
+            }
+            return TRUE;
+        }
+    }
+    return FALSE;               /* let the signal be handled by other callbacks */
+}
+
 void
 create_plugin_menuitems (PurpleConversation * conv) {
     if (PIDGIN_IS_PIDGIN_CONVERSATION (conv)) {
@@ -395,12 +456,11 @@ create_plugin_menuitems (PurpleConversation * conv) {
             g_object_get_data (G_OBJECT (conversation_menu),
                                "screenshot_menuitem");
 
-        /*   /\* show pending capture operation *\/ */
-/*         if (gtkconv == get_receiver_gtkconv (plugin) */
-/*             && PLUGIN (info_bar) == NULL && PLUGIN (info_bar_visible)) { */
-/* 	  g_assert (!PLUGIN(locked)/\* !plugin_is_unlocked (plugin *\/); */
-/*             setup_infobar (plugin, GTK_MESSAGE_INFO); */
-/*         } */
+        /* Intercept hotkeys defined in pref window */
+        g_signal_connect_swapped (G_OBJECT
+                                  (pidgin_conv_get_window (gtkconv)->window),
+                                  "key_release_event",
+                                  G_CALLBACK (catch_hotkeys_cb), win);
 
         /* Add us to the conv "Insert" menu */
         if (screenshot_insert_menuitem == NULL) {
@@ -544,18 +604,13 @@ remove_pidgin_menuitems (PurpleConversation * conv) {
 }
 
 static void
-on_blist_context_menu_send_capture (PurpleBlistNode * node,
+on_blist_context_menu_send_capture (PurpleBuddy * buddy,
                                     PurplePlugin * plugin) {
 
 
-    /*  if (PLUGIN(locked)/\*  !g_mutex_trylock (PLUGIN (mutex)) *\/) { */
-/*         NotifyError (PLUGIN_ALREADY_LOCKED_ERROR, PLUGIN_NAME); */
-/*     } */
-/*     else { */
-    if (PURPLE_BLIST_NODE_IS_BUDDY (node)) {
-
-        PurpleBuddy *buddy = (PurpleBuddy *) node;
-
+    if (PLUGIN (locked))
+        return;                 /* Just return, don't fail. */
+    else {
         PLUGIN (locked) = TRUE;
 
         PLUGIN (send_as) = SEND_AS_FILE;
@@ -567,7 +622,6 @@ on_blist_context_menu_send_capture (PurpleBlistNode * node,
         /* see on_screenshot_insert_as_image_activate_cb () */
         freeze_desktop (plugin);
     }
-    /*  } */
 }
 
 /* stolen from autoaccept.c and gtkblist.c files. */

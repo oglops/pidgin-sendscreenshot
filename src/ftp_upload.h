@@ -23,7 +23,6 @@
 #ifndef __FTP_UPLOAD_H__
 #define __FTP_UPLOAD_H__ 1
 
-
 #ifdef HAVE_CONFIG_H
 # include "../config.h"
 #endif

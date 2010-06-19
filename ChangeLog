@@ -1,8 +1,9 @@
 Pidgin Screenshot Plugin Changelog
 
 Version 0.8-2 06/??/10:
+	* Added hotkeys.
 	* New design for preferences window (tabs).
-	* Add a space before inserting a link, if necessary.
+	* Automatically add a space before inserting a link, if necessary.
 	* Added BMP file format.
 	* Hold shift key to move or resize the selection.
 	* Show countdown when a delay was set in pref window.

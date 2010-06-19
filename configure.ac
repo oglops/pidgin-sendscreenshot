@@ -63,7 +63,6 @@ AC_SUBST(CFLAGS)
 # --disable-upload : check for glib > 2.8
 #
 
-
 AC_ARG_ENABLE(upload, 
              [AC_HELP_STRING([--disable-upload],
              [compile without capability to upload a screenshot to a server.])],
@@ -118,8 +117,6 @@ AM_PATH_PIDGIN_CUSTOM([2.4.0], ,
 	AC_MSG_ERROR([
 	Please upgrade to a newer version.])
 )
-
-
 
 #
 # Finish up

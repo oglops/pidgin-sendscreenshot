@@ -41,20 +41,16 @@ update_countdown (PurplePlugin * plugin) {
         gdouble val =
             gtk_progress_bar_get_fraction (GTK_PROGRESS_BAR (progress_bar));
 
-        gdouble incr =
-            250.0 /
-            ((gdouble)
-             ((purple_prefs_get_int (PREF_WAIT_BEFORE_SCREENSHOT) -
-               1)) * 1000.0);
+        gdouble incr = 250.0 / ((gdouble)
+                                ((purple_prefs_get_int
+                                  (PREF_WAIT_BEFORE_SCREENSHOT) -
+                                  1)) * 1000.0);
         if (val < 0.99) {
             gchar *text = NULL;
-            text =
-                g_strdup_printf ("%.02f sec.",
-                                 ((gdouble)
-                                  purple_prefs_get_int
-                                  (PREF_WAIT_BEFORE_SCREENSHOT)) * (1.0 -
-                                                                    (val +
-                                                                     incr)));
+            text = g_strdup_printf ("%.02f sec.", ((gdouble)
+                                                   purple_prefs_get_int
+                                                   (PREF_WAIT_BEFORE_SCREENSHOT))
+                                    * (1.0 - (val + incr)));
             gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (progress_bar),
                                            MIN (val + incr, 1.0));
             gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progress_bar), text);
@@ -95,6 +91,7 @@ on_countdown_dialog_response_cb (PurplePlugin * plugin, gint response_id) {
             break;
         }
     case GTK_RESPONSE_REJECT:
+    case GTK_RESPONSE_DELETE_EVENT:
         {
 
             if (purple_timeout_remove (PLUGIN (timeout_source))) {
@@ -135,8 +132,11 @@ show_countdown_dialog (PurplePlugin * plugin) {
     gtkconv_window = get_receiver_window (plugin);
     blist_window = pidgin_blist_get_default_gtk_blist ()->window;
 
-    PLUGIN (countdown_dialog) = gtk_dialog_new_with_buttons (PLUGIN_NAME,
-                                                             GTK_WINDOW ((gtkconv_window) ? gtkconv_window : blist_window), 0, GTK_STOCK_EXECUTE, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
+    PLUGIN (countdown_dialog) = 
+        gtk_dialog_new_with_buttons (PLUGIN_NAME,
+				     GTK_WINDOW ((gtkconv_window) ? gtkconv_window : blist_window), 
+				     GTK_DIALOG_MODAL,
+				     GTK_STOCK_EXECUTE, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
 
     gtk_window_set_resizable (GTK_WINDOW (PLUGIN (countdown_dialog)), FALSE);
     gtk_progress_bar_set_pulse_step (GTK_PROGRESS_BAR (progress_bar), 0.05);
@@ -201,7 +201,7 @@ set_sensitive_if_input_and_noexist (GtkWidget * entry,
 
     warn_label = g_object_get_data (G_OBJECT (dlgbox_rename), "warn-label");
 
-    text = gtk_entry_get_text (GTK_ENTRY (entry));
+    text = purple_escape_filename (gtk_entry_get_text (GTK_ENTRY (entry)));
 
     capture_path_filename =
         g_build_filename (purple_prefs_get_string (PREF_STORE_FOLDER),

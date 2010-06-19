@@ -44,7 +44,7 @@
  */
 void
 freeze_desktop (PurplePlugin * plugin) {
-
+    g_assert (plugin != NULL && plugin->extra != NULL);
     if (purple_prefs_get_int (PREF_WAIT_BEFORE_SCREENSHOT) > 0)
         show_countdown_dialog (plugin);
 
@@ -258,6 +258,8 @@ maybe_change_cursor (gint x, gint y, PurplePlugin * plugin) {
 
     gint x1, x2, y1, y2;
 
+    g_assert (plugin != NULL && plugin->extra != NULL);
+
     x1 = CAPTURE_X0 (plugin);
     y1 = CAPTURE_Y0 (plugin);
 
@@ -330,12 +332,13 @@ static gboolean
 on_root_window_motion_notify_cb (GtkWidget * root_window,
                                  GdkEventMotion * event,
                                  PurplePlugin * plugin) {
+    g_assert (plugin != NULL && plugin->extra != NULL);
     /* select approriate mouse cursos */
     if (PLUGIN (resize_allow) && (event->state & GDK_BUTTON1_MASK) == 0)
         maybe_change_cursor (event->x, event->y, plugin);
 
     /* mouse button pressed */
-    if ((event->state & GDK_BUTTON1_MASK) == GDK_BUTTON1_MASK &&
+    if ((event->state & GDK_BUTTON1_MASK) &&
         selection_defined (plugin) && PLUGIN (resize_mode) != ResizeNone) {
         gint _x1, _y1, _x2, _y2;
 
@@ -370,7 +373,7 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
                 PLUGIN (resize_mode) != ResizeRight)
                 PLUGIN (y2) = (gint) event->y;
 
-            if (PLUGIN (select_mode) == SELECT_CENTER_HOLD) {
+            if (event->state & GDK_CONTROL_MASK) {
                 GdkScreen *screen;
                 gint xdiff, ydiff;
 
@@ -534,6 +537,7 @@ on_root_window_motion_notify_cb (GtkWidget * root_window,
 
 static void
 clear_selection (PurplePlugin * plugin) {
+    g_assert (plugin != NULL && plugin->extra != NULL);
     if (selection_defined (plugin)) {
         GdkRectangle area;
         GdkWindow *gdkwin = PLUGIN (root_window)->window;
@@ -577,6 +581,7 @@ static gboolean
 on_root_window_button_press_cb (GtkWidget * root_window,
                                 GdkEventButton * event,
                                 PurplePlugin * plugin) {
+    g_assert (plugin != NULL && plugin->extra != NULL);
     if (event->button == 1) {
         if ((PLUGIN (resize_mode) == ResizeLeft && PLUGIN (x1) < PLUGIN (x2))
             || (PLUGIN (resize_mode) == ResizeRight
@@ -652,6 +657,14 @@ on_root_window_button_press_cb (GtkWidget * root_window,
     else if (event->button == 2 &&      /* hide the current conversation window  */
              !receiver_window_is_iconified (plugin)) {
         THAW_DESKTOP ();
+        if (PLUGIN (root_pixbuf_x) != NULL) {
+            g_object_unref (PLUGIN (root_pixbuf_x));
+            PLUGIN (root_pixbuf_x) = NULL;
+        }
+        if (G_LIKELY (PLUGIN (root_pixbuf_orig) != NULL)) {
+            g_object_unref (PLUGIN (root_pixbuf_orig));
+            PLUGIN (root_pixbuf_orig) = NULL;
+        }
         gtk_window_iconify (GTK_WINDOW (get_receiver_window (plugin)));
         freeze_desktop (plugin);
     }
@@ -777,16 +790,14 @@ save_capture (PurplePlugin * plugin, GdkPixbuf * capture) {
 static void
 fetch_capture (PurplePlugin * plugin) {
     GdkPixbuf *capture = NULL;
-    GtkWidget *root_window = NULL;
 
     g_assert (plugin != NULL && plugin->extra != NULL);
-
 
     /* do nothing if there's no selection yet */
     if (!(selection_defined (plugin)))
         return;
 
-    root_window = PLUGIN (root_window);
+    THAW_DESKTOP ();
 
     if (receiver_window_is_iconified (plugin))
         gtk_window_deiconify (GTK_WINDOW (get_receiver_window (plugin)));
@@ -795,7 +806,6 @@ fetch_capture (PurplePlugin * plugin) {
     if ((capture = extract_capture (plugin)) == NULL) {
         purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
                              PLUGIN_MEMORY_ERROR);
-        THAW_DESKTOP ();
         plugin_stop (plugin);
     }
     else {
@@ -892,19 +902,18 @@ fetch_capture (PurplePlugin * plugin) {
             }
         }
     }
-    THAW_DESKTOP ();
 }
 
 static gboolean
 on_root_window_button_release_cb (PurplePlugin * plugin,
                                   GdkEventButton * event) {
+    g_assert (plugin != NULL && plugin->extra != NULL);
     /* capture not yet defined */
     if (event->button != 1 || PLUGIN (x2) == -1)
         return TRUE;
 
     /* press shift to hold the selection */
-    if ((event->state & GDK_SHIFT_MASK) == GDK_SHIFT_MASK
-        || PLUGIN (resize_allow))
+    if ((event->state & GDK_SHIFT_MASK) || PLUGIN (resize_allow))
         PLUGIN (resize_allow) = TRUE;
     else
         fetch_capture (plugin);
@@ -958,7 +967,7 @@ on_root_window_expose_cb (GtkWidget * root_window,
 
         /* draw cues if not already present */
         if (PLUGIN (timeout_source) == 0 &&
-	    purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)) {
+            purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)) {
             GdkDisplay *display = gdk_display_get_default ();
 
             gdk_display_get_pointer (display, NULL, &PLUGIN (mouse_x),
@@ -980,29 +989,11 @@ on_root_window_key_press_event_cb (GtkWidget * root_events,
     case GDK_Escape:
         plugin_cancel (plugin);
         break;
-    case GDK_Control_L:
-        if (PLUGIN (select_mode) != SELECT_MOVE)
-            PLUGIN (select_mode) = SELECT_CENTER_HOLD;
-        break;
     case GDK_Return:
         fetch_capture (plugin);
         break;
     case GDK_BackSpace:
         clear_selection (plugin);
-        break;
-    }
-    (void) root_events;
-    return FALSE;
-}
-
-static gboolean
-on_root_window_key_release_event_cb (GtkWidget * root_events,
-                                     GdkEventKey * event,
-                                     PurplePlugin * plugin) {
-    g_assert (plugin != NULL && plugin->extra != NULL);
-    switch (event->keyval) {
-    case GDK_Control_L:
-        PLUGIN (select_mode) = SELECT_REGULAR;
         break;
     }
     (void) root_events;
@@ -1079,10 +1070,6 @@ prepare_root_window (PurplePlugin * plugin) {
     g_signal_connect (GTK_OBJECT (PLUGIN (root_events)),
                       "key-press-event",
                       G_CALLBACK (on_root_window_key_press_event_cb), plugin);
-    g_signal_connect (GTK_OBJECT (PLUGIN (root_events)),
-                      "key-release-event",
-                      G_CALLBACK (on_root_window_key_release_event_cb),
-                      plugin);
 #ifdef G_OS_WIN32
     /* waiting for signal "monitors-changed" to be implemented
        under Win32 */

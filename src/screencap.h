@@ -40,19 +40,7 @@ typedef enum {
 /* Give back focus to Pidgin. */
 #define THAW_DESKTOP()					\
   gtk_widget_hide (PLUGIN (root_events));		\
-  gtk_widget_hide (PLUGIN (root_window));		\
-  if (PLUGIN (root_pixbuf_x) != NULL)			\
-    {							\
-      g_object_unref (PLUGIN (root_pixbuf_x));		\
-      PLUGIN (root_pixbuf_x) = NULL;			\
-    }							\
-  if (G_LIKELY (PLUGIN (root_pixbuf_orig) != NULL))	\
-    {							\
-      g_object_unref (PLUGIN (root_pixbuf_orig));	\
-      PLUGIN (root_pixbuf_orig) = NULL;			\
-    }							\
-  PLUGIN (resize_mode) = ResizeAny;			\
-  PLUGIN (resize_allow) = FALSE
+  gtk_widget_hide (PLUGIN (root_window))
 
 #define CAPTURE_X0(plugin)\
   MIN(PLUGIN (x1), PLUGIN (x2))

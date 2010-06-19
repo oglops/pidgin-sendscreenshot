@@ -65,8 +65,6 @@
 #define G_MARKUP_ERROR_MISSING_ATTRIBUTE G_MARKUP_ERROR_PARSE
 #endif
 
-
-
 #define gettext_noop(String) String
 
 /* various infos about this plugin */
@@ -148,9 +146,7 @@ typedef enum { SEND_AS_FILE, SEND_AS_IMAGE, SEND_AS_HTTP_LINK,
 typedef enum { SEND_AS_FILE, SEND_AS_IMAGE } SendType;
 #endif
 
-typedef enum { SELECT_REGULAR, SELECT_CENTER_HOLD,
-    SELECT_MOVE
-} SelectionMode;
+typedef enum { SELECT_REGULAR, SELECT_MOVE} SelectionMode;
 
 typedef enum {
     ResizeAny,
@@ -170,12 +166,9 @@ typedef enum {
 GtkWidget *get_receiver_window (PurplePlugin * plugin);
 GtkIMHtml *get_receiver_imhtml (PurplePlugin * plugin);
 void plugin_stop (PurplePlugin * plugin);
-/* gboolean plugin_is_unlocked (PurplePlugin * plugin); */
 gboolean receiver_window_is_iconified (PurplePlugin * plugin);
+void freeze_desktop (PurplePlugin * plugin);
 
-PidginConversation *get_receiver_gtkconv (PurplePlugin * plugin);
-void
-  freeze_desktop (PurplePlugin * plugin);
 #define selection_defined(plugin)\
   PLUGIN (x1) != -1
 

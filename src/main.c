@@ -33,22 +33,6 @@
 #include "http_upload.h"        /* CLEAR_HOST_PARAM_DATA_FULL() */
 #endif
 
-PidginConversation *
-get_receiver_gtkconv (PurplePlugin * plugin) {
-    PurpleConversation *target_conv;
-
-    g_assert (plugin != NULL && plugin->extra != NULL);
-    target_conv =
-        purple_find_conversation_with_account (PLUGIN (conv_type),
-                                               PLUGIN (name),
-                                               PLUGIN (account));
-
-    if (target_conv != NULL && PIDGIN_IS_PIDGIN_CONVERSATION (target_conv))
-        return PIDGIN_CONVERSATION (target_conv);
-    else
-        return NULL;
-}
-
 GtkWidget *
 get_receiver_window (PurplePlugin * plugin) {
     PurpleConversation *target_conv;
@@ -125,6 +109,17 @@ plugin_stop (PurplePlugin * plugin) {
         PLUGIN (timeout_source) = 0;
     }
 
+    if (PLUGIN (root_pixbuf_x) != NULL) {
+        g_object_unref (PLUGIN (root_pixbuf_x));
+        PLUGIN (root_pixbuf_x) = NULL;
+    }
+    if (G_LIKELY (PLUGIN (root_pixbuf_orig) != NULL)) {
+        g_object_unref (PLUGIN (root_pixbuf_orig));
+        PLUGIN (root_pixbuf_orig) = NULL;
+    }
+    PLUGIN (resize_mode) = ResizeAny;
+    PLUGIN (resize_allow) = FALSE;
+
     /* clear send informations */
     PLUGIN (conv_type) = PURPLE_CONV_TYPE_UNKNOWN;
     PLUGIN (account) = NULL;
@@ -132,7 +127,6 @@ plugin_stop (PurplePlugin * plugin) {
         g_free (PLUGIN (name));
         PLUGIN (name) = NULL;
     }
-    PLUGIN (locked) = FALSE;
 
     /* reactivate menuitems */
     convs = purple_get_conversations ();
@@ -165,6 +159,7 @@ plugin_stop (PurplePlugin * plugin) {
         }
         convs = g_list_next (convs);
     }
+    PLUGIN (locked) = FALSE;
 }
 
 static gboolean
@@ -227,8 +222,7 @@ plugin_unload (PurplePlugin * plugin) {
      *
      * see upload ()
      */
-    if (!G_TRYLOCK (unload)
-        || PLUGIN (locked) /* !plugin_is_unlocked (plugin) */ )
+    if (!G_TRYLOCK (unload) || PLUGIN (locked))
         return FALSE;           /* better let the upload to finish */
 
     host_data = PLUGIN (host_data);
@@ -352,6 +346,12 @@ init_plugin (PurplePlugin * plugin) {
     purple_prefs_add_bool (PREF_SHOW_VISUAL_CUES, TRUE);
 
     purple_prefs_add_int (PREF_WAIT_BEFORE_SCREENSHOT, 0);
+
+    purple_prefs_add_int (PREF_HOTKEYS_MODIFIERS, 12);  /* ctrl + alt */
+    purple_prefs_add_int (PREF_HOTKEYS_SEND_AS_FILE, GDK_f);
+    purple_prefs_add_int (PREF_HOTKEYS_SEND_AS_FTP, GDK_u);
+    purple_prefs_add_int (PREF_HOTKEYS_SEND_AS_HTTP, 0);
+    purple_prefs_add_int (PREF_HOTKEYS_SEND_AS_IMAGE, GDK_i);
 
     purple_prefs_add_string (PREF_STORE_FOLDER, g_get_tmp_dir ());
 

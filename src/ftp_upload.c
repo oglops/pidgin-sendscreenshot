@@ -54,7 +54,7 @@ static gpointer
 ftp_upload (PurplePlugin * plugin) {
     CURL *curl;
     CURLcode res;
-    GIOChannel *io_chan;
+    GIOChannel *io_chan = NULL;
 
     struct stat file_info;
     gchar *remote_url = NULL;
@@ -131,6 +131,7 @@ ftp_upload (PurplePlugin * plugin) {
         g_free (remote_url);
 
         if (PLUGIN (error) != NULL) {   /* read_callback() failed */
+            g_io_channel_unref (io_chan);
             THREAD_QUIT;
         }
         else if (res != 0) {
@@ -142,9 +143,10 @@ ftp_upload (PurplePlugin * plugin) {
         }
     }
     if ((g_io_channel_shutdown (io_chan, TRUE, NULL)) == G_IO_STATUS_ERROR) {
-        g_assert (PLUGIN (error) != NULL);
+        g_io_channel_unref (io_chan);
         THREAD_QUIT;
     }
+    g_io_channel_unref (io_chan);
     THREAD_QUIT;
 }
 
