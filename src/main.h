@@ -80,6 +80,8 @@
 
 G_LOCK_EXTERN (unload);
 
+#define PLUGIN_INFO _("Information")
+
 /* error reporting strings */
 #define PLUGIN_ERROR _("Error")
 
@@ -118,7 +120,6 @@ G_LOCK_EXTERN (unload);
 #define SCREENSHOT_SEND_MENUITEM_LABEL _("Send a _Screenshot...")
 
 #define CAPTURE _("capture")
-
 
 #define SEND_AS_IMAGE_TXT _("as an _Image")
 
@@ -170,7 +171,7 @@ gboolean receiver_window_is_iconified (PurplePlugin * plugin);
 void freeze_desktop (PurplePlugin * plugin);
 
 #define selection_defined(plugin)\
-  PLUGIN (x1) != -1
+  (PLUGIN (x1) >= 0)
 
 /* main struct holding data */
 typedef struct {
@@ -183,6 +184,7 @@ typedef struct {
     /* to display frozen desktop state */
     GdkGC *gc;
     GtkWidget *root_window;
+    gboolean root_exposed;
     /* used to catch events */
     GtkWidget *root_events;
 

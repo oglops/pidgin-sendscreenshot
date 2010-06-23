@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pidgin-screenshot 0.6-0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-10 17:05+0200\n"
+"POT-Creation-Date: 2010-06-21 22:21+0200\n"
 "PO-Revision-Date: 2009-08-07 03:49+0200\n"
 "Last-Translator:  <henkvandervelden86@gmail.com>\n"
 "Language-Team: Dutch\n"
@@ -16,11 +16,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/error.h:56
+#: src/dialogs.h:31
+msgid "Please be ready ! Desktop will freeze in..."
+msgstr ""
+
+#: src/error.h:58
 msgid "FTP upload failed:"
 msgstr ""
 
-#: src/error.h:59
+#: src/error.h:61
 #, fuzzy, c-format
 msgid ""
 "Failed to upload the screenshot to '%s'!\n"
@@ -29,35 +33,24 @@ msgstr ""
 "%s de plugin kan je screenshot niet opslaan in een tijdelijke file./nJe "
 "systeem antwoord: '%s'."
 
-#: src/error.h:62
+#: src/error.h:64
 #, fuzzy
 msgid "Failed to open screenshot file:"
 msgstr ""
 "%s de plugin kan je screenshot niet opslaan in een tijdelijke file./nJe "
 "systeem antwoord: '%s'."
 
-#: src/ftp_upload.h:39
+#: src/ftp_upload.h:38
 #, c-format
 msgid "Uploading %d/%d bytes..."
 msgstr ""
 
-#: src/ftp_upload.h:41
+#: src/ftp_upload.h:40
 msgid "as a link (_FTP upload)"
 msgstr ""
 
-#: src/ftp_upload.h:42
+#: src/ftp_upload.h:41
 msgid "as a URL (_FTP upload)"
-msgstr ""
-
-#: src/http_upload.c:364
-#, c-format
-msgid ""
-"Regexp doesn't match HTTP upload response !\n"
-"Server: %s\n"
-"Regexp:\n"
-"%s\n"
-"Response:\n"
-"%s\n"
 msgstr ""
 
 #: src/http_upload.h:93
@@ -175,24 +168,28 @@ msgstr "Maak een screenshot."
 msgid "This plugin will capture a screenshot given a rectangular area."
 msgstr "Deze plugin zal een sceenshot maken in een voorgedefinieerd gebied."
 
-#: src/main.h:84
-msgid "Error"
+#: src/main.h:83
+msgid "Information"
 msgstr ""
 
 #: src/main.h:86
+msgid "Error"
+msgstr ""
+
+#: src/main.h:88
 #, c-format
 msgid ""
 "Another instance of %s is already running.\n"
 "Please wait before sending an other screenshot."
 msgstr ""
 
-#: src/main.h:89
+#: src/main.h:91
 #, fuzzy, c-format
 msgid "Cannot allocate enough memory (%lu bytes) to load plugin data !"
 msgstr ""
 "Kan niet genoeg geheugen (%zd bytes) vinden om de plugin data te laden."
 
-#: src/main.h:90
+#: src/main.h:92
 #, fuzzy
 msgid ""
 "Failed to allocate enough memory to create the screenshot. You will need to "
@@ -201,193 +198,247 @@ msgstr ""
 "%s De plugin kan niet genoeg geheugen vinden om een screenshot te maken."
 "Sluit een aantal applicatie en probeer het opnieuw."
 
-#: src/main.h:92
+#: src/main.h:94
 #, fuzzy, c-format
 msgid "Failed to save your screenshot to '%s'."
 msgstr ""
 "%s de plugin kan je screenshot niet opslaan in een tijdelijke file./nJe "
 "systeem antwoord: '%s'."
 
-#: src/main.h:94
+#: src/main.h:96
 #, c-format
 msgid "Failed to get '%s' data."
 msgstr ""
 
-#: src/main.h:95
+#: src/main.h:97
 #, fuzzy
 msgid "Failed to insert your screenshot in the text area."
 msgstr ""
 "%s de plugin kan je screenshot niet opslaan in een tijdelijke file./nJe "
 "systeem antwoord: '%s'."
 
-#: src/main.h:97
+#: src/main.h:99
 #, c-format
 msgid ""
 "The image used to sign the screenshot is too big.\n"
 "%dx%d is the maximum allowed."
 msgstr ""
 
-#: src/main.h:100
+#: src/main.h:102
 msgid "An unexpected error occured, see debug window..."
 msgstr ""
 
-#: src/main.h:108
+#: src/main.h:110
 #, fuzzy
 msgid "No selection"
 msgstr "invert alleen de selectie"
 
-#: src/main.h:109
+#: src/main.h:111
 msgid "Terms Of Service"
 msgstr ""
 
-#: src/main.h:119
+#: src/main.h:118
 #, fuzzy
 msgid "_Screenshot"
 msgstr "Screenshot"
 
-#: src/main.h:120
+#: src/main.h:119
 #, fuzzy
 msgid "Insert _Screenshot..."
 msgstr "Voeg screenshot toe..."
 
-#: src/main.h:121
+#: src/main.h:120
 #, fuzzy
 msgid "Send a _Screenshot..."
 msgstr "Screenshot"
 
-#: src/main.h:123
+#: src/main.h:122
 msgid "capture"
 msgstr "Screenshot opslaan"
 
-#: src/main.h:126
+#: src/main.h:124
 msgid "as an _Image"
 msgstr ""
 
-#: src/main.h:128
+#: src/main.h:126
 msgid "Set capture name"
 msgstr "Bestandsnaam"
 
-#: src/main.h:129
+#: src/main.h:127
 msgid "Capture name:"
 msgstr "Bestandsnaam:"
 
-#: src/main.h:130
+#: src/main.h:128
 msgid "File already exists!"
 msgstr "Bestand bestaat al!"
 
-#: src/prefs.c:443
-msgid "Image"
-msgstr ""
-
-#: src/prefs.h:68
+#: src/prefs.h:72
 #, fuzzy
 msgid "Image parameters"
 msgstr "Afbeelding formaat: "
 
-#: src/prefs.h:69
-msgid "Plugin behaviour"
-msgstr ""
-
-#: src/prefs.h:70
-msgid "HTTP upload"
-msgstr ""
-
-#: src/prefs.h:71
-msgid "FTP upload"
-msgstr ""
-
-#: src/prefs.h:72
-msgid "Upload options"
+#: src/prefs.h:73
+msgid "Display behaviour"
 msgstr ""
 
 #: src/prefs.h:74
+msgid "Saving"
+msgstr ""
+
+#: src/prefs.h:75
+msgid "Misc"
+msgstr ""
+
+#: src/prefs.h:77
+msgid "Combo modifiers"
+msgstr ""
+
+#: src/prefs.h:78
+msgid "Keys"
+msgstr ""
+
+#: src/prefs.h:80
+msgid "HTTP upload"
+msgstr ""
+
+#: src/prefs.h:81
+msgid "FTP upload"
+msgstr ""
+
+#: src/prefs.h:82
+msgid "Upload options"
+msgstr ""
+
+#: src/prefs.h:84
 msgid "Image format: "
 msgstr "Afbeelding formaat: "
 
-#: src/prefs.h:80
+#: src/prefs.h:91
 msgid "JPEG quality level:"
 msgstr "JPEG qualiteit level:"
 
-#: src/prefs.h:82
+#: src/prefs.h:93
 msgid "PNG compression level:"
 msgstr "PNG compressie level:"
 
-#: src/prefs.h:84
+#: src/prefs.h:95
 msgid "Always add this signature:"
 msgstr ""
 
-#: src/prefs.h:86
+#: src/prefs.h:99
+#, c-format
+msgid "Hold the modifier keys and press %s..."
+msgstr ""
+
+#: src/prefs.h:101
+msgid "Send as File: "
+msgstr ""
+
+#: src/prefs.h:102
+msgid "Send as FTP link: "
+msgstr ""
+
+#: src/prefs.h:103
+msgid "Send as HTTP link: "
+msgstr ""
+
+#: src/prefs.h:104
+msgid "Send as Image: "
+msgstr ""
+
+#: src/prefs.h:106
 msgid "Highlight mode:"
 msgstr "Weergave:"
 
-#: src/prefs.h:87
+#: src/prefs.h:107
 #, fuzzy
 msgid "lighten up desktop"
 msgstr "licht desktop op"
 
-#: src/prefs.h:88
+#: src/prefs.h:108
 msgid "darken desktop"
 msgstr "verduister desktop"
 
-#: src/prefs.h:89
+#: src/prefs.h:109
 msgid "invert selection only"
 msgstr "invert alleen de selectie"
 
-#: src/prefs.h:90
+#: src/prefs.h:110
 msgid "borders only"
 msgstr "alleen de randen"
 
-#: src/prefs.h:91
+#: src/prefs.h:111
 #, fuzzy
 msgid "grayscale desktop"
 msgstr "verduister desktop"
 
-#: src/prefs.h:93
+#: src/prefs.h:113
 msgid "Folder to store captures in:"
 msgstr "Map om de screenshots in op de slaan:"
 
-#: src/prefs.h:95
+#: src/prefs.h:115
 #, fuzzy
 msgid "Always ask for filename when sending as a file."
 msgstr "Vraag altijd om de bestandsnaam."
 
-#: src/prefs.h:98
+#: src/prefs.h:116
+#, fuzzy
+msgid "Only save when sending as a File."
+msgstr "Vraag altijd om de bestandsnaam."
+
+#: src/prefs.h:118
 msgid "Show visual cues."
 msgstr ""
 
-#: src/prefs.h:99
+#: src/prefs.h:120
 msgid "Seconds to wait before desktop freezes:"
 msgstr ""
 
-#: src/prefs.h:102
+#: src/prefs.h:123
+msgid "General"
+msgstr ""
+
+#: src/prefs.h:124
+msgid "Hotkeys"
+msgstr ""
+
+#: src/prefs.h:127
+msgid "Upload"
+msgstr ""
+
+#: src/prefs.h:129
 #, c-format
 msgid ""
 "Pick an image hosting provider (<span foreground='blue'><u>list v.%s</u></"
 "span>)"
 msgstr ""
 
-#: src/prefs.h:104
+#: src/prefs.h:131
 msgid "Connect timeout (sec): "
 msgstr ""
 
-#: src/prefs.h:105
+#: src/prefs.h:132
 msgid "Upload timeout (sec): "
 msgstr ""
 
-#: src/prefs.h:106
+#: src/prefs.h:133
 msgid "Remote FTP URL:"
 msgstr ""
 
-#: src/prefs.h:107
+#: src/prefs.h:134
 msgid "Corresponding Web address:"
 msgstr ""
 
-#: src/prefs.h:108
+#: src/prefs.h:135
 msgid "User:"
 msgstr ""
 
-#: src/prefs.h:109
+#: src/prefs.h:136
 msgid "Password:"
+msgstr ""
+
+#: src/screencap.h:67
+msgid "An other program has requested to use the display, canceling..."
 msgstr ""
 
 #: src/upload_utils.h:39

@@ -120,6 +120,8 @@ plugin_stop (PurplePlugin * plugin) {
     PLUGIN (resize_mode) = ResizeAny;
     PLUGIN (resize_allow) = FALSE;
 
+    PLUGIN (root_exposed) = FALSE;
+
     /* clear send informations */
     PLUGIN (conv_type) = PURPLE_CONV_TYPE_UNKNOWN;
     PLUGIN (account) = NULL;

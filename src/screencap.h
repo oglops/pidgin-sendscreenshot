@@ -64,6 +64,8 @@ typedef enum {
   PLUGIN (resize_allow) = FALSE;\
   PLUGIN (select_mode) = SELECT_REGULAR
 
+#define FORCE_CANCEL_MSG _("An other program has requested to use the display, canceling...")
+
 /* prototypes */
 void prepare_root_window (PurplePlugin * plugin);
 guint timeout_freeze_screen (PurplePlugin * plugin);
