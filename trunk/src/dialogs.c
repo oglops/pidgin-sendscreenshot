@@ -132,11 +132,14 @@ show_countdown_dialog (PurplePlugin * plugin) {
     gtkconv_window = get_receiver_window (plugin);
     blist_window = pidgin_blist_get_default_gtk_blist ()->window;
 
-    PLUGIN (countdown_dialog) = 
+    PLUGIN (countdown_dialog) =
         gtk_dialog_new_with_buttons (PLUGIN_NAME,
-				     GTK_WINDOW ((gtkconv_window) ? gtkconv_window : blist_window), 
-				     GTK_DIALOG_MODAL,
-				     GTK_STOCK_EXECUTE, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
+                                     GTK_WINDOW ((gtkconv_window) ?
+                                                 gtkconv_window :
+                                                 blist_window),
+                                     GTK_DIALOG_MODAL, GTK_STOCK_EXECUTE,
+                                     GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL,
+                                     GTK_RESPONSE_REJECT, NULL);
 
     gtk_window_set_resizable (GTK_WINDOW (PLUGIN (countdown_dialog)), FALSE);
     gtk_progress_bar_set_pulse_step (GTK_PROGRESS_BAR (progress_bar), 0.05);

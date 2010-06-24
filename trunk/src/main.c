@@ -79,8 +79,8 @@ get_receiver_imhtml (PurplePlugin * plugin) {
     if (target_conv != NULL && PIDGIN_IS_PIDGIN_CONVERSATION (target_conv)) {
         return
             GTK_IMHTML (((GtkIMHtmlToolbar
-                          *) (PIDGIN_CONVERSATION (target_conv)->toolbar))->
-                        imhtml);
+                          *) (PIDGIN_CONVERSATION (target_conv)->
+                              toolbar))->imhtml);
     }
     else {
         /* reopen conversation */
@@ -339,8 +339,8 @@ init_plugin (PurplePlugin * plugin) {
     purple_prefs_add_string (PREF_UPLOAD_TO, HOST_DISABLED);
     purple_prefs_add_string (PREF_FTP_REMOTE_URL, "ftp://");
     purple_prefs_add_string (PREF_FTP_WEB_ADDR, "");
-    purple_prefs_add_int (PREF_UPLOAD_TIMEOUT, 30);
-    purple_prefs_add_int (PREF_UPLOAD_CONNECTTIMEOUT, 10);
+    purple_prefs_add_int (PREF_UPLOAD_TIMEOUT, 60);
+    purple_prefs_add_int (PREF_UPLOAD_CONNECTTIMEOUT, 25);
 #endif
 
     purple_prefs_add_bool (PREF_ASK_FILENAME, FALSE);
@@ -349,18 +349,25 @@ init_plugin (PurplePlugin * plugin) {
 
     purple_prefs_add_int (PREF_WAIT_BEFORE_SCREENSHOT, 0);
 
-    purple_prefs_add_int (PREF_HOTKEYS_MODIFIERS, 12);  /* ctrl + alt */
+    /* install default hotkey combos */
+    purple_prefs_add_int (PREF_HOTKEYS_SEND_AS_FILE_MDFS, 12);  /* ctrl + alt */
+    purple_prefs_add_int (PREF_HOTKEYS_SEND_AS_IMAGE_MDFS, 12);
+
     purple_prefs_add_int (PREF_HOTKEYS_SEND_AS_FILE, GDK_f);
-    purple_prefs_add_int (PREF_HOTKEYS_SEND_AS_FTP, GDK_u);
-    purple_prefs_add_int (PREF_HOTKEYS_SEND_AS_HTTP, 0);
     purple_prefs_add_int (PREF_HOTKEYS_SEND_AS_IMAGE, GDK_i);
+#ifdef ENABLE_UPLOAD
+    purple_prefs_add_int (PREF_HOTKEYS_SEND_AS_FTP_MDFS, 12);
+    purple_prefs_add_int (PREF_HOTKEYS_SEND_AS_HTTP_MDFS, 12);
+    purple_prefs_add_int (PREF_HOTKEYS_SEND_AS_FTP, GDK_u);
+    purple_prefs_add_int (PREF_HOTKEYS_SEND_AS_HTTP, GDK_at);
+#endif
 
     purple_prefs_add_string (PREF_STORE_FOLDER, g_get_tmp_dir ());
 
     purple_prefs_add_bool (PREF_ADD_SIGNATURE, FALSE);
     purple_prefs_add_string (PREF_SIGNATURE_FILENAME, "");
 
-    /* clean up old options... */
+    /* clean up very old options... */
     purple_prefs_remove (PREF_PREFIX "/highlight-all");
     purple_prefs_remove (PREF_PREFIX "/upload-activity_timeout");
 

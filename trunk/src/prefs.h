@@ -45,12 +45,25 @@
 #define PREF_ADD_SIGNATURE PREF_PREFIX "/add-signature"
 #define PREF_SIGNATURE_FILENAME PREF_PREFIX "/signature-filename"
 
-#define PREF_HOTKEYS_MODIFIERS PREF_PREFIX "/hotkeys-modifiers"
-#define PREF_HOTKEYS_SEND_AS_FILE PREF_PREFIX "/hotkeys-sendas-file"
-#define PREF_HOTKEYS_SEND_AS_FTP PREF_PREFIX "/hotkeys-sendas-ftp"
-#define PREF_HOTKEYS_SEND_AS_HTTP PREF_PREFIX "/hotkeys-sendas-http"
-#define PREF_HOTKEYS_SEND_AS_IMAGE PREF_PREFIX "/hotkeys-sendas-image"
+/* #define PREF_HOTKEYS_MODIFIERS PREF_PREFIX "/hotkeys-modifiers" */
 
+
+#define PREF_HOTKEYS_SEND_AS_FILE PREF_PREFIX "/hotkeys-sendas-file"
+#define PREF_HOTKEYS_SEND_AS_FILE_MDFS PREF_PREFIX "/hotkeys-sendas-file-mdfs"
+
+#define PREF_HOTKEYS_SEND_AS_IMAGE PREF_PREFIX "/hotkeys-sendas-image"
+#define PREF_HOTKEYS_SEND_AS_IMAGE_MDFS PREF_PREFIX "/hotkeys-sendas-image-mdfs"
+
+#ifdef ENABLE_UPLOAD
+#define PREF_HOTKEYS_SEND_AS_FTP PREF_PREFIX "/hotkeys-sendas-ftp"
+#define PREF_HOTKEYS_SEND_AS_FTP_MDFS PREF_PREFIX "/hotkeys-sendas-ftp-mdfs"
+#define PREF_HOTKEYS_SEND_AS_HTTP PREF_PREFIX "/hotkeys-sendas-http"
+#define PREF_HOTKEYS_SEND_AS_HTTP_MDFS PREF_PREFIX "/hotkeys-sendas-http-mdfs"
+#endif
+
+#define pref_keyval_modifier(key_combo, key)	\
+  gchar *key_combo = g_strdup (key);		\
+  gchar_add (&key_combo, "mdfs", "-")
 
 #ifdef ENABLE_UPLOAD
 
@@ -74,8 +87,7 @@
 #define PREF_UI_FRAME6 _("Saving")
 #define PREF_UI_FRAME7 _("Misc")
 
-#define PREF_UI_FRAME8 _("Combo modifiers")
-#define PREF_UI_FRAME9 _("Keys")
+#define PREF_UI_FRAME9 _("Combo of modifiers + keys")
 
 #define PREF_UI_FRAME3 _("HTTP upload")
 #define PREF_UI_FRAME4 _("FTP upload")
@@ -94,14 +106,14 @@
 
 #define PREF_UI_SIGNATURE _("Always add this signature:")
 
-#define KEYVAL_VALIDATE_COMBO GDK_Return
-
 #define PREF_UI_HOTKEYS_MODIFIERS _("Hold the modifier keys and press %s...")
 
 #define PREF_UI_HOTKEYS_SEND_AS_FILE _("Send as File: ")
+#define PREF_UI_HOTKEYS_SEND_AS_IMAGE _("Send as Image: ")
+#ifdef ENABLE_UPLOAD
 #define PREF_UI_HOTKEYS_SEND_AS_FTP _("Send as FTP link: ")
 #define PREF_UI_HOTKEYS_SEND_AS_HTTP _("Send as HTTP link: ")
-#define PREF_UI_HOTKEYS_SEND_AS_IMAGE _("Send as Image: ")
+#endif
 
 #define PREF_UI_HIGHLIGHT_MODE _("Highlight mode:")
 #define PREF_HIGHLIGHT_MODE_01 _("lighten up desktop")

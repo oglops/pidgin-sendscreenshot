@@ -328,130 +328,119 @@ maybe_change_cursor (gint x, gint y, PurplePlugin * plugin) {
     gdk_cursor_unref (cursor);
 }
 
-static void 
-draw_selection (gint _x1, gint _x2,
-		  gint _y1, gint _y2,
-		  PurplePlugin * plugin) {
+static void
+draw_selection (gint _x1, gint _x2, gint _y1, gint _y2, PurplePlugin * plugin) {
 
-        GdkRectangle old_r, new_r;
-        GdkRegion *border_inter = NULL;
-
-        GdkWindow *gdkwin;
-
-        g_assert (PLUGIN (old) == NULL);
-        g_assert (PLUGIN (new) == NULL);
-        g_assert (PLUGIN (border_old) == NULL);
-        g_assert (PLUGIN (border_new) == NULL);
-
+    GdkWindow *gdkwin;
+    GdkRectangle old_r, new_r;
+    /* regions to paint into */
+    GdkRegion *border_inter = NULL;
+    GdkRegion
+        * border_new = NULL,
+        *border_old = NULL, *new_region = NULL, *old_region = NULL;
 
 #if GTK_CHECK_VERSION(2,14,0)
-        gdkwin = gtk_widget_get_window (PLUGIN(root_window));
+    gdkwin = gtk_widget_get_window (PLUGIN (root_window));
 #else
-        gdkwin = PLUGIN(root_window)->window;
+    gdkwin = PLUGIN (root_window)->window;
 #endif
 
-        old_r.x = MIN (_x1, _x2);
-        old_r.y = MIN (_y1, _y2);
-        old_r.width = ABS (_x1 - _x2) + 1;
-        old_r.height = ABS (_y1 - _y2) + 1;
+    old_r.x = MIN (_x1, _x2);
+    old_r.y = MIN (_y1, _y2);
+    old_r.width = ABS (_x1 - _x2) + 1;
+    old_r.height = ABS (_y1 - _y2) + 1;
 
-        new_r.width = CAPTURE_WIDTH (plugin);
-        new_r.height = CAPTURE_HEIGHT (plugin);
-        new_r.x = CAPTURE_X0 (plugin);
-        new_r.y = CAPTURE_Y0 (plugin);
+    new_r.width = CAPTURE_WIDTH (plugin);
+    new_r.height = CAPTURE_HEIGHT (plugin);
+    new_r.x = CAPTURE_X0 (plugin);
+    new_r.y = CAPTURE_Y0 (plugin);
 
-        if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != InvertOnly) {
-            PLUGIN (old) = gdk_region_rectangle (&old_r);
-            PLUGIN (new) = gdk_region_rectangle (&new_r);
+    if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != InvertOnly) {
+        old_region = gdk_region_rectangle (&old_r);
+        new_region = gdk_region_rectangle (&new_r);
 
-            PLUGIN (border_old) = gdk_region_rectangle (&old_r);
-            PLUGIN (border_new) = gdk_region_rectangle (&new_r);
+        border_old = gdk_region_rectangle (&old_r);
+        border_new = gdk_region_rectangle (&new_r);
 
-            gdk_region_shrink (PLUGIN (old), BORDER_WIDTH, BORDER_WIDTH);
-            gdk_region_shrink (PLUGIN (new), BORDER_WIDTH, BORDER_WIDTH);
+        gdk_region_shrink (old_region, BORDER_WIDTH, BORDER_WIDTH);
+        gdk_region_shrink (new_region, BORDER_WIDTH, BORDER_WIDTH);
 
-            gdk_region_subtract (PLUGIN (border_old), PLUGIN (old));
-            gdk_region_subtract (PLUGIN (border_new), PLUGIN (new));
+        gdk_region_subtract (border_old, old_region);
+        gdk_region_subtract (border_new, new_region);
 
-            gdk_region_destroy (PLUGIN (old));
-            gdk_region_destroy (PLUGIN (new));
+        gdk_region_destroy (old_region);
+        gdk_region_destroy (new_region);
 
-            PLUGIN (old) = NULL;
-            PLUGIN (new) = NULL;
+        old_region = NULL;
+        new_region = NULL;
 
-            border_inter = gdk_region_copy (PLUGIN (border_old));
-            gdk_region_intersect (border_inter, PLUGIN (border_new));
-            gdk_region_subtract (PLUGIN (border_old), border_inter);
-            gdk_region_subtract (PLUGIN (border_new), border_inter);
-        }
+        border_inter = gdk_region_copy (border_old);
+        gdk_region_intersect (border_inter, border_new);
+        gdk_region_subtract (border_old, border_inter);
+        gdk_region_subtract (border_new, border_inter);
+    }
 
-        if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != BordersOnly) {
-            GdkRegion *inter;
+    if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != BordersOnly) {
+        GdkRegion *inter;
 
-            PLUGIN (old) = gdk_region_rectangle (&old_r);
-            PLUGIN (new) = gdk_region_rectangle (&new_r);
+        old_region = gdk_region_rectangle (&old_r);
+        new_region = gdk_region_rectangle (&new_r);
 
-            inter = gdk_region_copy (PLUGIN (old));
-            gdk_region_intersect (inter, PLUGIN (new));
+        inter = gdk_region_copy (old_region);
+        gdk_region_intersect (inter, new_region);
 
-            gdk_region_subtract (PLUGIN (old), inter);
-            gdk_region_subtract (PLUGIN (new), inter);
-            gdk_region_destroy (inter);
-        }
+        gdk_region_subtract (old_region, inter);
+        gdk_region_subtract (new_region, inter);
+        gdk_region_destroy (inter);
+    }
 
-        /* remove old borders */
-        if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != InvertOnly)
-            paint_region (PLUGIN (border_old), gdkwin,
-                          PLUGIN (root_pixbuf_orig), plugin);
+    /* remove old borders */
+    if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != InvertOnly)
+        paint_region (border_old, gdkwin, PLUGIN (root_pixbuf_orig), plugin);
 
-        /* clear old selection */
-        if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == InvertOnly)
-            paint_region (PLUGIN (old), gdkwin, PLUGIN (root_pixbuf_orig),
-                          plugin);
-        else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != BordersOnly)
-            paint_region (PLUGIN (old), gdkwin, PLUGIN (root_pixbuf_x),
-                          plugin);
+    /* clear old selection */
+    if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == InvertOnly)
+        paint_region (old_region, gdkwin, PLUGIN (root_pixbuf_orig), plugin);
+    else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != BordersOnly)
+        paint_region (old_region, gdkwin, PLUGIN (root_pixbuf_x), plugin);
 
-        /* draw selection */
-        if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == InvertOnly) {
-            gdk_gc_set_function (PLUGIN (gc), GDK_COPY_INVERT);
-            paint_region (PLUGIN (new), gdkwin, PLUGIN (root_pixbuf_orig),
-                          plugin);
-            gdk_gc_set_function (PLUGIN (gc), GDK_COPY);
+    /* draw selection */
+    if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) == InvertOnly) {
+        gdk_gc_set_function (PLUGIN (gc), GDK_COPY_INVERT);
+        paint_region (new_region, gdkwin, PLUGIN (root_pixbuf_orig), plugin);
+        gdk_gc_set_function (PLUGIN (gc), GDK_COPY);
 
-        }
-        else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != BordersOnly)
-            paint_region (PLUGIN (new), gdkwin, PLUGIN (root_pixbuf_orig),
-                          plugin);
+    }
+    else if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != BordersOnly)
+        paint_region (new_region, gdkwin, PLUGIN (root_pixbuf_orig), plugin);
 
-        /* add selection borders */
-        if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != InvertOnly) {
-            gdk_gc_set_function (PLUGIN (gc), GDK_COPY_INVERT);
-            paint_region (PLUGIN (border_new), gdkwin,
-                          PLUGIN (root_pixbuf_orig), plugin);
-            gdk_gc_set_function (PLUGIN (gc), GDK_COPY);
-        }
+    /* add selection borders */
+    if (purple_prefs_get_int (PREF_HIGHLIGHT_MODE) != InvertOnly) {
+        gdk_gc_set_function (PLUGIN (gc), GDK_COPY_INVERT);
+        paint_region (border_new, gdkwin, PLUGIN (root_pixbuf_orig), plugin);
+        gdk_gc_set_function (PLUGIN (gc), GDK_COPY);
+    }
 
-        if (PLUGIN (old) != NULL) {
-            gdk_region_destroy (PLUGIN (old));
-            PLUGIN (old) = NULL;
-        }
-        if (PLUGIN (border_old) != NULL) {
-            gdk_region_destroy (PLUGIN (border_old));
-            PLUGIN (border_old) = NULL;
-        }
-        if (PLUGIN (new) != NULL) {
-            gdk_region_destroy (PLUGIN (new));
-            PLUGIN (new) = NULL;
-        }
-        if (PLUGIN (border_new) != NULL) {
-            gdk_region_destroy (PLUGIN (border_new));
-            PLUGIN (border_new) = NULL;
-        }
+    if (old_region != NULL) {
+        gdk_region_destroy (old_region);
+        old_region = NULL;
+    }
+    if (border_old != NULL) {
+        gdk_region_destroy (border_old);
+        border_old = NULL;
+    }
+    if (new_region != NULL) {
+        gdk_region_destroy (new_region);
+        new_region = NULL;
+    }
+    if (border_new != NULL) {
+        gdk_region_destroy (border_new);
+        border_new = NULL;
+    }
 
-        if (border_inter != NULL)
-            gdk_region_destroy (border_inter);
-  
+    if (border_inter != NULL)
+        gdk_region_destroy (border_inter);
+
 }
 
 static gboolean
@@ -531,10 +520,10 @@ on_root_window_motion_notify_cb (PurplePlugin * plugin,
                 PLUGIN (y2) += dy;
             }
         }
-	
-	/* */
-	
-	draw_selection (_x1, _x2, _y1, _y2, plugin);
+
+        /* */
+
+        draw_selection (_x1, _x2, _y1, _y2, plugin);
     }
 
     if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)) {
@@ -639,9 +628,9 @@ on_root_window_button_press_cb (GtkWidget * root_window,
             GdkRegion *region = NULL;
             GdkRectangle rect;
 
-	    if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES))
-	         erase_cues (plugin);
-	      
+            if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES))
+                erase_cues (plugin);
+
             PLUGIN (x1) = (gint) event->x;
             PLUGIN (y1) = (gint) event->y;
             PLUGIN (x2) = (gint) event->x;
@@ -951,35 +940,32 @@ on_root_window_map_event_cb (GtkWidget * root_window, GdkEvent * event,
 
 static gboolean
 on_root_window_expose_cb (GtkWidget * root_window,
-                          GdkEventExpose * event, 
-			  PurplePlugin * plugin) {
+                          GdkEventExpose * event, PurplePlugin * plugin) {
 
     g_assert (plugin != NULL && plugin->extra != NULL);
-    
+
     /* This function should be called only one time,
        by the gtk_widget_show() function. The drawing work is
        actually done by on_root_window_motion_notify_cb().
-       
+
        If it called twice, it means that an other process
        or program has requested user attention on top of
        our screenshot plugin... Generally this will mess up
        the display so we'd better terminate and let the user
        do what is wanting to do.       
-    */
+     */
     if (PLUGIN (root_exposed)) {
         plugin_cancel (plugin);
-	purple_notify_info(plugin,
-			   PLUGIN_NAME, 
-			   PLUGIN_INFO, 
-			   FORCE_CANCEL_MSG);
+        purple_notify_info (plugin,
+                            PLUGIN_NAME, PLUGIN_INFO, FORCE_CANCEL_MSG);
         return TRUE;
     }
 
     /* no area is selected */
-    if (!PLUGIN(root_exposed) && !selection_defined (plugin)) {
+    if (!PLUGIN (root_exposed) && !selection_defined (plugin)) {
         GdkWindow *gdkwin;
 
-	PLUGIN (root_exposed) = TRUE;
+        PLUGIN (root_exposed) = TRUE;
 #if GTK_CHECK_VERSION(2,14,0)
         gdkwin = gtk_widget_get_window (root_window);
 #else
@@ -1017,36 +1003,36 @@ on_root_window_key_press_event_cb (GtkWidget * root_events,
                                    PurplePlugin * plugin) {
     g_assert (plugin != NULL && plugin->extra != NULL);
     switch (event->keyval) {
-    case GDK_f: /* select full screen */
-      {
-	GdkWindow *gdkroot;
-	gint _x1, _y1, _x2, _y2, width, height;
+    case GDK_f:case GDK_F:               /* select full screen */
+        {
+            GdkWindow *gdkroot;
+            gint _x1, _y1, _x2, _y2, width, height;
 
-	if (!selection_defined(plugin) &&
-	    purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)) {
-	  erase_cues (plugin);
-	  PLUGIN (resize_allow) = TRUE;
-	}
+            if (!selection_defined (plugin) &&
+                purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES)) {
+                erase_cues (plugin);
+                PLUGIN (resize_allow) = TRUE;
+            }
 
-        /* remember previous coordinates */
-        _x1 = PLUGIN (x1);
-        _y1 = PLUGIN (y1);
-        _x2 = PLUGIN (x2);
-        _y2 = PLUGIN (y2);
+            /* remember previous coordinates */
+            _x1 = PLUGIN (x1);
+            _y1 = PLUGIN (y1);
+            _x2 = PLUGIN (x2);
+            _y2 = PLUGIN (y2);
 
-        gdkroot = gdk_get_default_root_window ();
+            gdkroot = gdk_get_default_root_window ();
 
-        gdk_drawable_get_size (gdkroot, &width, &height);
+            gdk_drawable_get_size (gdkroot, &width, &height);
 
-	PLUGIN (x1) = 0;
-	PLUGIN (y1) = 0;
-	PLUGIN (x2) = width - 1;
-	PLUGIN (y2) = height - 1;
+            PLUGIN (x1) = 0;
+            PLUGIN (y1) = 0;
+            PLUGIN (x2) = width - 1;
+            PLUGIN (y2) = height - 1;
 
-	draw_selection (_x1, _x2, _y1, _y2, plugin);
-	maybe_change_cursor (PLUGIN(mouse_x), PLUGIN(mouse_y), plugin);
-	break;
-      }
+            draw_selection (_x1, _x2, _y1, _y2, plugin);
+            maybe_change_cursor (PLUGIN (mouse_x), PLUGIN (mouse_y), plugin);
+            break;
+        }
     case GDK_Escape:
         plugin_cancel (plugin);
         break;
@@ -1123,13 +1109,12 @@ prepare_root_window (PurplePlugin * plugin) {
                       "expose-event",
                       G_CALLBACK (on_root_window_expose_cb), plugin);
     g_signal_connect_swapped (GTK_OBJECT (PLUGIN (root_window)),
-			      "motion-notify-event",
-			      G_CALLBACK (on_root_window_motion_notify_cb), plugin);
-    g_signal_connect (GTK_OBJECT (PLUGIN (root_window)),
-                      "map-event",
+                              "motion-notify-event",
+                              G_CALLBACK (on_root_window_motion_notify_cb),
+                              plugin);
+    g_signal_connect (GTK_OBJECT (PLUGIN (root_window)), "map-event",
                       G_CALLBACK (on_root_window_map_event_cb), plugin);
-    g_signal_connect (GTK_OBJECT (PLUGIN (root_events)),
-                      "key-press-event",
+    g_signal_connect (GTK_OBJECT (PLUGIN (root_events)), "key-press-event",
                       G_CALLBACK (on_root_window_key_press_event_cb), plugin);
 #ifdef G_OS_WIN32
     /* waiting for signal "monitors-changed" to be implemented
