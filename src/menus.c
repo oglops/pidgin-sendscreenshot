@@ -367,6 +367,7 @@ static gboolean
 catch_hotkeys_cb (PidginWindow * win, GdkEventKey * event) {
     if (event->is_modifier == FALSE) {
         gint all_modifiers = 0;
+        PurpleConversation *conv = NULL;
 
         if (event->state & GDK_SHIFT_MASK)
             all_modifiers |= GDK_SHIFT_MASK;
@@ -375,60 +376,77 @@ catch_hotkeys_cb (PidginWindow * win, GdkEventKey * event) {
         if (event->state & GDK_MOD1_MASK)
             all_modifiers |= GDK_MOD1_MASK;
 
-        /* modifiers match  */
-        if (all_modifiers == purple_prefs_get_int (PREF_HOTKEYS_MODIFIERS)) {
-            PurpleConversation *conv =
-                pidgin_conv_window_get_active_conversation (win);
+        conv = pidgin_conv_window_get_active_conversation (win);
 
-            if (gdk_keyval_to_lower (event->keyval) ==
-                (guint) purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_FILE)) {
+        if (gdk_keyval_to_lower (event->keyval) ==
+            (guint) purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_FILE)
+            &&
+            all_modifiers ==
+            purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_FILE_MDFS))
+        {
 
-                PurpleConnection *gc = NULL;
-                PurplePluginProtocolInfo *prpl_info = NULL;
+            PurpleConnection *gc = NULL;
+            PurplePluginProtocolInfo *prpl_info = NULL;
 
-                gc = purple_conversation_get_gc (conv);
+            gc = purple_conversation_get_gc (conv);
 
-                if ((gc != NULL) &&
-                    ((purple_conversation_get_type (conv) !=
-                      PURPLE_CONV_TYPE_CHAT)
-                     || !purple_conv_chat_has_left (PURPLE_CONV_CHAT (conv)))) {
+            if ((gc != NULL) &&
+                ((purple_conversation_get_type (conv) !=
+                  PURPLE_CONV_TYPE_CHAT)
+                 || !purple_conv_chat_has_left (PURPLE_CONV_CHAT (conv)))) {
 
-                    prpl_info = PURPLE_PLUGIN_PROTOCOL_INFO (gc->prpl);
-                    if (purple_conversation_get_type (conv) ==
-                        PURPLE_CONV_TYPE_IM
-                        && prpl_info->send_file != NULL
-                        && (!prpl_info->can_receive_file
-                            || prpl_info->can_receive_file (gc,
-                                                            purple_conversation_get_name
-                                                            (conv)))) {
-                        PurplePlugin *plugin =
-                            purple_plugins_find_with_id (PLUGIN_ID);
+                prpl_info = PURPLE_PLUGIN_PROTOCOL_INFO (gc->prpl);
+                if (purple_conversation_get_type (conv) ==
+                    PURPLE_CONV_TYPE_IM
+                    && prpl_info->send_file != NULL
+                    && (!prpl_info->can_receive_file
+                        || prpl_info->can_receive_file (gc,
+                                                        purple_conversation_get_name
+                                                        (conv)))) {
+                    PurplePlugin *plugin =
+                        purple_plugins_find_with_id (PLUGIN_ID);
 
-                        if (PLUGIN (locked))
-                            return FALSE;       /* Just return, don't fail. */
-                        else {
-                            PLUGIN (locked) = TRUE;
-                            PLUGIN (send_as) = SEND_AS_FILE;
-                            REMEMBER_ACCOUNT (PIDGIN_CONVERSATION (conv));
-                            freeze_desktop (plugin);
-                        }
+                    if (PLUGIN (locked))
+                        return FALSE;   /* Just return, don't fail. */
+                    else {
+                        PLUGIN (locked) = TRUE;
+                        PLUGIN (send_as) = SEND_AS_FILE;
+                        REMEMBER_ACCOUNT (PIDGIN_CONVERSATION (conv));
+                        freeze_desktop (plugin);
                     }
                 }
             }
-            else if (gdk_keyval_to_lower (event->keyval) ==
-                     (guint) purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_FTP))
-                on_screenshot_insert_as_ftp_link_fromwin_activate_cb (win);
-            else if (gdk_keyval_to_lower (event->keyval) ==
-                     (guint) purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_HTTP))
-                on_screenshot_insert_as_link_fromwin_activate_cb (win);
-            else if (gdk_keyval_to_lower (event->keyval) == (guint)
-                     purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_IMAGE)) {
-                if (!(purple_conversation_get_features (conv) &
-                      PURPLE_CONNECTION_NO_IMAGES))
-                    on_screenshot_insert_as_image_fromwin_activate_cb (win);
-            }
-            return TRUE;
         }
+#ifdef ENABLE_UPLOAD
+        else if (gdk_keyval_to_lower (event->keyval) ==
+                 (guint) purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_FTP)
+                 &&
+                 all_modifiers ==
+                 purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_FTP_MDFS)
+            )
+            on_screenshot_insert_as_ftp_link_fromwin_activate_cb (win);
+        else if (gdk_keyval_to_lower (event->keyval) ==
+                 (guint) purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_HTTP)
+                 &&
+                 all_modifiers ==
+                 purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_HTTP_MDFS)
+            )
+            on_screenshot_insert_as_link_fromwin_activate_cb (win);
+#endif
+        else if (gdk_keyval_to_lower (event->keyval) == (guint)
+                 purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_IMAGE)
+                 &&
+                 all_modifiers ==
+                 purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_IMAGE_MDFS)
+		 ) {
+            if (!(purple_conversation_get_features (conv) &
+                  PURPLE_CONNECTION_NO_IMAGES))
+                on_screenshot_insert_as_image_fromwin_activate_cb (win);
+        }
+        else {
+            /* nothing match ! */
+        }
+        return TRUE;
     }
     return FALSE;               /* let the signal be handled by other callbacks */
 }
@@ -632,12 +650,12 @@ buddy_context_menu_add_item (PurpleBlistNode * node, GList ** menu,
 
     if (PURPLE_BLIST_NODE_IS_BUDDY (node)) {
         prpl_info =
-            PURPLE_PLUGIN_PROTOCOL_INFO (((PurpleBuddy *) node)->account->gc->
-                                         prpl);
+            PURPLE_PLUGIN_PROTOCOL_INFO (((PurpleBuddy *) node)->account->
+                                         gc->prpl);
         if (prpl_info && prpl_info->send_file) {
             if (!prpl_info->can_receive_file ||
-                prpl_info->can_receive_file (((PurpleBuddy *) node)->account->
-                                             gc,
+                prpl_info->can_receive_file (((PurpleBuddy *) node)->
+                                             account->gc,
                                              ((PurpleBuddy *) node)->name)) {
                 PurpleMenuAction *action;
 

@@ -147,7 +147,7 @@ typedef enum { SEND_AS_FILE, SEND_AS_IMAGE, SEND_AS_HTTP_LINK,
 typedef enum { SEND_AS_FILE, SEND_AS_IMAGE } SendType;
 #endif
 
-typedef enum { SELECT_REGULAR, SELECT_MOVE} SelectionMode;
+typedef enum { SELECT_REGULAR, SELECT_MOVE } SelectionMode;
 
 typedef enum {
     ResizeAny,
@@ -192,8 +192,6 @@ typedef struct {
     GdkPixbuf *root_pixbuf_orig;
     /* modified image (highlight mode) */
     GdkPixbuf *root_pixbuf_x;
-    /* regions to paint into */
-    GdkRegion *border_new, *border_old, *new, *old;
 
     /* where to send capture ? */
     PurpleConnectionFlags conv_features;

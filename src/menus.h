@@ -30,7 +30,7 @@ void create_plugin_menuitems (PurpleConversation * conv);
 void remove_pidgin_menuitems (PurpleConversation * conv);
 
 void buddy_context_menu_add_item (PurpleBlistNode * node,
-				  GList ** menu, PurplePlugin * plugin);
+                                  GList ** menu, PurplePlugin * plugin);
 #endif
 
 /* end of menus.h */

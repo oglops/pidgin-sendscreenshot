@@ -76,6 +76,7 @@ pidgin_prefs_labeled_spin_button_custom (GtkWidget * box, const gchar * title,
                                       NULL);
 }
 
+#ifdef ENABLE_UPLOAD
 /* same as pidgin_prefs_labeled_entry() but using invisible chars */
 static GtkWidget *
 pidgin_prefs_labeled_entry_custom (GtkWidget * page, const gchar * title,
@@ -100,7 +101,6 @@ pidgin_prefs_labeled_entry_custom (GtkWidget * page, const gchar * title,
                                       NULL);
 }
 
-#ifdef ENABLE_UPLOAD
 static void
 hosts_combobox_changed_cb (GtkComboBox * hosts_combobox) {
     enum { COLUMN_PIXBUF, COLUMN_STRING, N_COLUMNS };
@@ -352,9 +352,9 @@ change_signature_cb (GtkFileChooser * file_chooser, GtkImage * sign_image) {
 #endif /* GTK_CHECK_VERSION(2,6,0) */
 
 static void
-gchar_add (gchar ** str, const gchar * add) {
+gchar_add (gchar ** str, const gchar * add, const gchar * separator) {
     if (*str != NULL) {
-        gchar *tmp = g_strjoin ("+", *str, add, NULL);
+        gchar *tmp = g_strjoin (separator, *str, add, NULL);
         g_free (*str);
         *str = tmp;
     }
@@ -364,7 +364,7 @@ gchar_add (gchar ** str, const gchar * add) {
 
 #define maybe_add_modifier(m, m_strval)		\
   if (event->state & m) {			\
-    gchar_add (&combo, m_strval);		\
+    gchar_add (&combo, m_strval, "+");		\
     all_modifiers |= m;				\
   }
 
@@ -373,49 +373,25 @@ gchar_add (gchar ** str, const gchar * add) {
 #define ALT_MODIFIER_STR "Alt"
 
 static gchar *
-get_combo (PurplePlugin * plugin) {
+get_combo (PurplePlugin * plugin, const gchar * key_combo) {
 
     gchar *res = NULL;
 
-    guint combo = purple_prefs_get_int (PREF_HOTKEYS_MODIFIERS);
+    guint combo = purple_prefs_get_int (key_combo);
 
     if (combo & GDK_SHIFT_MASK)
-        gchar_add (&res, SHIFT_MODIFIER_STR);
+        gchar_add (&res, SHIFT_MODIFIER_STR, "+");
     if (combo & GDK_CONTROL_MASK)
-        gchar_add (&res, CONTROL_MODIFIER_STR);
+        gchar_add (&res, CONTROL_MODIFIER_STR, "+");
     if (combo & GDK_MOD1_MASK)
-        gchar_add (&res, ALT_MODIFIER_STR);
-    if (res)
-        gchar_add (&res, "...");
-    else {
-        gchar_add (&res, "invalid...");
-        purple_prefs_set_int (PREF_HOTKEYS_MODIFIERS, 0);       /* disable hotkeys */
-    }
+        gchar_add (&res, ALT_MODIFIER_STR, "+");
     (void) plugin;
     return res;
 }
 
 static gboolean
-set_keyval_name (GtkWidget * entry, GdkEventKey * event, const gchar * key) {
-    if (event->is_modifier == FALSE && event->keyval
-        && event->keyval != GDK_BackSpace && event->keyval != GDK_Tab) {
-
-        gtk_entry_set_text (GTK_ENTRY (entry),
-                            gdk_keyval_name (gdk_keyval_to_lower
-                                             (event->keyval)));
-
-        purple_prefs_set_int (key, gdk_keyval_to_lower (event->keyval));
-
-    }
-    else {
-        gtk_entry_set_text (GTK_ENTRY (entry), "");
-        purple_prefs_set_int (key, 0);
-    }
-    return TRUE;
-}
-
-static gboolean
-on_modifiers_entry_key_press_cb (GtkWidget * entry, GdkEventKey * event) {
+on_combo_entry_key_press_cb (GtkWidget * entry,
+                             GdkEventKey * event, const gchar * key) {
     if (event->is_modifier == FALSE) {
         gchar *combo = NULL;
         guint all_modifiers = 0;
@@ -425,18 +401,31 @@ on_modifiers_entry_key_press_cb (GtkWidget * entry, GdkEventKey * event) {
         maybe_add_modifier (GDK_MOD1_MASK, ALT_MODIFIER_STR);
 
         /* validate modifiers combo */
-        if (combo && event->keyval == KEYVAL_VALIDATE_COMBO) {
-            gchar_add (&combo, "...");
+        if (all_modifiers
+            && event->keyval
+            && event->keyval != GDK_BackSpace
+            && event->keyval != GDK_Tab && event->keyval != GDK_Return) {
+
+	    pref_keyval_modifier(key_combo, key);
+
+            gchar_add (&combo,
+                       gdk_keyval_name (gdk_keyval_to_lower (event->keyval)),
+                       "+");
             gtk_entry_set_text (GTK_ENTRY (entry), combo);
 
-            purple_prefs_set_int (PREF_HOTKEYS_MODIFIERS, all_modifiers);
+            /* save keyval */
+            purple_prefs_set_int (key, gdk_keyval_to_lower (event->keyval));
 
+            /* save combo of modifiers */
+            purple_prefs_set_int (key_combo,
+				  all_modifiers);
+
+            g_free (key_combo);
             g_free (combo);
             return TRUE;
         }
-
         gtk_entry_set_text (GTK_ENTRY (entry), "invalid...");
-        purple_prefs_set_int (PREF_HOTKEYS_MODIFIERS, 0);       /* disable hotkeys */
+        purple_prefs_set_int (key, 0);
     }
     return TRUE;
 }
@@ -444,13 +433,21 @@ on_modifiers_entry_key_press_cb (GtkWidget * entry, GdkEventKey * event) {
 #define add_hotkey_entry(vbox, title, key)				\
   {									\
     GtkWidget * _entry;							\
+    gchar * entry_combo = NULL;						\
+    pref_keyval_modifier(key_combo, key);				\
+    entry_combo = get_combo(plugin, key_combo);				\
+    if (entry_combo)							\
+      gchar_add (&entry_combo, gdk_keyval_name(purple_prefs_get_int(key)), "+"); \
+    else								\
+      entry_combo = g_strdup ("invalid...");				\
     _entry = gtk_entry_new ();						\
-    gtk_entry_set_text (GTK_ENTRY (_entry),gdk_keyval_name(purple_prefs_get_int(key)));	\
+    gtk_entry_set_text (GTK_ENTRY (_entry), entry_combo);		\
     pidgin_add_widget_to_vbox (GTK_BOX (vbox), title, NULL, _entry, TRUE,  NULL); \
     g_signal_connect (G_OBJECT(_entry), "key-release-event",		\
-		      G_CALLBACK(set_keyval_name), key);		\
+		      G_CALLBACK(on_combo_entry_key_press_cb), key);	\
+    g_free (key_combo);							\
+    g_free (entry_combo);						\
   }
-
 
 GtkWidget *
 get_plugin_pref_frame (PurplePlugin * plugin) {
@@ -625,48 +622,54 @@ get_plugin_pref_frame (PurplePlugin * plugin) {
      *      HOTKEYS
      * ========================================================================= */
 
-    vbox = pidgin_make_frame (tab2, PREF_UI_FRAME8);
+/*     vbox = pidgin_make_frame (tab2, PREF_UI_FRAME8); */
 
-    GtkWidget *modifiers_entry;
-    GtkWidget *modif_label;
-    GtkWidget *modif_hbox;
+/*     GtkWidget *modifiers_entry; */
+/*     GtkWidget *modif_label; */
+/*     GtkWidget *modif_hbox; */
 
-    gchar *lbl_txt = NULL;
-    gchar *current_combo = NULL;
+/*     gchar *lbl_txt = NULL; */
+/*     gchar *current_combo = NULL; */
 
-    lbl_txt = g_strdup_printf (PREF_UI_HOTKEYS_MODIFIERS,
-                               gdk_keyval_name (KEYVAL_VALIDATE_COMBO));
+/*     lbl_txt = g_strdup_printf (PREF_UI_HOTKEYS_MODIFIERS, */
+/*                                gdk_keyval_name (KEYVAL_VALIDATE_COMBO)); */
 
-    modif_hbox = gtk_hbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
-    modifiers_entry = gtk_entry_new ();
+/*     modif_hbox = gtk_hbox_new (FALSE, PIDGIN_HIG_CAT_SPACE); */
+/*     modifiers_entry = gtk_entry_new (); */
 
-    current_combo = get_combo (plugin);
+/*     current_combo = get_combo (plugin); */
 
-    gtk_entry_set_text (GTK_ENTRY (modifiers_entry), current_combo);
-    g_free (current_combo);
+/*     gtk_entry_set_text (GTK_ENTRY (modifiers_entry), current_combo); */
+/*     g_free (current_combo); */
 
-    modif_label = gtk_label_new (lbl_txt);
-    g_free (lbl_txt);
+/*     modif_label = gtk_label_new (lbl_txt); */
+/*     g_free (lbl_txt); */
 
-    gtk_box_pack_start_defaults (GTK_BOX (vbox), modif_hbox);
+/*     gtk_box_pack_start_defaults (GTK_BOX (vbox), modif_hbox); */
 
-    gtk_box_pack_start_defaults (GTK_BOX (modif_hbox), modif_label);
-    gtk_box_pack_start_defaults (GTK_BOX (modif_hbox), modifiers_entry);
+/*     gtk_box_pack_start_defaults (GTK_BOX (modif_hbox), modif_label); */
+/*     gtk_box_pack_start_defaults (GTK_BOX (modif_hbox), modifiers_entry); */
 
     /* Intercept hotkeys defined in pref window */
-    g_signal_connect (G_OBJECT (modifiers_entry),
-                      "key-press-event",
-                      G_CALLBACK (on_modifiers_entry_key_press_cb), NULL);
+/*     g_signal_connect (G_OBJECT (modifiers_entry), */
+/*                       "key-press-event", */
+/*                       G_CALLBACK (on_modifiers_entry_key_press_cb), NULL); */
 
     vbox = pidgin_make_frame (tab2, PREF_UI_FRAME9);
 
-    add_hotkey_entry (vbox, PREF_UI_HOTKEYS_SEND_AS_FILE,
+    add_hotkey_entry (vbox,
+                      PREF_UI_HOTKEYS_SEND_AS_FILE,
                       PREF_HOTKEYS_SEND_AS_FILE);
-    add_hotkey_entry (vbox, PREF_UI_HOTKEYS_SEND_AS_FTP,
-                      PREF_HOTKEYS_SEND_AS_FTP);
-    add_hotkey_entry (vbox, PREF_UI_HOTKEYS_SEND_AS_HTTP,
+#ifdef ENABLE_UPLOAD
+    add_hotkey_entry (vbox,
+                      PREF_UI_HOTKEYS_SEND_AS_FTP, PREF_HOTKEYS_SEND_AS_FTP);
+
+    add_hotkey_entry (vbox,
+                      PREF_UI_HOTKEYS_SEND_AS_HTTP,
                       PREF_HOTKEYS_SEND_AS_HTTP);
-    add_hotkey_entry (vbox, PREF_UI_HOTKEYS_SEND_AS_IMAGE,
+#endif
+    add_hotkey_entry (vbox,
+                      PREF_UI_HOTKEYS_SEND_AS_IMAGE,
                       PREF_HOTKEYS_SEND_AS_IMAGE);
 
 

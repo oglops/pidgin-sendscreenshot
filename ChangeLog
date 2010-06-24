@@ -1,6 +1,6 @@
 Pidgin Screenshot Plugin Changelog
 
-Version 0.8-2 06/??/10:
+Version 0.8-2 06/24/10:
 	* Added hotkeys.
 	* New design for preferences window (tabs).
 	* Automatically add a space before inserting a link, if necessary.
