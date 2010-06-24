@@ -621,40 +621,6 @@ get_plugin_pref_frame (PurplePlugin * plugin) {
     /* =========================================================================
      *      HOTKEYS
      * ========================================================================= */
-
-/*     vbox = pidgin_make_frame (tab2, PREF_UI_FRAME8); */
-
-/*     GtkWidget *modifiers_entry; */
-/*     GtkWidget *modif_label; */
-/*     GtkWidget *modif_hbox; */
-
-/*     gchar *lbl_txt = NULL; */
-/*     gchar *current_combo = NULL; */
-
-/*     lbl_txt = g_strdup_printf (PREF_UI_HOTKEYS_MODIFIERS, */
-/*                                gdk_keyval_name (KEYVAL_VALIDATE_COMBO)); */
-
-/*     modif_hbox = gtk_hbox_new (FALSE, PIDGIN_HIG_CAT_SPACE); */
-/*     modifiers_entry = gtk_entry_new (); */
-
-/*     current_combo = get_combo (plugin); */
-
-/*     gtk_entry_set_text (GTK_ENTRY (modifiers_entry), current_combo); */
-/*     g_free (current_combo); */
-
-/*     modif_label = gtk_label_new (lbl_txt); */
-/*     g_free (lbl_txt); */
-
-/*     gtk_box_pack_start_defaults (GTK_BOX (vbox), modif_hbox); */
-
-/*     gtk_box_pack_start_defaults (GTK_BOX (modif_hbox), modif_label); */
-/*     gtk_box_pack_start_defaults (GTK_BOX (modif_hbox), modifiers_entry); */
-
-    /* Intercept hotkeys defined in pref window */
-/*     g_signal_connect (G_OBJECT (modifiers_entry), */
-/*                       "key-press-event", */
-/*                       G_CALLBACK (on_modifiers_entry_key_press_cb), NULL); */
-
     vbox = pidgin_make_frame (tab2, PREF_UI_FRAME9);
 
     add_hotkey_entry (vbox,
