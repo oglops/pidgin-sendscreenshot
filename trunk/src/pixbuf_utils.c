@@ -26,13 +26,13 @@
 
 static guchar
 op_lighten (guchar val, gpointer data) {
-    return MIN (val + (gint) data, 255);
+    return MIN (val + GPOINTER_TO_INT(data), 255);
 }
 
 
 static guchar
 op_darken (guchar val, gpointer data) {
-    return MAX (val - (gint) data, 0);
+    return MAX (val - GPOINTER_TO_INT(data), 0);
 }
 
 
@@ -48,12 +48,12 @@ mygdk_pixbuf_apply_op (GdkPixbuf * pixbuf,
 
 void
 mygdk_pixbuf_lighten (GdkPixbuf * pixbuf, gint val) {
-    mygdk_pixbuf_apply_op (pixbuf, op_lighten, (gpointer) val);
+    mygdk_pixbuf_apply_op (pixbuf, op_lighten, GINT_TO_POINTER(val));
 }
 
 void
 mygdk_pixbuf_darken (GdkPixbuf * pixbuf, gint val) {
-    mygdk_pixbuf_apply_op (pixbuf, op_darken, (gpointer) val);
+    mygdk_pixbuf_apply_op (pixbuf, op_darken, GINT_TO_POINTER(val));
 }
 
 void
@@ -161,7 +161,6 @@ blank_rectangle_in_pixbuf (GdkPixbuf * pixbuf, GdkRectangle * rect) {
     guchar *row;
     gboolean has_alpha;
 
-    /* g_assert (gdk_pixbuf_get_colorspace (pixbuf) == GDK_COLORSPACE_RGB); */
 
     x2 = rect->x + rect->width;
     y2 = rect->y + rect->height;
