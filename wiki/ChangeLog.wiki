@@ -1,6 +1,15 @@
 #labels Featured
 =Pidgin Screenshot Plugin Changelog=
 
+==Version 0.8-2 07/04/10==
+	* Added hotkeys (experimental).
+	* New design for preferences window (tabs).
+	* Automatically add a space before inserting a link, if necessary.
+	* Added BMP file format.
+	* Hold shift key to move or resize the selection.
+	* Show countdown when a delay was set in pref window.
+	* Animated cues.
+
 ==Version 0.8-1 04/18/10==
 	* Present conversation to show upload link if it is closed (instead of showing an error msg).
 	* Use GIOChannel related funcs instead of fread() fclose().
