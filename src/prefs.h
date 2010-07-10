@@ -146,6 +146,10 @@
 #define PREF_UI_FTP_WEB_ADDR _("Corresponding Web address:")
 #define PREF_UI_FTP_USERNAME _("User:")
 #define PREF_UI_FTP_PASSWORD _("Password:")
+
+
+#define STR_INVALID_KEY _("invalid...")
+
 #endif /* ENABLE_UPLOAD */
 
 GtkWidget *get_plugin_pref_frame (PurplePlugin * plugin);

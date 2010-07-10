@@ -424,7 +424,7 @@ on_combo_entry_key_press_cb (GtkWidget * entry,
             g_free (combo);
             return TRUE;
         }
-        gtk_entry_set_text (GTK_ENTRY (entry), "invalid...");
+        gtk_entry_set_text (GTK_ENTRY (entry), STR_INVALID_KEY);
         purple_prefs_set_int (key, 0);
     }
     return TRUE;
@@ -439,7 +439,7 @@ on_combo_entry_key_press_cb (GtkWidget * entry,
     if (entry_combo)							\
       gchar_add (&entry_combo, gdk_keyval_name(purple_prefs_get_int(key)), "+"); \
     else								\
-      entry_combo = g_strdup ("invalid...");				\
+      entry_combo = g_strdup (STR_INVALID_KEY);				\
     _entry = gtk_entry_new ();						\
     gtk_entry_set_text (GTK_ENTRY (_entry), entry_combo);		\
     pidgin_add_widget_to_vbox (GTK_BOX (vbox), title, NULL, _entry, TRUE,  NULL); \
@@ -637,7 +637,6 @@ get_plugin_pref_frame (PurplePlugin * plugin) {
     add_hotkey_entry (vbox,
                       PREF_UI_HOTKEYS_SEND_AS_IMAGE,
                       PREF_HOTKEYS_SEND_AS_IMAGE);
-
 
 
 #ifdef ENABLE_UPLOAD

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pidgin-screenshot 0.6-5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-06-21 22:21+0200\n"
+"POT-Creation-Date: 2010-07-10 13:50+0200\n"
 "PO-Revision-Date: 2010-04-14 13:40+0200\n"
 "Last-Translator: nini <nanani19830602@hotmail.com>\n"
 "Language-Team: Chinese (simplified)\n"
@@ -48,6 +48,17 @@ msgstr "以连接方式(_FTP上传)"
 #: src/ftp_upload.h:41
 msgid "as a URL (_FTP upload)"
 msgstr "以URL方式(_FTP上传)"
+
+#: src/http_upload.c:338
+#, c-format
+msgid ""
+"Regexp doesn't match HTTP upload response !\n"
+"Server: %s\n"
+"Regexp:\n"
+"%s\n"
+"Response:\n"
+"%s\n"
+msgstr ""
 
 #: src/http_upload.h:93
 #, c-format
@@ -253,169 +264,173 @@ msgstr "截图名称："
 msgid "File already exists!"
 msgstr ""
 
-#: src/prefs.h:72
+#: src/prefs.c:537
+msgid "Image"
+msgstr "图片"
+
+#: src/prefs.h:85
 msgid "Image parameters"
 msgstr "图像格式"
 
-#: src/prefs.h:73
+#: src/prefs.h:86
 #, fuzzy
 msgid "Display behaviour"
 msgstr "插件状态"
 
-#: src/prefs.h:74
+#: src/prefs.h:87
 msgid "Saving"
 msgstr ""
 
-#: src/prefs.h:75
+#: src/prefs.h:88
 msgid "Misc"
 msgstr ""
 
-#: src/prefs.h:77
-msgid "Combo modifiers"
+#: src/prefs.h:90
+msgid "Combo of modifiers + keys"
 msgstr ""
 
-#: src/prefs.h:78
-msgid "Keys"
-msgstr ""
-
-#: src/prefs.h:80
+#: src/prefs.h:92
 msgid "HTTP upload"
 msgstr "用HTTP上传"
 
-#: src/prefs.h:81
+#: src/prefs.h:93
 msgid "FTP upload"
 msgstr "用FTP上传"
 
-#: src/prefs.h:82
+#: src/prefs.h:94
 #, fuzzy
 msgid "Upload options"
 msgstr "上传时限（秒）："
 
-#: src/prefs.h:84
+#: src/prefs.h:96
 msgid "Image format: "
 msgstr "图像格式"
 
-#: src/prefs.h:91
+#: src/prefs.h:103
 msgid "JPEG quality level:"
 msgstr "JPEG分辨率:"
 
-#: src/prefs.h:93
+#: src/prefs.h:105
 msgid "PNG compression level:"
 msgstr "PNG压缩率:"
 
-#: src/prefs.h:95
+#: src/prefs.h:107
 msgid "Always add this signature:"
 msgstr "一直使用签名"
 
-#: src/prefs.h:99
+#: src/prefs.h:109
 #, c-format
 msgid "Hold the modifier keys and press %s..."
 msgstr ""
 
-#: src/prefs.h:101
+#: src/prefs.h:111
 msgid "Send as File: "
 msgstr ""
 
-#: src/prefs.h:102
-msgid "Send as FTP link: "
-msgstr ""
-
-#: src/prefs.h:103
-msgid "Send as HTTP link: "
-msgstr ""
-
-#: src/prefs.h:104
+#: src/prefs.h:112
 msgid "Send as Image: "
 msgstr ""
 
-#: src/prefs.h:106
+#: src/prefs.h:114
+msgid "Send as FTP link: "
+msgstr ""
+
+#: src/prefs.h:115
+msgid "Send as HTTP link: "
+msgstr ""
+
+#: src/prefs.h:118
 msgid "Highlight mode:"
 msgstr "凸现模式"
 
-#: src/prefs.h:107
+#: src/prefs.h:119
 msgid "lighten up desktop"
 msgstr "桌面亮度加强"
 
-#: src/prefs.h:108
+#: src/prefs.h:120
 msgid "darken desktop"
 msgstr "桌面亮度减弱"
 
-#: src/prefs.h:109
+#: src/prefs.h:121
 msgid "invert selection only"
 msgstr "只将选中部分反色"
 
-#: src/prefs.h:110
+#: src/prefs.h:122
 msgid "borders only"
 msgstr "只是边缘"
 
-#: src/prefs.h:111
+#: src/prefs.h:123
 msgid "grayscale desktop"
 msgstr "桌面亮度减弱"
 
-#: src/prefs.h:113
+#: src/prefs.h:125
 msgid "Folder to store captures in:"
 msgstr "用来储存捕捉的图像的文件夹:"
 
-#: src/prefs.h:115
+#: src/prefs.h:127
 msgid "Always ask for filename when sending as a file."
 msgstr "发送文件时需知文件名"
 
-#: src/prefs.h:116
+#: src/prefs.h:128
 #, fuzzy
 msgid "Only save when sending as a File."
 msgstr "发送文件时需知文件名"
 
-#: src/prefs.h:118
+#: src/prefs.h:130
 msgid "Show visual cues."
 msgstr "标线显示"
 
-#: src/prefs.h:120
+#: src/prefs.h:132
 msgid "Seconds to wait before desktop freezes:"
 msgstr "等待时间（秒），用来清除桌面"
 
-#: src/prefs.h:123
+#: src/prefs.h:135
 msgid "General"
 msgstr ""
 
-#: src/prefs.h:124
+#: src/prefs.h:136
 msgid "Hotkeys"
 msgstr ""
 
-#: src/prefs.h:127
+#: src/prefs.h:139
 #, fuzzy
 msgid "Upload"
 msgstr "用FTP上传"
 
-#: src/prefs.h:129
+#: src/prefs.h:141
 #, c-format
 msgid ""
 "Pick an image hosting provider (<span foreground='blue'><u>list v.%s</u></"
 "span>)"
 msgstr "选择在线相册 (<span foreground='blue'><u>列表 v.%s</u></span>)"
 
-#: src/prefs.h:131
+#: src/prefs.h:143
 msgid "Connect timeout (sec): "
 msgstr "登陆时限（秒）："
 
-#: src/prefs.h:132
+#: src/prefs.h:144
 msgid "Upload timeout (sec): "
 msgstr "上传时限（秒）："
 
-#: src/prefs.h:133
+#: src/prefs.h:145
 msgid "Remote FTP URL:"
 msgstr "FTP网址"
 
-#: src/prefs.h:134
+#: src/prefs.h:146
 msgid "Corresponding Web address:"
 msgstr "相对网址"
 
-#: src/prefs.h:135
+#: src/prefs.h:147
 msgid "User:"
 msgstr "用户"
 
-#: src/prefs.h:136
+#: src/prefs.h:148
 msgid "Password:"
 msgstr "密码"
+
+#: src/prefs.h:151
+msgid "invalid..."
+msgstr ""
 
 #: src/screencap.h:67
 msgid "An other program has requested to use the display, canceling..."
@@ -440,6 +455,3 @@ msgid ""
 "The link is:\n"
 "%s"
 msgstr ""
-
-#~ msgid "Image"
-#~ msgstr "图片"
