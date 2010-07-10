@@ -1,26 +1,27 @@
-# 
 # German translations for pidgin-screenshot package.
-# 
+#
 # This file is distributed under the same license as the pidgin-screenshot package.
 #   Translation by David Scheffler <david.scheffler+translation@gmail.com>, 2009.
-#   Translation by Siggi, 2010.
-# 
+#   Translation by Mario Siegmann <Mario_Siegmann@web.de>, 2010.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: pidgin-screenshot 0.8-1\n"
+"Project-Id-Version: pidgin-screenshot 0.8-2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-06-21 22:21+0200\n"
-"PO-Revision-Date: 2010-05-10 19:30+0200\n"
-"Last-Translator: Siggi\n"
+"POT-Creation-Date: 2010-07-10 13:50+0200\n"
+"PO-Revision-Date: 2010-07-09 18:23+0100\n"
+"Last-Translator: Mario Siegmann <mario_siegmann@web.de>\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
 
 #: src/dialogs.h:31
 msgid "Please be ready ! Desktop will freeze in..."
-msgstr ""
+msgstr "Bitte seien Sie bereit! Der Desktop wird eingefroren in..."
 
 #: src/error.h:58
 msgid "FTP upload failed:"
@@ -32,12 +33,12 @@ msgid ""
 "Failed to upload the screenshot to '%s'!\n"
 "%s"
 msgstr ""
-"Upload des Bildschrimfotos nach '%s' fehlgeschlagen!\n"
+"Konnte das Bildschirmfotos nicht nach '%s' hochladen!\n"
 "%s"
 
 #: src/error.h:64
 msgid "Failed to open screenshot file:"
-msgstr "Das Öffnen der Bildschirmfoto-Datei fehlgeschlagen:"
+msgstr "Konnte die Bildschirmfoto-Datei nicht öffnen:"
 
 #: src/ftp_upload.h:38
 #, c-format
@@ -52,6 +53,23 @@ msgstr "als Link (_FTP Upload)"
 msgid "as a URL (_FTP upload)"
 msgstr "als URL (_FTP Upload)"
 
+#: src/http_upload.c:338
+#, c-format
+msgid ""
+"Regexp doesn't match HTTP upload response !\n"
+"Server: %s\n"
+"Regexp:\n"
+"%s\n"
+"Response:\n"
+"%s\n"
+msgstr ""
+"Regexp passt nicht zur HTTP-Upload Antwort!\n"
+"Server: %s\n"
+"Regexp:\n"
+"%s\n"
+"Antwort:\n"
+"%s\n"
+
 #: src/http_upload.h:93
 #, c-format
 msgid "Error on line %d char %d:\n"
@@ -65,12 +83,13 @@ msgstr "Für den Server '%s' fehlt etwas:"
 #: src/http_upload.h:95
 #, c-format
 msgid "Please refer to %s to learn how to add your own server."
-msgstr "Unter %s wird beschrieben, wie man eigene Anbieter hinzufügt."
+msgstr ""
+"Bitte beachte: Unter %s wird beschrieben, wie man eigene Anbieter hinzufügt."
 
 #: src/http_upload.h:97
 #, c-format
 msgid "Bad regular expression: '%s'!"
-msgstr "Der reguläre Ausdruck ist falsch:"
+msgstr "Der reguläre Ausdruck ist falsch: '%s'!"
 
 #: src/http_upload.h:99
 #, c-format
@@ -80,12 +99,12 @@ msgid ""
 "Most likeley '%s' has been updated...\n"
 msgstr ""
 "Kann die Bildschirmfoto-URL nicht abrufen!\n"
-"Der reguläre Ausdruck stimmt nicht überein (Beachte Debug-Fenster).\n"
+"Der reguläre Ausdruck stimmt nicht überein (Debug-Fenster beachten).\n"
 "Höchstwahrscheinlich wurde '%s' aktualisiert...\n"
 
 #: src/http_upload.h:103
 msgid "Incorrect xml host config file"
-msgstr "Ungültige xml Server Datei"
+msgstr "Ungültige xml-Server-Datei"
 
 #: src/http_upload.h:105
 #, c-format
@@ -97,7 +116,7 @@ msgid ""
 msgstr ""
 "%s.\n"
 "\n"
-"Diese Datei enthält eine Liste von Bilder-Hochlade-Anbietern.\n"
+"Diese Datei enthält eine Liste von Bilder-Upload-Anbietern.\n"
 "Sie ist auf %s verfügbar."
 
 #: src/http_upload.h:109
@@ -176,7 +195,7 @@ msgstr "Dieses Plugin nimmt einen rechteckigen Bereich des Bildschirms auf."
 
 #: src/main.h:83
 msgid "Information"
-msgstr ""
+msgstr "Information"
 
 #: src/main.h:86
 msgid "Error"
@@ -195,7 +214,7 @@ msgstr ""
 #, c-format
 msgid "Cannot allocate enough memory (%lu bytes) to load plugin data !"
 msgstr ""
-"Kann nicht genug Arbeitsspeicher (%lu Bytes) reservierenum das Plugin zu "
+"Kann nicht genug Arbeitsspeicher (%lu Bytes) reservieren, um das Plugin zu "
 "laden!"
 
 #: src/main.h:92
@@ -203,7 +222,7 @@ msgid ""
 "Failed to allocate enough memory to create the screenshot. You will need to "
 "quit some applications and retry."
 msgstr ""
-"Das Plugin kann nicht genug Arbeitsspeicher reservieren um das "
+"Das Plugin kann nicht genug Arbeitsspeicher reservieren, um das "
 "Bildschirmfoto zu erstellen. Schließen Sie Anwendungen und versuchen Sie es "
 "erneut."
 
@@ -273,141 +292,139 @@ msgstr "Name des Bildschirmfotos:"
 
 #: src/main.h:128
 msgid "File already exists!"
-msgstr "Datei existiert schon!"
+msgstr "Datei existiert bereits!"
 
-#: src/prefs.h:72
+#: src/prefs.c:537
+msgid "Image"
+msgstr "Bild"
+
+#: src/prefs.h:85
 msgid "Image parameters"
 msgstr "Bildformat"
 
-#: src/prefs.h:73
-#, fuzzy
+#: src/prefs.h:86
 msgid "Display behaviour"
-msgstr "Allgemeines Verhalten"
+msgstr "Anzeige-Verhalten"
 
-#: src/prefs.h:74
+#: src/prefs.h:87
 msgid "Saving"
-msgstr ""
+msgstr "Speichere"
 
-#: src/prefs.h:75
+#: src/prefs.h:88
 msgid "Misc"
-msgstr ""
+msgstr "Verschiedenes"
 
-#: src/prefs.h:77
-msgid "Combo modifiers"
-msgstr ""
+#: src/prefs.h:90
+#, fuzzy
+msgid "Combo of modifiers + keys"
+msgstr "Kombinations-Änderungen"
 
-#: src/prefs.h:78
-msgid "Keys"
-msgstr ""
-
-#: src/prefs.h:80
+#: src/prefs.h:92
 msgid "HTTP upload"
-msgstr "HTTP Upload"
+msgstr "HTTP-Upload"
 
-#: src/prefs.h:81
+#: src/prefs.h:93
 msgid "FTP upload"
-msgstr "FTP Upload"
+msgstr "FTP-Upload"
 
-#: src/prefs.h:82
+#: src/prefs.h:94
 msgid "Upload options"
-msgstr "Upload-Zeitüberschreitung (Sek.):"
+msgstr "Upload-Optionen:"
 
-#: src/prefs.h:84
+#: src/prefs.h:96
 msgid "Image format: "
 msgstr "Bildformat:"
 
-#: src/prefs.h:91
+#: src/prefs.h:103
 msgid "JPEG quality level:"
 msgstr "JPEG Qualitätsstufe:"
 
-#: src/prefs.h:93
+#: src/prefs.h:105
 msgid "PNG compression level:"
 msgstr "PNG Komprimierungsstufe:"
 
-#: src/prefs.h:95
+#: src/prefs.h:107
 msgid "Always add this signature:"
 msgstr "Immer diese Signatur hinzufügen:"
 
-#: src/prefs.h:99
+#: src/prefs.h:109
 #, c-format
 msgid "Hold the modifier keys and press %s..."
-msgstr ""
+msgstr "Halte die Tastenkombination und drücke %s..."
 
-#: src/prefs.h:101
+#: src/prefs.h:111
 msgid "Send as File: "
-msgstr ""
+msgstr "Sende als Datei:"
 
-#: src/prefs.h:102
-msgid "Send as FTP link: "
-msgstr ""
-
-#: src/prefs.h:103
-msgid "Send as HTTP link: "
-msgstr ""
-
-#: src/prefs.h:104
+#: src/prefs.h:112
 msgid "Send as Image: "
-msgstr ""
+msgstr "Sende als Bild:"
 
-#: src/prefs.h:106
+#: src/prefs.h:114
+msgid "Send as FTP link: "
+msgstr "Sende als FTP-Verknüpfung:"
+
+#: src/prefs.h:115
+msgid "Send as HTTP link: "
+msgstr "Sende als HTTP-Verknüpfung:"
+
+#: src/prefs.h:118
 msgid "Highlight mode:"
 msgstr "Hervorhebungsart:"
 
-#: src/prefs.h:107
+#: src/prefs.h:119
 msgid "lighten up desktop"
 msgstr "Desktop aufhellen"
 
-#: src/prefs.h:108
+#: src/prefs.h:120
 msgid "darken desktop"
 msgstr "Desktop verdunkeln"
 
-#: src/prefs.h:109
+#: src/prefs.h:121
 msgid "invert selection only"
 msgstr "ausgewählten Bereich invertieren"
 
-#: src/prefs.h:110
+#: src/prefs.h:122
 msgid "borders only"
 msgstr "nur einen Rahmen anzeigen"
 
-#: src/prefs.h:111
+#: src/prefs.h:123
 msgid "grayscale desktop"
 msgstr "Desktop in Graustufen anzeigen"
 
-#: src/prefs.h:113
+#: src/prefs.h:125
 msgid "Folder to store captures in:"
-msgstr "Lokaler Speicherort:"
+msgstr "Lokaler Speicherort für Aufnahmen:"
 
-#: src/prefs.h:115
+#: src/prefs.h:127
 msgid "Always ask for filename when sending as a file."
 msgstr "Vor dem Senden immer nach einem Dateinamen fragen."
 
-#: src/prefs.h:116
-#, fuzzy
+#: src/prefs.h:128
 msgid "Only save when sending as a File."
-msgstr "Vor dem Senden immer nach einem Dateinamen fragen."
+msgstr "Nur speichern, wenn als Datei versendet wird."
 
-#: src/prefs.h:118
+#: src/prefs.h:130
 msgid "Show visual cues."
 msgstr "Zeige Hilfslinien"
 
-#: src/prefs.h:120
+#: src/prefs.h:132
 msgid "Seconds to wait before desktop freezes:"
-msgstr "Sekunden, die gewartet wird, bis der Desktop eingefrohren wird:"
+msgstr "Sekunden, die gewartet werden, bis der Desktop eingefroren wird:"
 
-#: src/prefs.h:123
+#: src/prefs.h:135
 msgid "General"
-msgstr ""
+msgstr "Allgemein"
 
-#: src/prefs.h:124
+#: src/prefs.h:136
 msgid "Hotkeys"
-msgstr ""
+msgstr "Hotkeys"
 
-#: src/prefs.h:127
-#, fuzzy
+#: src/prefs.h:139
 msgid "Upload"
-msgstr "FTP Upload"
+msgstr "Upload"
 
-#: src/prefs.h:129
+#: src/prefs.h:141
 #, c-format
 msgid ""
 "Pick an image hosting provider (<span foreground='blue'><u>list v.%s</u></"
@@ -416,37 +433,41 @@ msgstr ""
 "Bilder-Upload-Anbieter auswählen (<span foreground='blue'><u>(Liste v. %s):</"
 "u></span>)"
 
-#: src/prefs.h:131
+#: src/prefs.h:143
 msgid "Connect timeout (sec): "
 msgstr "Verbindungs-Zeitüberschreitung (Sek.):"
 
-#: src/prefs.h:132
+#: src/prefs.h:144
 msgid "Upload timeout (sec): "
 msgstr "Upload-Zeitüberschreitung (Sek.):"
 
-#: src/prefs.h:133
+#: src/prefs.h:145
 msgid "Remote FTP URL:"
 msgstr "FTP URL:"
 
-#: src/prefs.h:134
+#: src/prefs.h:146
 msgid "Corresponding Web address:"
 msgstr "Entsprechende Web-Adresse:"
 
-#: src/prefs.h:135
+#: src/prefs.h:147
 msgid "User:"
 msgstr "Benutzer:"
 
-#: src/prefs.h:136
+#: src/prefs.h:148
 msgid "Password:"
 msgstr "Passwort:"
 
+#: src/prefs.h:151
+msgid "invalid..."
+msgstr ""
+
 #: src/screencap.h:67
 msgid "An other program has requested to use the display, canceling..."
-msgstr ""
+msgstr "Ein anderes Programm hat die Anzeige-Nutzung angefordert, abbrechen..."
 
 #: src/upload_utils.h:39
 msgid "Location of your screenshot on disk:"
-msgstr "Speicherort des Bildschirmfotos:"
+msgstr "Speicherort des Bildschirmfotos auf der Festplatte:"
 
 #: src/upload_utils.h:42
 #, c-format
@@ -470,20 +491,5 @@ msgstr ""
 "Der Link lautet:\n"
 "%s"
 
-#~ msgid ""
-#~ "Regexp doesn't match HTTP upload response !\n"
-#~ "Server: %s\n"
-#~ "Regexp:\n"
-#~ "%s\n"
-#~ "Response:\n"
-#~ "%s\n"
-#~ msgstr ""
-#~ "Regexp passt nicht zur HTTP-Upload Antwort!\n"
-#~ "Server: %s\n"
-#~ "Regexp:\n"
-#~ "%s\n"
-#~ "Antwort:\n"
-#~ "%s\n"
-
-#~ msgid "Image"
-#~ msgstr "Bild"
+#~ msgid "Keys"
+#~ msgstr "Tasten"
