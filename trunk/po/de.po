@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: pidgin-screenshot 0.8-2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-07-10 13:50+0200\n"
-"PO-Revision-Date: 2010-07-09 18:23+0100\n"
+"PO-Revision-Date: 2010-07-12 20:40+0200\n"
 "Last-Translator: Mario Siegmann <mario_siegmann@web.de>\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -315,9 +315,8 @@ msgid "Misc"
 msgstr "Verschiedenes"
 
 #: src/prefs.h:90
-#, fuzzy
 msgid "Combo of modifiers + keys"
-msgstr "Kombinations-Änderungen"
+msgstr "Kombinations-Änderungen + Tasten"
 
 #: src/prefs.h:92
 msgid "HTTP upload"
@@ -459,7 +458,7 @@ msgstr "Passwort:"
 
 #: src/prefs.h:151
 msgid "invalid..."
-msgstr ""
+msgstr "Ungültig..."
 
 #: src/screencap.h:67
 msgid "An other program has requested to use the display, canceling..."
@@ -490,6 +489,3 @@ msgstr ""
 "\n"
 "Der Link lautet:\n"
 "%s"
-
-#~ msgid "Keys"
-#~ msgstr "Tasten"
