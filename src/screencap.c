@@ -45,9 +45,13 @@
 void
 freeze_desktop (PurplePlugin * plugin) {
     g_assert (plugin != NULL && plugin->extra != NULL);
+    g_assert (selection_defined (plugin) == FALSE);
+
     if (purple_prefs_get_int (PREF_WAIT_BEFORE_SCREENSHOT) > 0)
         show_countdown_dialog (plugin);
 
+    g_assert (PLUGIN (timeout_source) == 0);
+    
     PLUGIN (timeout_source) =
         purple_timeout_add
         (MAX
@@ -581,6 +585,7 @@ on_root_window_button_press_cb (GtkWidget * root_window,
                                 GdkEventButton * event,
                                 PurplePlugin * plugin) {
     g_assert (plugin != NULL && plugin->extra != NULL);
+
     if (event->button == 1) {
         if ((PLUGIN (resize_mode) == ResizeLeft && PLUGIN (x1) < PLUGIN (x2))
             || (PLUGIN (resize_mode) == ResizeRight
@@ -629,7 +634,7 @@ on_root_window_button_press_cb (GtkWidget * root_window,
             GdkRectangle rect;
 
             if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES))
-                erase_cues (plugin);
+	      erase_cues (plugin);
 
             PLUGIN (x1) = (gint) event->x;
             PLUGIN (y1) = (gint) event->y;
@@ -650,12 +655,17 @@ on_root_window_button_press_cb (GtkWidget * root_window,
             gdk_gc_set_function (PLUGIN (gc), GDK_COPY);
 
             gdk_region_destroy (region);
-            region = NULL;
+            region = NULL;  
         }
     }
-    else if (event->button == 2 &&      /* hide the current conversation window  */
-             !receiver_window_is_iconified (plugin)) {
-        THAW_DESKTOP ();
+    else if (event->button == 2 &&     /* hide the current conversation window  */
+	     get_receiver_window (plugin) != NULL &&
+             !receiver_window_is_iconified (plugin) &&
+	     !selection_defined(plugin)) {
+
+      if (purple_prefs_get_bool (PREF_SHOW_VISUAL_CUES))
+	erase_cues (plugin);
+      THAW_DESKTOP ();
         if (PLUGIN (root_pixbuf_x) != NULL) {
             g_object_unref (PLUGIN (root_pixbuf_x));
             PLUGIN (root_pixbuf_x) = NULL;
@@ -670,9 +680,8 @@ on_root_window_button_press_cb (GtkWidget * root_window,
     else if (event->button == 3) {
         if (event->type == GDK_2BUTTON_PRESS)
             plugin_cancel (plugin);
-        else if (selection_defined (plugin)) {
-            clear_selection (plugin);
-        }
+        else if (selection_defined (plugin)) 
+	    clear_selection (plugin);
     }
     return TRUE;
 }
@@ -1053,7 +1062,6 @@ on_screen_monitors_changed_cb (GdkScreen * screen, PurplePlugin * plugin) {
     gtk_widget_set_size_request (PLUGIN (root_window),
                                  gdk_screen_get_width (screen),
                                  gdk_screen_get_height (screen));
-    /* RESET_SELECTION (plugin); */
     clear_selection (plugin);
 }
 

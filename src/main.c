@@ -190,6 +190,7 @@ plugin_load (PurplePlugin * plugin) {
         curl_global_init (CURL_GLOBAL_ALL);
 #endif
 
+	RESET_SELECTION(plugin);
         prepare_root_window (plugin);
 
         /* add menuitems each time a conversation is opened */

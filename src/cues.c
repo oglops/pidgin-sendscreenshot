@@ -163,7 +163,7 @@ __private_f_cues (gboolean on, gboolean double_buff,    /* see expose-event hand
         PLUGIN (__mouse_y) = PLUGIN (mouse_y);
 
         if (PLUGIN (timeout_source) == 0) {
-            PLUGIN (timeout_source) =
+	  PLUGIN (timeout_source) =
                 g_timeout_add (30, update_cue_offset, plugin);
         }
 
@@ -186,7 +186,7 @@ erase_cues (PurplePlugin * plugin) {
     g_assert (plugin != NULL);
 
     if (PLUGIN (timeout_source) != 0) {
-        g_source_remove (PLUGIN (timeout_source));
+      if (g_source_remove (PLUGIN (timeout_source)))      
         PLUGIN (timeout_source) = 0;
     }
 

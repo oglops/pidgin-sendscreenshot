@@ -40,7 +40,8 @@ typedef enum {
 /* Give back focus to Pidgin. */
 #define THAW_DESKTOP()					\
   gtk_widget_hide (PLUGIN (root_events));		\
-  gtk_widget_hide (PLUGIN (root_window))
+  gtk_widget_hide (PLUGIN (root_window));		\
+  PLUGIN (root_exposed) = FALSE;
 
 #define CAPTURE_X0(plugin)\
   MIN(PLUGIN (x1), PLUGIN (x2))
