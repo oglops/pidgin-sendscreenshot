@@ -1,5 +1,9 @@
 Pidgin Screenshot Plugin Changelog
 
+Version 0.8-3 07/31/10:
+	* Fixed freeze when starting a fullscreen application (issue 12).
+	* Fixed crash when hiding current conversation window (issue 11?).
+
 Version 0.8-2 06/24/10:
 	* Added hotkeys.
 	* New design for preferences window (tabs).
@@ -8,12 +12,12 @@ Version 0.8-2 06/24/10:
 	* Hold shift key to move or resize the selection.
 	* Show countdown when a delay was set in pref window.
 	* Animated cues (quite useless).
-	
+
 Version 0.8-1 04/18/10:
-	* Present conversation to show upload link if it is closed 
+	* Present conversation to show upload link if it is closed
 	  (instead of showing an error msg).
 	* Use GIOChannel related funcs instead of fread() fclose().
-	* Added unicode support under Win32. 
+	* Added unicode support under Win32.
 Version 0.8 04/15/10:
 	* Don't ignore proxy settings ! (Repported by Paul Matthias Diderichsen and Homolibere).
 	* Faster selection drawing.
@@ -23,7 +27,7 @@ Version 0.8 04/15/10:
 	* Added keybord interaction while selecting (Escape, ctrl keys). More to come...
 Version 0.7 03/22/10:
 	* Added option to print a signature at the bottom-right corner.
-	* Added Russian translation by Ilya S. 
+	* Added Russian translation by Ilya S.
 	* Fixed bad target conv when inserting screenshot from Conversation menu.
 	* Fixed multi-head support on MsWindows.
 Version 0.6-5 03/06/10:
@@ -39,12 +43,12 @@ Version 0.6-3 12/09/09:
 	  error msg when user selects an hosting provider for the 1st time.
 	* Minor code improvements (removed extra->imhtml and extra->who, added
 	  extra->account and extra->name).
-	
+
 Version 0.6-2 10/16/09:
 	* Fixed menuitem (Conversation->Insert Screenshot had disapeared
 	  since version 0.6-0).
 	  Thanks to Christopher Riordan for pointing this out.
-	
+
 Version	0.6-1 10/15/09:
 	* Added option to specify a delay before starting
 	  a screenshot, thanks to Andreas Kostyrka for his initial patch !
@@ -59,7 +63,7 @@ Version	0.6-1 10/15/09:
 	* Capture couldn't be saved at first time run, fixed (issue reported by Bob Day).
 	* Fixed bad datadir (WIN32 fix).
 	* Fixed G_MARKUP_ERROR_MISSING_ATTRIBUTE undef issue
-	
+
 Version	0.6-0 08/05/09:
 	* Added "show visual cues" option (default: on).
 	* Added capability to upload the screenshot to an image hosting provider.
@@ -77,25 +81,25 @@ Version	0.6-0 08/05/09:
 
 Version 0.5-4 05/16/09:
 	* Spanish translation by Alexander Ovalle is now available ;-)
-	
+
 Version 0.5-3 04/18/09:
 	* Added Polish tranlsation by Odin. Thanks !
-	
+
 Version 0.5-2 03/20/09:
 	* Really added Simplified Chinese translation by Ni Ni.
-	
+
 Version 0.5-1 03/12/09:
 	* Added Dutch translation by Henk van der Velden.
 
 Version 0.5 03/06/09:
 	* Fixed second click of middle mouse button.
 	* Added "always ask for filename" option.
-	
+
 Version 0.4 02/25/09:
 	* Added "save captures in" option.
 	* Added German translation by David Scheffler.
 	* Added French translation.
-	
+
 Version 0.3 02/20/09:
 	* Added partial support for multi-head configurations. Thanks to
 	Phil L. for his detailed report.
@@ -114,10 +118,10 @@ Version 0.2 02/08/09:
 	* Removed g_file_open_tmp() call, instead, generate a filename
 	using g_get_current_time().
 	* Under Win32, when Pidgin is about to be closed,
-	the plugin caused Pidgin to crash. Fixed that by removing 
+	the plugin caused Pidgin to crash. Fixed that by removing
 	g_signal_disconnect() call (temporarily).
 	* Added gtk/glib version checks.
 	* Fixed timeout_freeze_screen() proto.
-	
+
 Version 0.1 02/05/09:
 	* Initial release. Testing...
