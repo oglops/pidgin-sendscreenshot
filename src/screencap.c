@@ -43,20 +43,23 @@
  * click on may remain. That's we wait for a small timeout.
  */
 void
-freeze_desktop (PurplePlugin * plugin) {
+freeze_desktop (PurplePlugin * plugin, gboolean ignore_delay) {
+    int delay = 0;
     g_assert (plugin != NULL && plugin->extra != NULL);
     g_assert (selection_defined (plugin) == FALSE);
 
-    if (purple_prefs_get_int (PREF_WAIT_BEFORE_SCREENSHOT) > 0)
+    if ( ! ignore_delay &&
+	purple_prefs_get_int (PREF_WAIT_BEFORE_SCREENSHOT) > 0)
         show_countdown_dialog (plugin);
+
+    if ( ! ignore_delay)
+      delay = purple_prefs_get_int (PREF_WAIT_BEFORE_SCREENSHOT);
 
     g_assert (PLUGIN (timeout_source) == 0);
     
     PLUGIN (timeout_source) =
         purple_timeout_add
-        (MAX
-         (MSEC_TIMEOUT_VAL,
-          purple_prefs_get_int (PREF_WAIT_BEFORE_SCREENSHOT) * 1000),
+        (MAX (MSEC_TIMEOUT_VAL, delay * 1000),
          (GSourceFunc) timeout_freeze_screen, plugin);
 }
 
@@ -675,7 +678,7 @@ on_root_window_button_press_cb (GtkWidget * root_window,
             PLUGIN (root_pixbuf_orig) = NULL;
         }
         gtk_window_iconify (GTK_WINDOW (get_receiver_window (plugin)));
-        freeze_desktop (plugin);
+        freeze_desktop (plugin, TRUE);
     }
     else if (event->button == 3) {
         if (event->type == GDK_2BUTTON_PRESS)

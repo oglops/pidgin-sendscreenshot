@@ -63,7 +63,7 @@ on_screenshot_insert_as_link_aux (PidginWindow * win,
         REMEMBER_ACCOUNT (gtkconv);
 
         PLUGIN (conv_features) = gtkconv->active_conv->features;
-        freeze_desktop (plugin);
+        freeze_desktop (plugin, FALSE);
     }
 }
 
@@ -129,7 +129,7 @@ on_screenshot_insert_as_ftp_link_aux (PidginWindow * win,
         PLUGIN (send_as) = SEND_AS_FTP_LINK;
 
         PLUGIN (conv_features) = gtkconv->active_conv->features;
-        freeze_desktop (plugin);
+        freeze_desktop (plugin, FALSE);
     }
 }
 
@@ -196,7 +196,7 @@ on_screenshot_insert_as_image_aux (PidginWindow * win,
         REMEMBER_ACCOUNT (gtkconv);
 
         PLUGIN (conv_features) = gtkconv->active_conv->features;
-        freeze_desktop (plugin);
+        freeze_desktop (plugin, FALSE);
     }
 }
 
@@ -412,7 +412,7 @@ catch_hotkeys_cb (PidginWindow * win, GdkEventKey * event) {
                         PLUGIN (locked) = TRUE;
                         PLUGIN (send_as) = SEND_AS_FILE;
                         REMEMBER_ACCOUNT (PIDGIN_CONVERSATION (conv));
-                        freeze_desktop (plugin);
+                        freeze_desktop (plugin, FALSE);
                     }
                 }
             }
@@ -638,7 +638,7 @@ on_blist_context_menu_send_capture (PurpleBuddy * buddy,
         PLUGIN (name) = g_strdup_printf ("%s", purple_buddy_get_name (buddy));
 
         /* see on_screenshot_insert_as_image_activate_cb () */
-        freeze_desktop (plugin);
+        freeze_desktop (plugin, FALSE);
     }
 }
 
