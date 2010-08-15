@@ -3,6 +3,7 @@ Pidgin Screenshot Plugin Changelog
 Version 0.8-3 07/31/10:
 	* Fixed freeze when starting a fullscreen application (issue 12).
 	* Fixed crash when hiding current conversation window (issue 11?).
+	* Don't show countdown again if we minimize the current conv window.
 
 Version 0.8-2 06/24/10:
 	* Added hotkeys.

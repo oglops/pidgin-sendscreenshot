@@ -168,7 +168,6 @@ GtkWidget *get_receiver_window (PurplePlugin * plugin);
 GtkIMHtml *get_receiver_imhtml (PurplePlugin * plugin);
 void plugin_stop (PurplePlugin * plugin);
 gboolean receiver_window_is_iconified (PurplePlugin * plugin);
-void freeze_desktop (PurplePlugin * plugin);
 
 #define selection_defined(plugin)\
   (PLUGIN (x1) >= 0)

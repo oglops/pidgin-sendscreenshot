@@ -68,6 +68,7 @@ typedef enum {
 #define FORCE_CANCEL_MSG _("An other program has requested to use the display, canceling...")
 
 /* prototypes */
+void freeze_desktop (PurplePlugin * plugin, gboolean ignore_delay);
 void prepare_root_window (PurplePlugin * plugin);
 guint timeout_freeze_screen (PurplePlugin * plugin);
 
