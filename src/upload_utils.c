@@ -132,6 +132,7 @@ real_insert_link (PurplePlugin * plugin, const gchar * url) {
         }
         else
             gtk_text_buffer_insert (textbf, &iter, url, (gint) strlen (url));
+	gtk_widget_grab_focus (GTK_WIDGET(imhtml));
     }
 }
 
