@@ -137,7 +137,7 @@ show_countdown_dialog (PurplePlugin * plugin) {
                                      GTK_WINDOW ((gtkconv_window) ?
                                                  gtkconv_window :
                                                  blist_window),
-                                     GTK_DIALOG_MODAL, GTK_STOCK_EXECUTE,
+                                     0, GTK_STOCK_EXECUTE,
                                      GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL,
                                      GTK_RESPONSE_REJECT, NULL);
 
