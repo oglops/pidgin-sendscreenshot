@@ -340,6 +340,8 @@ init_plugin (PurplePlugin * plugin) {
     purple_prefs_add_string (PREF_UPLOAD_TO, HOST_DISABLED);
     purple_prefs_add_string (PREF_FTP_REMOTE_URL, "ftp://");
     purple_prefs_add_string (PREF_FTP_WEB_ADDR, "");
+    purple_prefs_add_string (PREF_FTP_USERNAME, "");
+    purple_prefs_add_string (PREF_FTP_PASSWORD, "");
     purple_prefs_add_int (PREF_UPLOAD_TIMEOUT, 60);
     purple_prefs_add_int (PREF_UPLOAD_CONNECTTIMEOUT, 25);
 #endif
