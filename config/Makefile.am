@@ -23,5 +23,7 @@ toshosts_DATA = \
 	tos/Freeimagehosting.txt \
 	tos/HostingPics.txt \
 	tos/ImageHosting.txt \
-	tos/ImageShack.txt
+	tos/ImageShack.txt \
+	tos/UploadScreenshot.txt
+
 endif
