@@ -30,6 +30,14 @@
 
   <!-- - - - - - - - - - - -->
 
+  <host name="UploadScreenshot">
+    <param location=""/>
+	<param form_action="http://img1.uploadscreenshot.com/api-upload.php"/>
+	<param file_input_name="userfile"/>
+	<param regexp="&lt;original&gt;(.*?)&lt;\/original&gt;"/>
+    <param name="apiKey" value="1fd6e9437e1180528760857308" />
+    <param name="xmlOutput" value="1" />
+  </host>
 
   <host name="ImageShack">
     <param location="us"/>
