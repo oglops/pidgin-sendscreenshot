@@ -3,7 +3,8 @@
 # Copyright (C) 2009 THE pidgin-screenshot'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the pidgin-screenshot package.
 # <lightcloak@gmail.com>, 2009.
-#
+# tomkiewi, 2011
+
 msgid ""
 msgstr ""
 "Project-Id-Version: pidgin-screenshot 0.6-0\n"
@@ -19,36 +20,37 @@ msgstr ""
 
 #: src/dialogs.h:31
 msgid "Please be ready ! Desktop will freeze in..."
-msgstr ""
+msgstr "Proszę czekać, zrzut ekranu zostanie wykonany za..."
 
 #: src/error.h:58
 msgid "FTP upload failed:"
-msgstr ""
+msgstr "Nie udało się wysłać przez FTP:"
 
 #: src/error.h:61
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Failed to upload the screenshot to '%s'!\n"
 "%s"
-msgstr "Niepowodzenie uploadu zrzutu na '%s'!"
+msgstr ""
+"Nie udało się wysłać zrzutu ekranu na \"%s\"!\n"
+"%s"
 
 #: src/error.h:64
-#, fuzzy
 msgid "Failed to open screenshot file:"
-msgstr "Niepowodzenie uploadu zrzutu na '%s'!"
+msgstr "Nie udało się otworzyć pliku ze zrzutem ekranu:"
 
 #: src/ftp_upload.h:38
 #, c-format
 msgid "Uploading %d/%d bytes..."
-msgstr ""
+msgstr "Wysyłanie: %d/%d bajtów..."
 
 #: src/ftp_upload.h:40
 msgid "as a link (_FTP upload)"
-msgstr ""
+msgstr "jako link (upload _FTP)"
 
 #: src/ftp_upload.h:41
 msgid "as a URL (_FTP upload)"
-msgstr ""
+msgstr "jako URL (upload _FTP)"
 
 #: src/http_upload.c:338
 #, c-format
@@ -60,6 +62,12 @@ msgid ""
 "Response:\n"
 "%s\n"
 msgstr ""
+"Wyrażenie regularne nie pasuje do odpowiedzi HTTP!\n"
+"Serwer: %s\n"
+"Wyrażenie:\n"
+"%s\n"
+"Odpowiedź:\n"
+"%s\n"
 
 #: src/http_upload.h:93
 #, c-format
@@ -77,9 +85,9 @@ msgid "Please refer to %s to learn how to add your own server."
 msgstr "Aby dodać Swój własny serwer, odwołaj się do %s."
 
 #: src/http_upload.h:97
-#, fuzzy, c-format
+#, c-format
 msgid "Bad regular expression: '%s'!"
-msgstr "Błąd w wyrażeniu regularnym!"
+msgstr "Błąd w wyrażeniu regularnym: \"%s\"!"
 
 #: src/http_upload.h:99
 #, c-format
@@ -88,6 +96,9 @@ msgid ""
 "Regular expression doesn't match (see debug window).\n"
 "Most likeley '%s' has been updated...\n"
 msgstr ""
+"Nie można przetworzyć URL Twojego zrzutu ekranu!\n"
+"Wyrażenie regularne nie pasuje (patrz okno debugowania).\n"
+"Najprawdopodobniej, serwis \"%s\" został zmodyfikowany...\n"
 
 #: src/http_upload.h:103
 msgid "Incorrect xml host config file"
@@ -160,11 +171,11 @@ msgstr "brakuje następującego atrybutu: \"value\"\n"
 
 #: src/http_upload.h:130
 msgid "as a link (_HTML upload)"
-msgstr ""
+msgstr "jako link (upload _HTML)"
 
 #: src/http_upload.h:131
 msgid "as a URL (_HTML upload)"
-msgstr ""
+msgstr "jako URL (upload _HTML)"
 
 #: src/http_upload.h:132
 msgid "More info"
@@ -172,19 +183,21 @@ msgstr "Więcej"
 
 #: src/main.h:73
 msgid "Send Screenshot"
-msgstr "Zrzut ekranu"
+msgstr "Wysyłanie zrzutów ekranu"
 
 #: src/main.h:74
 msgid "Capture and send a screenshot."
-msgstr "Plugin umożliwiający wykonanie zrzutu ekranu"
+msgstr "Umożliwia łatwe wykonywanie i wysyłanie zrzutu ekranu."
 
 #: src/main.h:75
 msgid "This plugin will capture a screenshot given a rectangular area."
-msgstr "Ten plugin wykona zrzut ekranu zaznaczonego miejsca."
+msgstr ""
+"Ten plugin pozwoli łatwo wykonać zrzut ekranu oraz wybrać obszar do "
+"wysłania."
 
 #: src/main.h:83
 msgid "Information"
-msgstr ""
+msgstr "Informacje"
 
 #: src/main.h:86
 msgid "Error"
@@ -234,10 +247,12 @@ msgid ""
 "The image used to sign the screenshot is too big.\n"
 "%dx%d is the maximum allowed."
 msgstr ""
+"Obrazek użyty do podpisania zrzutu ekranu jest za duży.\n"
+"%dx%d jest maksymalnym dozwolonym rozmiarem."
 
 #: src/main.h:102
 msgid "An unexpected error occured, see debug window..."
-msgstr ""
+msgstr "Wystąpił niespodziewany błąd, szczegóły w oknie debugowania..."
 
 #: src/main.h:110
 msgid "No selection"
@@ -248,28 +263,24 @@ msgid "Terms Of Service"
 msgstr "Warunki usługi"
 
 #: src/main.h:118
-#, fuzzy
 msgid "_Screenshot"
 msgstr "Zrzut ekranu"
 
 #: src/main.h:119
-#, fuzzy
 msgid "Insert _Screenshot..."
 msgstr "Wstaw zrzut ekranu..."
 
 #: src/main.h:120
-#, fuzzy
 msgid "Send a _Screenshot..."
-msgstr "Zrzut ekranu"
+msgstr "Wyślij _Zrzut ekranu"
 
 #: src/main.h:122
 msgid "capture"
-msgstr "Wykonaj zrzut ekranu"
+msgstr "zrzut_ekranu"
 
 #: src/main.h:124
-#, fuzzy
 msgid "as an _Image"
-msgstr "jako obrazek..."
+msgstr "jako obrazek"
 
 #: src/main.h:126
 msgid "Set capture name"
@@ -285,41 +296,39 @@ msgstr "Plik już istnieje"
 
 #: src/prefs.c:537
 msgid "Image"
-msgstr ""
+msgstr "Obrazek"
 
 #: src/prefs.h:85
 msgid "Image parameters"
-msgstr "Parametry obrazka: "
+msgstr "Parametry obrazka"
 
 #: src/prefs.h:86
-#, fuzzy
 msgid "Display behaviour"
-msgstr "Zachowanie pluginu:"
+msgstr "Wyświetlanie"
 
 #: src/prefs.h:87
 msgid "Saving"
-msgstr ""
+msgstr "Zapisywanie"
 
 #: src/prefs.h:88
 msgid "Misc"
-msgstr ""
+msgstr "Różne"
 
 #: src/prefs.h:90
 msgid "Combo of modifiers + keys"
-msgstr ""
+msgstr "Ustawienia skrótów klawiszowych"
 
 #: src/prefs.h:92
 msgid "HTTP upload"
-msgstr ""
+msgstr "Wysyłanie przez HTTP"
 
 #: src/prefs.h:93
 msgid "FTP upload"
-msgstr ""
+msgstr "Wysyłanie przez FTP"
 
 #: src/prefs.h:94
-#, fuzzy
 msgid "Upload options"
-msgstr "Przekroczony limit uploadu (sec): "
+msgstr "Opcje wysyłania"
 
 #: src/prefs.h:96
 msgid "Image format: "
@@ -335,28 +344,28 @@ msgstr "Stopień kompresji PNG:"
 
 #: src/prefs.h:107
 msgid "Always add this signature:"
-msgstr ""
+msgstr "Wklejaj podpis:"
 
 #: src/prefs.h:109
 #, c-format
 msgid "Hold the modifier keys and press %s..."
-msgstr ""
+msgstr "Przytrzymaj klawisz specjalny i przyciśnij %s..."
 
 #: src/prefs.h:111
 msgid "Send as File: "
-msgstr ""
+msgstr "Wyślij jako plik: "
 
 #: src/prefs.h:112
 msgid "Send as Image: "
-msgstr ""
+msgstr "Wyślij jako obrazek: "
 
 #: src/prefs.h:114
 msgid "Send as FTP link: "
-msgstr ""
+msgstr "Wyślij jako link (przez FTP): "
 
 #: src/prefs.h:115
 msgid "Send as HTTP link: "
-msgstr ""
+msgstr "Wyślij jako link (przez HTTP): "
 
 #: src/prefs.h:118
 msgid "Highlight mode:"
@@ -391,37 +400,35 @@ msgid "Always ask for filename when sending as a file."
 msgstr "Zawsze pytaj o nazwę pliku przed wysłaniem."
 
 #: src/prefs.h:128
-#, fuzzy
 msgid "Only save when sending as a File."
-msgstr "Zawsze pytaj o nazwę pliku przed wysłaniem."
+msgstr "Zapisuj tylko, gdy obrazek jest wysyłany jako plik."
 
 #: src/prefs.h:130
 msgid "Show visual cues."
-msgstr "Pokazuj podpowiedzi."
+msgstr "Pokazuj prowadnice."
 
 #: src/prefs.h:132
 msgid "Seconds to wait before desktop freezes:"
-msgstr ""
+msgstr "Oczekiwanie przed wykonaniem zrzutu ekranu (sekundy):"
 
 #: src/prefs.h:135
 msgid "General"
-msgstr ""
+msgstr "Ogólne"
 
 #: src/prefs.h:136
 msgid "Hotkeys"
-msgstr ""
+msgstr "Skróty klawiszowe"
 
 #: src/prefs.h:139
-#, fuzzy
 msgid "Upload"
-msgstr "Przekroczony limit uploadu (sec): "
+msgstr "Wysyłanie"
 
 #: src/prefs.h:141
-#, fuzzy, c-format
 msgid ""
 "Pick an image hosting provider (<span foreground='blue'><u>list v.%s</u></"
 "span>)"
-msgstr "Wybierz serwer hostujący pliki (list v.%s):"
+msgstr "Wybierz serwer hostujący pliki (<span foreground='blue'><u>lista v.%s</u>"
+"</span>)"
 
 #: src/prefs.h:143
 msgid "Connect timeout (sec): "
@@ -429,43 +436,43 @@ msgstr "Przekroczony limit połączenia (sec): "
 
 #: src/prefs.h:144
 msgid "Upload timeout (sec): "
-msgstr "Przekroczony limit uploadu (sec): "
+msgstr "Przekroczony limit wysyłania (sec): "
 
 #: src/prefs.h:145
 msgid "Remote FTP URL:"
-msgstr ""
+msgstr "Adres FTP:"
 
 #: src/prefs.h:146
 msgid "Corresponding Web address:"
-msgstr ""
+msgstr "Powiązany adres HTTP:"
 
 #: src/prefs.h:147
 msgid "User:"
-msgstr ""
+msgstr "Użytkownik:"
 
 #: src/prefs.h:148
 msgid "Password:"
-msgstr ""
+msgstr "Hasło:"
 
 #: src/prefs.h:151
 msgid "invalid..."
-msgstr ""
+msgstr "nieprawidłowy..."
 
 #: src/screencap.h:67
 msgid "An other program has requested to use the display, canceling..."
-msgstr ""
+msgstr "Inna aplikacja używa ekranu, anulowanie..."
 
 #: src/upload_utils.h:39
 msgid "Location of your screenshot on disk:"
 msgstr "Lokalizacja zrzutu na dysku:"
 
 #: src/upload_utils.h:42
-#, fuzzy, c-format
+#, c-format
 msgid "Uploading to \"%s\"..."
-msgstr "Wgrywanie zrzutu ekranu na \"%s\"..."
+msgstr "Wysyłanie zrzutu ekranu na \"%s\"..."
 
 #: src/upload_utils.h:45
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Failed to insert a link, possible reasons are:\n"
 " - account not connected,\n"
@@ -474,7 +481,9 @@ msgid ""
 "The link is:\n"
 "%s"
 msgstr ""
-"Nie udało się podać linka, gdyż okno rozmowy zostało zamknięte.\n"
+"Nie udało się wstawić linka, prawdopodobne powody:\n"
+" - nie połączono z serwerem,\n"
+" - okno rozmowy zostało zamknięte.\n"
 "\n"
 "Link:\n"
 "%s"
