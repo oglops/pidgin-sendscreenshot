@@ -53,6 +53,8 @@ typedef enum {
     PLUGIN_ERROR_OPEN_SCREENSHOT_FILE
 } PluginError;
 
+#define PLUGIN_CONFIGURE_ERROR\
+  _("Direct IM of images is not allowed with current protocol, please configure the plugin to send images remotely !")
 
 #define PLUGIN_ERROR_FTP_UPLOAD_s\
   _("FTP upload failed:")

@@ -18,7 +18,7 @@
   *
   * Comments are very welcomed !
   *
-  * --  Raoul Berger <contact@raoulito.info>
+  * --  Raoul Berger <raoul.berger@yahoo.fr>
   *
   */
 
@@ -310,7 +310,6 @@ static PurplePluginInfo info = {
     &ui_info,
     NULL,
     NULL,
-
     NULL,
 
     /* reserved */
@@ -334,6 +333,7 @@ init_plugin (PurplePlugin * plugin) {
     purple_prefs_add_int (PREF_JPEG_QUALITY, PREF_JPEG_QUALITY_DEFAULT);
     purple_prefs_add_int (PREF_PNG_COMPRESSION, PREF_PNG_COMPRESSION_DEFAULT);
     purple_prefs_add_string (PREF_IMAGE_TYPE, "jpeg");
+    purple_prefs_add_string (PREF_SEND_TYPE, "img-ftp-http");  /* v. 0.9 */
     purple_prefs_add_int (PREF_HIGHLIGHT_MODE, 2);
 
 #ifdef ENABLE_UPLOAD
