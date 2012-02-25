@@ -33,6 +33,7 @@
 
 /* xml prefs keys */
 #define	PREF_PREFIX	"/plugins/gtk/" PLUGIN_ID
+#define PREF_SEND_TYPE PREF_PREFIX "/send-type"
 #define PREF_IMAGE_TYPE PREF_PREFIX "/image-type"
 #define PREF_JPEG_QUALITY	PREF_PREFIX "/jpeg-quality"
 #define PREF_PNG_COMPRESSION	PREF_PREFIX "/png-compression"
@@ -97,6 +98,10 @@
 #define PREF_TYPE_JPG "JPEG"
 #define PREF_TYPE_PNG "PNG"
 #define PREF_TYPE_BMP "BMP"
+
+#define PREF_UI_SEND_TYPE _("Sending method: ")
+#define PREF_SEND_IMG_FTP_HTTP "Direct IM or FTP or HTTP"
+
 
 
 #define PREF_JPEG_QUALITY_DEFAULT 93

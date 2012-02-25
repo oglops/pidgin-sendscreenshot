@@ -16,7 +16,7 @@
   * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
   *
   *
-  * --  Raoul Berger <contact@raoulito.info>
+  * --  Raoul Berger <raoul.berger@yahoo.fr>
   *
   */
 
@@ -452,8 +452,9 @@ on_combo_entry_key_press_cb (GtkWidget * entry,
 GtkWidget *
 get_plugin_pref_frame (PurplePlugin * plugin) {
     GtkWidget *tab1, *tab2, *tab3;
-    GtkWidget *vbox;
+    GtkWidget *vbox = NULL;
     GtkWidget *dropdown_imgtype;
+    GtkWidget *dropdown_sndtype;
     GtkWidget *hbox_imgtype, *hbox_sign;
     GtkWidget *prefs_book;
 
@@ -516,6 +517,10 @@ get_plugin_pref_frame (PurplePlugin * plugin) {
     hbox_imgtype = gtk_hbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
     hbox_sign = gtk_hbox_new (FALSE, PIDGIN_HIG_CAT_SPACE);
 
+    dropdown_sndtype =
+        pidgin_prefs_dropdown (vbox, PREF_UI_SEND_TYPE, PURPLE_PREF_STRING,
+                               PREF_SEND_TYPE, PREF_SEND_IMG_FTP_HTTP, "img-ftp-http",
+			       NULL);
     dropdown_imgtype =
         pidgin_prefs_dropdown (vbox, PREF_UI_IMAGE_TYPE, PURPLE_PREF_STRING,
                                PREF_IMAGE_TYPE, PREF_TYPE_JPG, "jpeg",
