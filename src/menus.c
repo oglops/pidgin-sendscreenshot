@@ -16,7 +16,7 @@
   * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
   *
   *
-  * --  Raoul Berger <raoul.berger@yahoo.fr>
+  * --  Raoul Berger <contact@raoulito.info>
   *
   */
 
@@ -32,11 +32,8 @@
 #include "http_upload.h"
 #include "ftp_upload.h"
 
-//static void
-//on_screenshot_insert_as_link_aux 
-
 static void
-send_as_link (PidginWindow * win,
+on_screenshot_insert_as_link_aux (PidginWindow * win,
                                   PidginConversation * _gtkconv) {
     PurplePlugin *plugin;
 
@@ -70,8 +67,6 @@ send_as_link (PidginWindow * win,
     }
 }
 
-
-/*
 static void
 on_screenshot_insert_as_link_fromwin_activate_cb (PidginWindow * win) {
     on_screenshot_insert_as_link_aux (win, NULL);
@@ -81,7 +76,6 @@ static void
 on_screenshot_insert_as_link_activate_cb (PidginConversation * gtkconv) {
     on_screenshot_insert_as_link_aux (NULL, gtkconv);
 }
-*/
 
 static void
 on_screenshot_insert_as_link_show_cb (GtkWidget * as_link,
@@ -110,11 +104,8 @@ on_screenshot_insert_as_link_show_cb (GtkWidget * as_link,
 }
 
 
-//static void
-//on_screenshot_insert_as_ftp_link_aux 
-
 static void
-send_as_ftp_link (PidginWindow * win,
+on_screenshot_insert_as_ftp_link_aux (PidginWindow * win,
                                       PidginConversation * _gtkconv) {
     PurplePlugin *plugin;
 
@@ -142,8 +133,6 @@ send_as_ftp_link (PidginWindow * win,
     }
 }
 
-/*
-
 static void
 on_screenshot_insert_as_ftp_link_fromwin_activate_cb (PidginWindow * win) {
     on_screenshot_insert_as_ftp_link_aux (win, NULL);
@@ -154,7 +143,6 @@ static void
 on_screenshot_insert_as_ftp_link_activate_cb (PidginConversation * gtkconv) {
     on_screenshot_insert_as_ftp_link_aux (NULL, gtkconv);
 }
-*/
 
 static void
 on_screenshot_insert_as_ftp_link_show_cb (GtkWidget *
@@ -184,12 +172,9 @@ on_screenshot_insert_as_ftp_link_show_cb (GtkWidget *
 }
 #endif /* ENABLE_UPLOAD */
 
-//static void
-//on_screenshot_insert_as_image_aux
-
 static void
-send_as_image (PidginWindow * win,
-               PidginConversation * _gtkconv) {
+on_screenshot_insert_as_image_aux (PidginWindow * win,
+                                   PidginConversation * _gtkconv) {
     PurplePlugin *plugin = purple_plugins_find_with_id (PLUGIN_ID);
 
     if (PLUGIN (locked))
@@ -215,8 +200,6 @@ send_as_image (PidginWindow * win,
     }
 }
 
-
-/*
 static void
 on_screenshot_insert_as_image_fromwin_activate_cb (PidginWindow * win) {
     on_screenshot_insert_as_image_aux (win, NULL);
@@ -226,21 +209,21 @@ static void
 on_screenshot_insert_as_image_activate_cb (PidginConversation * gtkconv) {
     on_screenshot_insert_as_image_aux (NULL, gtkconv);
 }
-*/
 
-/*
 static void
 on_screenshot_insert_as_image_show_cb (GtkWidget *
                                        as_image,
                                        PidginConversation * gtkconv) {
     PurpleConversation *conv = gtkconv->active_conv;
 
-   
+    /*
+     * Depending on which protocol the conv is associated with, direct
+     * image send is allowed or not. So we gray out our menu or not.
+     */
     gtk_widget_set_sensitive (as_image,
                               !(purple_conversation_get_features (conv) &
                                 PURPLE_CONNECTION_NO_IMAGES));
 }
-*/
 
 /**
  * Handle hiding and showing stuff based on what type of conv this is...
@@ -272,9 +255,8 @@ on_conversation_menu_show_cb (PidginWindow * win) {
 
     img_menuitem =
         g_object_get_data (G_OBJECT (conversation_menu), "img_menuitem");
-    
-    //  on_screenshot_insert_as_image_show_cb (img_menuitem,
-    //                                     PIDGIN_CONVERSATION (conv));
+    on_screenshot_insert_as_image_show_cb (img_menuitem,
+                                           PIDGIN_CONVERSATION (conv));
 
     screenshot_menuitem =
         g_object_get_data (G_OBJECT (conversation_menu),
@@ -286,7 +268,6 @@ on_conversation_menu_show_cb (PidginWindow * win) {
 /**
    Create a submenu with send as Image, Link (Http) and Link (Ftp) menuitems.
  */
-/*
 static GtkWidget *
 create_plugin_submenu (PidginConversation * gtkconv, gboolean multiconv) {
     GtkWidget *submenu;
@@ -375,49 +356,12 @@ create_plugin_submenu (PidginConversation * gtkconv, gboolean multiconv) {
     }
     return submenu;
 }
-*/
 
-
-/**
-   If the plugin is locked, don't activate the menuitem.
-   This tipically happens when we're sending the capture to a remote server.
- */
 static void
 on_insert_menu_show_cb (GtkWidget * screenshot_insert_menuitem) {
     PurplePlugin *plugin = purple_plugins_find_with_id (PLUGIN_ID);
     gtk_widget_set_sensitive (screenshot_insert_menuitem, !PLUGIN (locked));
 }
-
-
-/**
-   The user wants to insert a sreenshot.
- */
-static void
-on_screenshot_insert_menuitem_activate_cb (GtkWidget * screenshot_insert_menuitem,
-					   PidginConversation *gtkconv) {
-    PurplePlugin *plugin = purple_plugins_find_with_id (PLUGIN_ID);
-   
-  
-    if (!strcmp (purple_prefs_get_string (PREF_SEND_TYPE), "img-ftp-http")) {
-      PurpleConversation *conv = gtkconv->active_conv;
-      
-      /* Direct IM of image is allowed by current protocol */
-      if (!(purple_conversation_get_features (conv) & PURPLE_CONNECTION_NO_IMAGES)) {
-	    send_as_image (NULL, gtkconv);
-      } else if (strcmp(purple_prefs_get_string (PREF_FTP_REMOTE_URL), "") && 
-		 strcmp(purple_prefs_get_string (PREF_FTP_USERNAME), "") && 
-		 strcmp(purple_prefs_get_string (PREF_FTP_PASSWORD), "")) {
-	    send_as_ftp_link (NULL, gtkconv);
-      } else if (strcmp (purple_prefs_get_string (PREF_UPLOAD_TO), HOST_DISABLED)) {
-	    send_as_link (NULL, gtkconv);
-      } else {
-	    purple_notify_error (plugin, PLUGIN_NAME, PLUGIN_ERROR,
-                                 PLUGIN_CONFIGURE_ERROR);
-            plugin_stop (plugin);
-      }
-    }
-}
-
 
 static gboolean
 catch_hotkeys_cb (PidginWindow * win, GdkEventKey * event) {
@@ -480,16 +424,14 @@ catch_hotkeys_cb (PidginWindow * win, GdkEventKey * event) {
                  all_modifiers ==
                  purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_FTP_MDFS)
             )
-	  send_as_ftp_link(win, NULL);
-	  //on_screenshot_insert_as_ftp_link_fromwin_activate_cb (win);
+            on_screenshot_insert_as_ftp_link_fromwin_activate_cb (win);
         else if (gdk_keyval_to_lower (event->keyval) ==
                  (guint) purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_HTTP)
                  &&
                  all_modifiers ==
                  purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_HTTP_MDFS)
             )
-	  send_as_link(win, NULL);
-	  //on_screenshot_insert_as_link_fromwin_activate_cb (win);
+            on_screenshot_insert_as_link_fromwin_activate_cb (win);
 #endif
         else if (gdk_keyval_to_lower (event->keyval) == (guint)
                  purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_IMAGE)
@@ -497,9 +439,9 @@ catch_hotkeys_cb (PidginWindow * win, GdkEventKey * event) {
                  all_modifiers ==
                  purple_prefs_get_int (PREF_HOTKEYS_SEND_AS_IMAGE_MDFS)
 		 ) {
-          //  if (!(purple_conversation_get_features (conv) &
-	  //      PURPLE_CONNECTION_NO_IMAGES))
-	  //  on_screenshot_insert_as_image_fromwin_activate_cb (win);
+            if (!(purple_conversation_get_features (conv) &
+                  PURPLE_CONNECTION_NO_IMAGES))
+                on_screenshot_insert_as_image_fromwin_activate_cb (win);
         }
         else {
             /* nothing match ! */
@@ -540,7 +482,7 @@ create_plugin_menuitems (PurpleConversation * conv) {
 
         /* Add us to the conv "Insert" menu */
         if (screenshot_insert_menuitem == NULL) {
-	  GtkWidget *insert_menu;//, *submenu;
+            GtkWidget *insert_menu, *submenu;
             if ((insert_menu =
                  g_object_get_data (G_OBJECT (gtkconv->toolbar),
                                     "insert_menu")) != NULL) {
@@ -549,23 +491,16 @@ create_plugin_menuitems (PurpleConversation * conv) {
                     gtk_menu_item_new_with_mnemonic
                     (SCREENSHOT_INSERT_MENUITEM_LABEL);
 
-                //submenu = create_plugin_submenu (gtkconv, FALSE);
-
+                submenu = create_plugin_submenu (gtkconv, FALSE);
 
                 g_signal_connect_swapped (G_OBJECT (insert_menu), "show",
                                           G_CALLBACK (on_insert_menu_show_cb),
                                           screenshot_insert_menuitem);
 
-
-		   g_signal_connect  (G_OBJECT (screenshot_insert_menuitem), "activate",
-                                  G_CALLBACK (on_screenshot_insert_menuitem_activate_cb),
-                                 gtkconv);
-
-		/*
                 gtk_menu_item_set_submenu (GTK_MENU_ITEM
                                            (screenshot_insert_menuitem),
                                            submenu);
-		*/
+
                 gtk_menu_shell_insert (GTK_MENU_SHELL (insert_menu), screenshot_insert_menuitem, 1);    /* 0 = Image */
 
                 /* register new widget */
@@ -579,15 +514,15 @@ create_plugin_menuitems (PurpleConversation * conv) {
         if (screenshot_menuitem == NULL) {
             GList *children = NULL, *head_chld = NULL;  /* don't g_list_free() it */
             guint i = 0;
-            //GtkWidget *submenu = create_plugin_submenu (gtkconv, TRUE);
+            GtkWidget *submenu = create_plugin_submenu (gtkconv, TRUE);
 
             screenshot_menuitem =
                 gtk_menu_item_new_with_mnemonic (SCREENSHOT_MENUITEM_LABEL);
 
-            /*gtk_menu_item_set_submenu (GTK_MENU_ITEM
-	      (screenshot_menuitem), submenu); */
+            gtk_menu_item_set_submenu (GTK_MENU_ITEM
+                                       (screenshot_menuitem), submenu);
 
-            /*gtk_widget_show_all (submenu);*/
+            gtk_widget_show_all (submenu);
 
             children =
                 gtk_container_get_children (GTK_CONTAINER

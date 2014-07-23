@@ -16,7 +16,7 @@
   * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
   *
   *
-  * --  Raoul Berger <raoul.berger@yahoo.fr>
+  * --  Raoul Berger <contact@raoulito.info>
   *
   */
 
@@ -137,7 +137,7 @@ show_countdown_dialog (PurplePlugin * plugin) {
                                      GTK_WINDOW ((gtkconv_window) ?
                                                  gtkconv_window :
                                                  blist_window),
-                                     0, GTK_STOCK_EXECUTE,
+                                     GTK_DIALOG_MODAL, GTK_STOCK_EXECUTE,
                                      GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL,
                                      GTK_RESPONSE_REJECT, NULL);
 

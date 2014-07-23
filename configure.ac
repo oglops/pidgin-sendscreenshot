@@ -8,9 +8,11 @@
 #  
 #
 
-AC_INIT([pidgin-sendscreenshot],[m4_esyscmd(build-aux/version-gen)],[contact@raoulito.info])
+AC_INIT([pidgin-sendscreenshot],
+	 m4_esyscmd([build-aux/version-gen]),
+	[contact@raoulito.info])
 
-AC_PREREQ([2.67])
+AC_PREREQ(2.59)
 
 AC_CANONICAL_TARGET
 AC_CONFIG_HEADERS([config.h])
@@ -32,7 +34,7 @@ AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
 #
 # Setup libtool
 #
-LT_INIT
+AM_PROG_LIBTOOL
 LIBTOOL="$LIBTOOL --silent"
 
 #
@@ -62,7 +64,8 @@ AC_SUBST(CFLAGS)
 #
 
 AC_ARG_ENABLE(upload, 
-             [AS_HELP_STRING([--disable-upload],[compile without capability to upload a screenshot to a server.])],
+             [AC_HELP_STRING([--disable-upload],
+             [compile without capability to upload a screenshot to a server.])],
 	     enable_upload="$enableval", enable_upload="yes")
 
 AM_CONDITIONAL(ENABLE_UPLOAD, test "x$enable_upload" = "xyes")
@@ -86,7 +89,7 @@ if test "x$enable_upload" = "xyes" ; then
 
       AC_MSG_ERROR([
 To compile this plugin *with* upload support, you must have :
- - libcurl dev headers >= 7.19.1 ($foundlibcurl) and glib>=2.14.0 ($foundpcre).
+ - libcurl >= 7.19.1 ($foundlibcurl) and glib>=2.14.0 ($foundpcre).
 
 If you don't need this feature, please specify --disable-upload when running configure.])
    else
