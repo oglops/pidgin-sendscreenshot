@@ -125,11 +125,16 @@ real_insert_link (PurplePlugin * plugin, const gchar * url) {
 
         /* support for HTML-formatted messages */
         if (PLUGIN (conv_features) & PURPLE_CONNECTION_HTML) {
-            gchar *basename =
-                g_path_get_basename (PLUGIN (capture_path_filename));
-            gtk_imhtml_insert_link (imhtml, mark, url, basename);
-            g_free (basename);
-        }
+            gchar *basename =                                 
+                    g_path_get_basename (PLUGIN (capture_path_filename));
+                if (purple_prefs_get_bool (PREF_USE_FULL_URL)) {         
+                    gtk_imhtml_insert_link (imhtml, mark, url, url);     
+                    }                                                    
+                else {                                                   
+                gtk_imhtml_insert_link (imhtml, mark, url, basename);    
+            }                                                            
+            g_free (basename);                                           
+        }    
         else
             gtk_text_buffer_insert (textbf, &iter, url, (gint) strlen (url));
     }

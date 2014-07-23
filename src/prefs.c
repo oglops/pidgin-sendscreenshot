@@ -617,6 +617,7 @@ get_plugin_pref_frame (PurplePlugin * plugin) {
                                              PREF_UI_WAIT_BEFORE_SCREENSHOT,
                                              PREF_WAIT_BEFORE_SCREENSHOT, 0,
                                              30, 5, NULL);
+    pidgin_prefs_checkbox (PREF_UI_USE_FULL_URL, PREF_USE_FULL_URL, vbox);
 
     /* =========================================================================
      *      HOTKEYS

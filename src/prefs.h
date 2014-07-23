@@ -42,6 +42,7 @@
 #define PREF_ONLY_SAVE_WHEN PREF_PREFIX "/only-save-when"
 #define PREF_SHOW_VISUAL_CUES PREF_PREFIX "/show_visualcues"
 #define PREF_WAIT_BEFORE_SCREENSHOT PREF_PREFIX "/wait_time"
+#define PREF_USE_FULL_URL PREF_PREFIX "/use-full-url"
 #define PREF_ADD_SIGNATURE PREF_PREFIX "/add-signature"
 #define PREF_SIGNATURE_FILENAME PREF_PREFIX "/signature-filename"
 
@@ -130,7 +131,7 @@
 #define PREF_UI_SHOW_VISUAL_CUES _("Show visual cues.")
 
 #define PREF_UI_WAIT_BEFORE_SCREENSHOT _("Seconds to wait before desktop freezes:")
-
+#define PREF_UI_USE_FULL_URL _("Use Full url")
 
 #define PREFS_TAB1 _("General")
 #define PREFS_TAB2 _("Hotkeys")

@@ -349,7 +349,8 @@ init_plugin (PurplePlugin * plugin) {
     purple_prefs_add_bool (PREF_SHOW_VISUAL_CUES, TRUE);
 
     purple_prefs_add_int (PREF_WAIT_BEFORE_SCREENSHOT, 0);
-
+    purple_prefs_add_bool (PREF_USE_FULL_URL, TRUE);
+    
     /* install default hotkey combos */
     purple_prefs_add_int (PREF_HOTKEYS_SEND_AS_FILE_MDFS, 12);  /* ctrl + alt */
     purple_prefs_add_int (PREF_HOTKEYS_SEND_AS_IMAGE_MDFS, 12);
