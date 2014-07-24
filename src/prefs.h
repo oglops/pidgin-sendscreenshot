@@ -131,7 +131,7 @@
 #define PREF_UI_SHOW_VISUAL_CUES _("Show visual cues.")
 
 #define PREF_UI_WAIT_BEFORE_SCREENSHOT _("Seconds to wait before desktop freezes:")
-#define PREF_UI_USE_FULL_URL _("Use Full url")
+#define PREF_UI_USE_FULL_URL _("Use Full URL")
 
 #define PREFS_TAB1 _("General")
 #define PREFS_TAB2 _("Hotkeys")
